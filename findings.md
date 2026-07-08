@@ -29,6 +29,10 @@
 - 선행 DB 체커(Drugs.com/Medscape/WebMD)는 자연어·AI·AI답변검증 아님. Drugs.com만 therapeutic duplication(드묾). · 영향: 빈자리 확인.
 - 전체 종합 → docs/AI-ARCHITECTURE.md (v2). 문헌 목록은 architect.md(v1) + AI-ARCHITECTURE.md(v2) References.
 
+## 2026-07-08 (Day 3 — 다중 SKU 강도 발견)
+- **OTC 브랜드는 강도별 다중 SKU** (약사 검증 중 발견): Benadryl Allergy 25mg vs Extra Strength 50mg/정; Mucinex/Mucinex DM 600mg(regular) vs 1200mg(Maximum Strength)/정. · 영향: "몇 알" 표시는 SKU 의존 → 브랜드명에 강도 못박아 고정(D20). 일일상한 판정은 SKU 무관 동일이라 판정 정확성엔 영향 없음. · 소스: 사용자 제공 제품 라벨 스크린샷(각 SKU Drug Facts).
+- **FDA 모노그래프 5개 성분 상한 결정론 추출 완료**(pdftotext+grep, refs/M013.txt·M012.txt): aspirin 4,000(M013:696) / doxylamine 75(M012:558) / phenylephrine 60(M012:1335) / pseudoephedrine 240(M012:1345) / caffeine=모노그래프 부재(null 유지). **5개 전부 기존 KB값과 정확히 일치** → verify:true→false 승격 준비됨(약사 확인 대기).
+
 ## 2026-07-09 (Day 2)
 - **Agent SDK 도구 API 확정**: `tool(name, desc, zodShape, handler, {annotations})` + `createSdkMcpServer({name,version,tools})` → query의 `mcpServers`에 넘기고 `allowedTools`에 `mcp__{server}__{tool}` 등록. `structuredContent`로 기계판독 결과, `readOnlyHint:true`로 병렬 허용. zod ^4 필요(4.4.3 설치). · 출처: code.claude.com/docs/en/agent-sdk/custom-tools.
 - **스킬 로딩 vs 개발 CLAUDE.md 충돌**: `settingSources:["project"]`로 스킬 로드하면 **개발용 루트 CLAUDE.md(내 작업규칙)까지 런타임 에이전트에 섞임.** · 영향: Day 2는 systemPrompt로 방법론 주입(스킬 파일은 정본 유지), 실제 스킬 로딩은 Day 3에 **격리 프롬프트 서브에이전트(AgentDefinition)**로 배선 예정.

@@ -37,3 +37,9 @@ Thumbs.db
 # Local data caches (openFDA/DailyMed fetch caches)
 .cache/
 *.local
+
+# Working artifacts (not part of the shipped app)
+# FDA monograph PDFs/extractions — downloadable from URLs in backlog B-4
+refs/
+# Dev screenshots — regenerated on demand
+docs/screenshots/

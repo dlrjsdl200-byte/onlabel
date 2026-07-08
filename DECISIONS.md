@@ -31,4 +31,12 @@
 - **D17. 심화 범위 L1~L4 + eval-first**: eval 하네스(L2) 먼저 baseline → claim 파이프라인(L1) → openFDA sync(L3) → 스킬 서브에이전트(L4) → 그 다음 UI. UI 스펙은 claim 배지 반영 필요.
 - **D18. openFDA는 빌드타임 sync(런타임 아님)**: 판정 핫패스는 항상 로컬 KB(인메모리·즉시, 네트워크 0). openFDA는 `npm run sync:fda`로 KB를 오프라인 채움·검증. 라이브 fallback은 KB-미스에만·캐시·핫패스 밖(선택/backlog). 근거: 런타임 지연·API장애 회피 + "판정 먼저 즉시" UX 보호 + 뉴로심볼릭(런타임 결정론) 원칙 부합.
 
+## 2026-07-08 — Day 3 데이터/UI 정밀화
+
+- **D19. 성분 원장에 용법 명시(dosing basis)**: 원장 "Found in" 열에 각 제품의 `unitsPerDose × dosesPerDay = mg/day`를 표시(예: "2 caplets × 3/day = 3,000 mg"). 이유: combined 합계(예: 5,600)를 사용자가 눈으로 검산 → "숫자로 반박"의 투명성·신뢰 완성. `unitsPerDose` 필드를 products.json에 추가, verify()의 IngredientContribution 확장(계산 로직 maxDailyMg는 불변, 표시용 필드만 additive).
+- **D20. 카탈로그는 명명된 단일 SKU에 고정**: 다수 OTC 브랜드가 강도별 다중 SKU(예: Benadryl 25mg/50mg, Mucinex 600/1200mg). 판정 일일상한은 SKU 무관하게 동일하나 "몇 알" 표시는 SKU마다 다름. → **강도가 모호한 브랜드는 브랜드명에 강도를 못박음**(Benadryl→"Benadryl Allergy (25 mg)", Mucinex DM→"Mucinex DM (600 mg)", Mucinex→"Mucinex (600 mg)"). 가장 흔한/표준 SKU 기준, source에 다른 SKU 존재를 주석. 사용자 강도 선택 UI는 backlog B-5.
+
+- **D21. 강도 변이(Type B) 처리 = 안 1 채택 (구현은 SSE 배선 이후)**: 같은 성분 다른 강도(Tylenol 325/500/650, Benadryl 25/50 등)는 **강도별 별도 항목 + 브랜드당 default SKU 지정 + 가정 명시(surfaced assumption)**로 처리. bare "Tylenol"→default(Extra Strength 500mg)로 결정론 해소하되 UI에 "assumed strength, tap to change" 노출. Type A(성분 구성 다름: Tylenol PM/Cold+Flu)는 지금처럼 별도 항목 유지. `lookupProduct` 수정 필요(default 우선 + 가정 신호). **착수 순서: UI SSE 배선 먼저 → 그다음 이 강도 정밀화.** 상세 backlog B-5.
+- **D22. FDA 모노그래프 상한 검증 완료(B-4)**: refs/M013·M012 PDF를 pdftotext+grep 결정론 추출, 약사 확인. 5개 성분(aspirin 4000·pseudoephedrine 240·phenylephrine 60·doxylamine 75·caffeine 부재/null) 전부 기존 KB값과 일치 → `verify:true→false` 승격, source에 모노그래프 조항 인용. LLM 미개입.
+
 <!-- 새 결정은 이 아래에 날짜 섹션으로 추가 -->

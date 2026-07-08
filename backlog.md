@@ -30,6 +30,11 @@
 - 안 열리면 포털 검색: `https://www.accessdata.fda.gov/scripts/cder/omuf/index.cfm?event=monographsearch` (M013/M012)
 - 받은 PDF는 `f:\hackathon\refs\`에 저장 → 다음 세션에 pdftotext 추출.
 
+## B-5. 다중 SKU 강도 구분 (multi-SKU disambiguation) `[P2]`
+- **무엇**: 한 브랜드가 강도별 여러 SKU를 가짐 — Benadryl(25/50 mg), Mucinex/Mucinex DM(600/1200 mg), Sudafed(30/60 mg) 등. 일일상한 판정은 SKU 무관 동일하나 "몇 알" 표시는 SKU마다 다름.
+- **현재 처리(D20)**: 강도 모호 브랜드는 브랜드명에 강도 못박아 표준 SKU 하나로 고정("Benadryl Allergy (25 mg)" 등). 데모엔 충분.
+- **개선안**: 사용자가 강도를 고르게 하는 UI(제품 선택 시 강도 드롭다운) 또는 자연어에서 "extra strength"·"maximum strength" 파싱 → 해당 SKU 매핑. openFDA sync(B-4) 시 SKU별 NDC 단위로 적재.
+
 ## B-3. 확장 후보 (아이디어 저장소) `[IDEA]`
 - 소아 체중당 용량 계산기
 - 임부/수유부 안전성 등급 레이어
