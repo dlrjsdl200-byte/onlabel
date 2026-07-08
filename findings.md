@@ -120,3 +120,8 @@
 - **scope 수정 검증**: "acetaminophen+한 NSAID 병용 안전" claim이 claim-scope verify(APAP+ibuprofen)=OK로 **정확히 VERIFIED**(이전 false CONTRADICTED 해소).
 - **잔여 = 기존 B-10 한계**(신규 아님): naproxen first-dose 440 규칙 부재, 3000/4000 conservative-vs-ceiling 미구분, "NSAID" 클래스명 claim UNSUPPORTED 노이즈.
 - **다음 = Phase 4**: eval에 claim 파이프라인 반영 + **UI claim 배지/대조 엔진 시각화**(데모 30%) + 배선.
+
+## 2026-07-08 (L1 Phase 4 — 대조 엔진 UI, additive)
+- **UI 대조 엔진 배선**: `/api/contrast`(POST {question,products}→runClaimPipeline) + `ContrastEngine.tsx`(opt-in 버튼→generic AI 답변 + claim별 FDA 배지 + "무엇을 틀렸나" 교정목록) + `ClaimBadge.tsx`(VERIFIED/CONTRADICTED/UNSUPPORTED). OnLabelApp에서 grounded 답변 아래 additive 렌더(스트리밍 완료 후, 데모 코어 불변).
+- **검증**: tsc 0, `npm run build` 통과(/api/contrast 라우트 등록). 파이프라인 자체는 이미 live 검증(claims transcript). 라우트는 얇은 래퍼라 JSON 직렬화만 신규.
+- **잔여(시각확인)**: `npm run dev`로 버튼 클릭 렌더 확인 권장(대조 버튼=유료 호출 트리거). 폴리시: 로딩/에러 상태 있음. 다크·반응형은 기존 토큰 상속.

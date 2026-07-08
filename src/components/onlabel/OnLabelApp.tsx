@@ -2,6 +2,7 @@
 
 import { QuestionInput } from "./QuestionInput";
 import { AnswerView } from "./AnswerView";
+import { ContrastEngine } from "./ContrastEngine";
 import { Disclaimer } from "./Disclaimer";
 import { useOnLabelStream } from "./useOnLabelStream";
 
@@ -41,12 +42,21 @@ export function OnLabelApp() {
               <p className="mt-1 text-foreground/70">{state.error}</p>
             </div>
           ) : state.verification ? (
-            <AnswerView
-              question={state.question}
-              result={state.verification}
-              prose={state.prose}
-              streaming={state.status === "streaming"}
-            />
+            <div className="space-y-6">
+              <AnswerView
+                question={state.question}
+                result={state.verification}
+                prose={state.prose}
+                streaming={state.status === "streaming"}
+              />
+              {state.status !== "streaming" &&
+                state.verification.matched.length > 0 && (
+                  <ContrastEngine
+                    question={state.question}
+                    products={state.verification.matched.map((p) => p.brand)}
+                  />
+                )}
+            </div>
           ) : (
             <PendingVerdict question={state.question} />
           )}
