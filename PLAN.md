@@ -4,6 +4,8 @@
 > 실질 빌드 5일(7/8~7/12) + 7/13 제출/버퍼 + 7/14 아침 최종.
 > 원칙(CLAUDE.md): **항상 작동하는 데모 경로 유지** · 확실한 결정론적 코어부터 → 레이어로 점수 · Demo 우선.
 > 매일 끝: 커밋 + (D3부터) Vercel 배포로 "언제든 보여줄 수 있는" 상태 유지.
+>
+> **📍 현재 위치(2026-07-08 갱신)**: Day 1·2·3 완료(로컬 웹 데모 라이브 동작). **다음 최우선 = Vercel 배포** + 제출물(README·요약·영상). 상세는 memory/onlabel-progress.md · DECISIONS.md.
 
 ---
 
@@ -27,15 +29,17 @@
 - ⚠️ **라이브 LLM 경로는 ANTHROPIC_API_KEY 필요**(미커밋) — 사용자가 .env 넣고 `npm run dev` 후 확인.
 - 서빙 기준: Claude Use.
 
-## Day 3 — 7/10(금) · 프론트 + 서브에이전트 (★데모 존재 마일스톤★)
+## Day 3 — 7/10(금) · 프론트 + 서브에이전트 (★데모 존재 마일스톤★) ✅ 대부분 완료
 **목표: 사람이 타이핑해서 보는 웹 데모 완성. 스펙 = docs/UI-SPEC.md (확정).**
-- [ ] shadcn/ui init + 클리니컬-클린 토큰
-- [ ] 정적 컴포넌트(더미): VerdictCard · IngredientLedger · ContrastStrip · EfficacyNote · Sources · Disclaimer · QuestionInput
-- [ ] SSE 스트림 라우트 `POST /api/check/stream`(verification→token→done) + `useOnLabelStream` 훅
-- [ ] "판정 먼저, 설명 나중" 배선 + 예시 칩 + 상태(빈/스트리밍/미매칭/에러)
-- [ ] (선택) Verifier 서브에이전트 + `otc-plain-language-counseling` 스킬 배선
-- [ ] 반응형/다크/접근성 패스
-- **Done =** 웹에서 "Tylenol + DayQuil?" → 판정 카드 즉시 + 산문 스트리밍. **Vercel preview 배포.** 커밋.
+- [x] shadcn/ui init + 클리니컬-클린 토큰 (globals.css: 블루 액센트 + verdict green/amber/red)
+- [x] 컴포넌트 src/components/onlabel/*: VerdictCard · IngredientLedger(용법 원장) · ContrastStrip · EfficacyNote · Sources · Disclaimer · QuestionInput(자연어 예시칩) · AnswerView · OnLabelApp · AssumptionNote
+- [x] SSE 스트림 라우트 `POST /api/check/stream`(verification→token→done→error) + `useOnLabelStream` 훅 + `streamOnLabel()`(includePartialMessages)
+- [x] "판정 먼저, 설명 나중" 배선 + 예시 칩 + 상태(빈/스트리밍/미매칭/에러) — 라이브 playwright 실증
+- [ ] (선택) Verifier 서브에이전트 + 스킬 배선 — 미실시(→ L1 파이프라인으로, backlog/AI-ARCHITECTURE)
+- [ ] 반응형/다크/접근성 패스 — 미실시(폴리시 잔여)
+- [ ] **Vercel preview 배포 — 미완(다음 세션 최우선, Demo 30% 위해 필수)**
+- **추가 선행(원래 Day4/B-4)**: FDA 모노그래프 5개 성분 상한 결정론 추출·검증(verify:false 승격, D22) · 용법 원장 unitsPerDose(D19) · 다중 SKU 강도 고정(D20) · 강도 변이 해소+가정 명시 안1(D21).
+- 검증: typecheck 통과 · 테스트 10 verifier + 4 tool + 23 golden 그린. 커밋 4개(main, 미푸시).
 - 서빙 기준: Demo(핵심) + Claude Use.
 
 ## Day 4 — 7/11(토) · Depth·견고성 + 스트레치
