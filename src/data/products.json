@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "description": "US OTC analgesic + cold/flu product catalog for OnLabel. Per-dose active ingredient amounts (mgPerDose) and label max doses per day. maxDailyContribution = mgPerDose * maxDosesPerDay. Entries with verify=true need DailyMed/openFDA confirmation.",
+    "description": "US OTC analgesic + cold/flu product catalog for OnLabel. Per-dose active ingredient amounts (mgPerDose) and label max doses per day. unitsPerDose = number of physical units (tablet/caplet/LiquiCap) in one label dose. maxDailyContribution = mgPerDose * maxDosesPerDay. Entries with verify=true need DailyMed/openFDA confirmation.",
     "reviewedBy": "pending pharmacist review",
     "updated": "2026-07-08"
   },
@@ -12,6 +12,7 @@
       "category": "analgesic",
       "core": true,
       "doseForm": "tablet",
+      "unitsPerDose": 2,
       "maxDosesPerDay": 5,
       "ingredients": [{ "ingredient": "acetaminophen", "mgPerDose": 650 }],
       "source": "Tylenol Regular Strength label (2 x 325 mg per dose)",
@@ -24,6 +25,7 @@
       "category": "analgesic",
       "core": true,
       "doseForm": "caplet",
+      "unitsPerDose": 2,
       "maxDosesPerDay": 3,
       "ingredients": [{ "ingredient": "acetaminophen", "mgPerDose": 1000 }],
       "source": "Tylenol Extra Strength label (2 x 500 mg per dose, max 6 caplets/day)",
@@ -36,6 +38,7 @@
       "category": "analgesic",
       "core": true,
       "doseForm": "tablet",
+      "unitsPerDose": 2,
       "maxDosesPerDay": 3,
       "ingredients": [{ "ingredient": "ibuprofen", "mgPerDose": 400 }],
       "source": "OTC ibuprofen label (up to 2 x 200 mg per dose, max 1200 mg/day)",
@@ -48,6 +51,7 @@
       "category": "analgesic",
       "core": true,
       "doseForm": "tablet",
+      "unitsPerDose": 1,
       "maxDosesPerDay": 3,
       "ingredients": [{ "ingredient": "naproxen", "mgPerDose": 220 }],
       "source": "Aleve label (220 mg, max 3 tablets/day)",
@@ -60,6 +64,7 @@
       "category": "analgesic",
       "core": true,
       "doseForm": "tablet",
+      "unitsPerDose": 2,
       "maxDosesPerDay": 6,
       "ingredients": [{ "ingredient": "aspirin", "mgPerDose": 650 }],
       "source": "Aspirin analgesic label (2 x 325 mg per dose)",
@@ -72,6 +77,7 @@
       "category": "analgesic-combo",
       "core": true,
       "doseForm": "tablet",
+      "unitsPerDose": 2,
       "maxDosesPerDay": 2,
       "ingredients": [
         { "ingredient": "acetaminophen", "mgPerDose": 500 },
@@ -88,6 +94,7 @@
       "category": "cold-flu",
       "core": true,
       "doseForm": "liquicap",
+      "unitsPerDose": 2,
       "maxDosesPerDay": 4,
       "ingredients": [
         { "ingredient": "acetaminophen", "mgPerDose": 650 },
@@ -104,6 +111,7 @@
       "category": "cold-flu",
       "core": true,
       "doseForm": "liquicap",
+      "unitsPerDose": 2,
       "maxDosesPerDay": 4,
       "ingredients": [
         { "ingredient": "acetaminophen", "mgPerDose": 650 },
@@ -120,6 +128,7 @@
       "category": "cold-flu",
       "core": true,
       "doseForm": "caplet",
+      "unitsPerDose": 2,
       "maxDosesPerDay": 4,
       "ingredients": [
         { "ingredient": "acetaminophen", "mgPerDose": 650 },
@@ -132,29 +141,31 @@
     },
     {
       "id": "mucinex",
-      "brand": "Mucinex",
+      "brand": "Mucinex (600 mg)",
       "company": "Reckitt",
       "category": "cough-expectorant",
       "core": true,
       "doseForm": "tablet-er",
+      "unitsPerDose": 2,
       "maxDosesPerDay": 2,
       "ingredients": [{ "ingredient": "guaifenesin", "mgPerDose": 1200 }],
-      "source": "Mucinex ER label (up to 2 x 600 mg per dose, every 12h)",
+      "source": "Mucinex label (600 mg guaifenesin per ER tablet; adults 1-2 tablets every 12h, max 4 tablets/day). Modeled at the 2-tablet max dose. NOTE: Maximum Strength Mucinex is 1200 mg per tablet — a different SKU.",
       "verify": true
     },
     {
       "id": "mucinex-dm",
-      "brand": "Mucinex DM",
+      "brand": "Mucinex DM (600 mg)",
       "company": "Reckitt",
       "category": "cough-expectorant",
       "core": true,
       "doseForm": "tablet-er",
+      "unitsPerDose": 2,
       "maxDosesPerDay": 2,
       "ingredients": [
         { "ingredient": "guaifenesin", "mgPerDose": 1200 },
         { "ingredient": "dextromethorphan", "mgPerDose": 60 }
       ],
-      "source": "Mucinex DM ER label (every 12h)",
+      "source": "Mucinex DM label (600 mg guaifenesin + 30 mg DXM per ER tablet; adults 1-2 tablets every 12h, max 4 tablets/day). Modeled at the 2-tablet max dose. NOTE: Maximum Strength Mucinex DM is 1200 mg/60 mg per tablet — a different SKU.",
       "verify": true
     },
     {
@@ -164,6 +175,7 @@
       "category": "decongestant",
       "core": true,
       "doseForm": "tablet",
+      "unitsPerDose": 1,
       "maxDosesPerDay": 4,
       "ingredients": [{ "ingredient": "pseudoephedrine", "mgPerDose": 60 }],
       "source": "Sudafed label (60 mg every 4-6h, max 240 mg/day)",
@@ -176,6 +188,7 @@
       "category": "decongestant",
       "core": false,
       "doseForm": "tablet",
+      "unitsPerDose": 1,
       "maxDosesPerDay": 6,
       "ingredients": [{ "ingredient": "phenylephrine", "mgPerDose": 10 }],
       "source": "Sudafed PE label (10 mg every 4h)",
@@ -183,14 +196,15 @@
     },
     {
       "id": "benadryl",
-      "brand": "Benadryl",
+      "brand": "Benadryl Allergy (25 mg)",
       "company": "Kenvue",
       "category": "antihistamine",
       "core": true,
       "doseForm": "tablet",
+      "unitsPerDose": 2,
       "maxDosesPerDay": 6,
       "ingredients": [{ "ingredient": "diphenhydramine", "mgPerDose": 50 }],
-      "source": "Benadryl label (25-50 mg every 4-6h, max 300 mg/day)",
+      "source": "Benadryl Allergy label (25 mg/tablet; adults 1-2 tablets every 4-6h, max 6 doses/300 mg per day). Modeled at the 2-tablet max dose.",
       "verify": true
     },
     {
@@ -200,6 +214,7 @@
       "category": "antihistamine",
       "core": true,
       "doseForm": "tablet",
+      "unitsPerDose": 1,
       "maxDosesPerDay": 1,
       "ingredients": [{ "ingredient": "cetirizine", "mgPerDose": 10 }],
       "source": "Zyrtec label (10 mg once daily)",
@@ -212,6 +227,7 @@
       "category": "pm-combo",
       "core": true,
       "doseForm": "caplet",
+      "unitsPerDose": 2,
       "maxDosesPerDay": 1,
       "ingredients": [
         { "ingredient": "acetaminophen", "mgPerDose": 1000 },
@@ -227,12 +243,13 @@
       "category": "cold-flu",
       "core": true,
       "doseForm": "caplet",
+      "unitsPerDose": 1,
       "maxDosesPerDay": 4,
       "ingredients": [
         { "ingredient": "ibuprofen", "mgPerDose": 200 },
         { "ingredient": "pseudoephedrine", "mgPerDose": 30 }
       ],
-      "source": "Advil Cold & Sinus label",
+      "source": "Advil Cold & Sinus label (1 caplet every 4-6h)",
       "verify": true
     }
   ]

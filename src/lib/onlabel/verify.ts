@@ -36,6 +36,7 @@ export interface Product {
   category: string;
   core: boolean;
   doseForm: string;
+  unitsPerDose: number;
   maxDosesPerDay: number;
   ingredients: ProductIngredient[];
   source: string;
@@ -45,6 +46,14 @@ export interface Product {
 export interface IngredientContribution {
   brand: string;
   maxDailyMg: number;
+  /** mg of this ingredient in one label dose */
+  mgPerDose: number;
+  /** physical units (tablet/caplet/LiquiCap) per label dose */
+  unitsPerDose: number;
+  /** max label doses per day */
+  dosesPerDay: number;
+  /** dose-form label, e.g. "caplet", "liquicap" */
+  doseForm: string;
 }
 
 export interface IngredientFinding {
@@ -138,6 +147,10 @@ export function verify(productNames: string[]): VerifyResult {
       const contribution: IngredientContribution = {
         brand: p.brand,
         maxDailyMg: ing.mgPerDose * p.maxDosesPerDay,
+        mgPerDose: ing.mgPerDose,
+        unitsPerDose: p.unitsPerDose,
+        dosesPerDay: p.maxDosesPerDay,
+        doseForm: p.doseForm,
       };
       const list = ledger.get(ing.ingredient) ?? [];
       list.push(contribution);

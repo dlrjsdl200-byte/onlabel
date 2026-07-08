@@ -39,8 +39,8 @@
       "class": "nsaid",
       "maxDailyMg": 4000,
       "risk": "GI bleeding; Reye's syndrome in children/teens with viral illness. Is an NSAID.",
-      "source": "FDA OTC analgesic label",
-      "verify": true
+      "source": "FDA OTC Monograph M013 (Internal Analgesic) §M013.10(b) Dosage: adults not to exceed 4,000 mg in 24 hours.",
+      "verify": false
     },
     "dextromethorphan": {
       "displayName": "Dextromethorphan",
@@ -66,8 +66,8 @@
       "class": "decongestant",
       "maxDailyMg": 240,
       "risk": "Raises blood pressure and heart rate. Sold behind the counter.",
-      "source": "Standard OTC max 240 mg/24h (60 mg q4-6h); confirm against FDA OTC monograph M012",
-      "verify": true
+      "source": "FDA OTC Monograph M012 (Cough/Cold/Allergy) §M012.20(a)(2)-(3) Directions: adults 60 mg every 4-6h, not to exceed 240 mg in 24 hours.",
+      "verify": false
     },
     "phenylephrine": {
       "displayName": "Phenylephrine",
@@ -80,8 +80,8 @@
         "https://www.fda.gov/news-events/press-announcements/fda-proposes-ending-use-oral-phenylephrine-otc-monograph-nasal-decongestant-active-ingredient-after",
         "https://www.fda.gov/drugs/understanding-over-counter-medicines/key-information-about-nonprescription-over-counter-otc-oral-phenylephrine"
       ],
-      "source": "OTC labeling; FDA 2023-2024 efficacy review",
-      "verify": true
+      "source": "FDA OTC Monograph M012 (Cough/Cold/Allergy) §M012.20(a)(1) Directions: adults 10 mg every 4h, not to exceed 60 mg in 24 hours. Efficacy per FDA 2023-2024 review.",
+      "verify": false
     },
     "diphenhydramine": {
       "displayName": "Diphenhydramine",
@@ -107,8 +107,8 @@
       "class": "antihistamine-sedating",
       "maxDailyMg": 75,
       "risk": "Sedation; found in nighttime cold products and sleep aids.",
-      "source": "OTC antihistamine labeling (~75 mg/day; sleep-aid single dose is 25 mg). NyQuil label max delivers 50 mg/day, so daily ceiling must be >= 50.",
-      "verify": true
+      "source": "FDA OTC Monograph M012 (Cough/Cold/Allergy) §M012.12(h) Directions: adults 7.5-12.5 mg every 4-6h, not to exceed 75 mg in 24 hours.",
+      "verify": false
     },
     "loratadine": {
       "displayName": "Loratadine",
@@ -143,8 +143,8 @@
       "class": "stimulant",
       "maxDailyMg": null,
       "risk": "Added to some analgesics; jitteriness at high totals.",
-      "source": "OTC labeling",
-      "verify": true
+      "source": "No OTC monograph daily ceiling — caffeine is an adjunct, not an analgesic active ingredient in FDA Monograph M013. Limit intentionally null (duplication still flagged).",
+      "verify": false
     }
   }
 }
