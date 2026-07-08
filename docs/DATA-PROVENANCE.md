@@ -13,7 +13,7 @@ OnLabel의 데이터 저장소는 **버전관리되는 큐레이션 JSON**(`src/
 | 제품 활성성분 목록 | products.json | FDA 라벨(SPL) | ✅ 직접 | L3 후 높음 |
 | 단위당 함량 mgPerDose | products.json | FDA 라벨 | ✅ 대부분(라벨 파싱) | L3 후 높음 |
 | 하루 최대 횟수 maxDosesPerDay | products.json | 라벨 "용법"(자유서술) | ⚠️ 부분(파싱 필요) | 파싱+검수 |
-| **성분 일일한도 maxDailyMg** | ingredients.json | **FDA OTC 모노그래프**(M002 진통, M012 감기) | ❌ **라벨에 없음** | 모노그래프+약사 |
+| **성분 일일한도 maxDailyMg** | ingredients.json | **FDA OTC 모노그래프**(M013 진통, M012 감기) | ❌ **라벨에 없음** | 모노그래프+약사 |
 | 금기·상호작용 규칙 R3 | (규칙셋) | 약사 저작 / ONCHigh | ❌ | 약사 |
 | 효능 노트(phenylephrine) | ingredients.json | FDA 자문위/보도(2023-24) | ❌ 별도(확보됨) | 높음 |
 | Red-flag | (규칙셋) | 약사/임상 | ❌ | 약사 |
