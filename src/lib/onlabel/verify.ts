@@ -278,6 +278,16 @@ export function lookupProduct(name: string): Product | null {
   return resolveProduct(name)?.product ?? null;
 }
 
+/** Resolve a free-text ingredient name/brand-ingredient/aka to its KB key. */
+export function resolveIngredientKey(name: string): string | null {
+  return matchGenericIngredient(name);
+}
+
+/** The human-verified KB entry for an ingredient key, if any. */
+export function ingredientRef(key: string): IngredientRef | undefined {
+  return INGREDIENTS[key];
+}
+
 /**
  * Verify a set of products taken together.
  * @param productNames free-text product names (brand or catalog id)

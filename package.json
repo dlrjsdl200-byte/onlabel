@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "tsx src/lib/onlabel/verify.test.ts && tsx src/lib/onlabel/tool.test.ts && tsx evals/check-golden.ts",
+    "test": "tsx src/lib/onlabel/verify.test.ts && tsx src/lib/onlabel/tool.test.ts && tsx src/lib/onlabel/verifyClaims.test.ts && tsx evals/check-golden.ts",
     "check:golden": "tsx evals/check-golden.ts",
     "check:live": "node --env-file=.env --import tsx scripts/live-check.ts",
     "eval": "tsx evals/run-eval.ts",
