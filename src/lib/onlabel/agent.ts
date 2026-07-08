@@ -37,13 +37,128 @@ Rules:
   mentioned, advise consulting a pharmacist.
 - Always add: this is not medical advice; confirm with a pharmacist or physician.
 
-Style: plain, calm, non-clinical language. Give the concrete action first, then
-the reason.`;
+Style: plain, calm, non-clinical language. Lead directly with the answer — do not
+open with a preamble like "I'll check this for you" or "Let me look". Give the
+concrete action first, then the reason. Write in plain prose sentences only — do NOT use markdown formatting
+(no **bold**, headings, bullet lists, or hyperlinks). The interface already shows
+the ingredient ledger, sources, and efficacy notes as separate elements, so do
+not reproduce tables or link lists in your text. Keep it to a short, readable
+few sentences.`;
 
 export interface OnLabelResponse {
   answer: string;
   verification: VerifyResult | null;
   productsChecked: string[];
+}
+
+/** Events streamed to the client for the verdict-first interaction. */
+export type OnLabelEvent =
+  | { type: "verification"; verification: VerifyResult; productsChecked: string[] }
+  | { type: "token"; text: string }
+  | { type: "done"; productsChecked: string[] }
+  | { type: "error"; message: string };
+
+function extractProducts(input: unknown): string[] {
+  const out: string[] = [];
+  if (input && typeof input === "object" && "products" in input) {
+    const products = (input as { products?: unknown }).products;
+    if (Array.isArray(products)) {
+      for (const p of products) if (typeof p === "string") out.push(p);
+    }
+  }
+  return out;
+}
+
+/**
+ * Streaming variant of runOnLabel. Yields the deterministic `verification`
+ * the moment Claude calls check_otc_safety (verdict-first snap), then streams
+ * prose `token` deltas. Prose tokens are buffered until the verdict is sent so
+ * the verdict always lands first.
+ */
+export async function* streamOnLabel(
+  questionText: string,
+): AsyncGenerator<OnLabelEvent> {
+  const productSet = new Set<string>();
+  let verdictSent = false;
+  let streamedProse = false;
+  const buffered: string[] = [];
+
+  function makeVerification(): OnLabelEvent | null {
+    const productsChecked = [...productSet];
+    if (productsChecked.length === 0) return null;
+    return {
+      type: "verification",
+      verification: verify(productsChecked),
+      productsChecked,
+    };
+  }
+
+  for await (const message of query({
+    prompt: questionText,
+    options: {
+      systemPrompt: SYSTEM_PROMPT,
+      mcpServers: { onlabel: onlabelServer },
+      allowedTools: [CHECK_OTC_SAFETY_TOOL],
+      tools: [],
+      includePartialMessages: true,
+    },
+  })) {
+    if (message.type === "assistant") {
+      for (const block of message.message.content) {
+        if (block.type === "tool_use" && block.name === CHECK_OTC_SAFETY_TOOL) {
+          for (const p of extractProducts(block.input)) productSet.add(p);
+        }
+      }
+      // Snap the verdict as soon as we know the products.
+      if (!verdictSent) {
+        const v = makeVerification();
+        if (v) {
+          verdictSent = true;
+          yield v;
+          for (const t of buffered) {
+            streamedProse = true;
+            yield { type: "token", text: t };
+          }
+          buffered.length = 0;
+        }
+      }
+    } else if (message.type === "stream_event") {
+      const ev = message.event as {
+        type?: string;
+        delta?: { type?: string; text?: string };
+      };
+      if (
+        ev.type === "content_block_delta" &&
+        ev.delta?.type === "text_delta" &&
+        typeof ev.delta.text === "string"
+      ) {
+        const text = ev.delta.text;
+        if (!verdictSent) {
+          buffered.push(text); // hold prose until the verdict lands
+        } else {
+          streamedProse = true;
+          yield { type: "token", text };
+        }
+      }
+    } else if (message.type === "result" && message.subtype === "success") {
+      // Ensure a verdict went out even if partial parsing missed the tool call.
+      if (!verdictSent) {
+        const v = makeVerification();
+        if (v) {
+          verdictSent = true;
+          yield v;
+        }
+      }
+      // Fallback: if no deltas streamed, emit the full result text at once.
+      if (!streamedProse && message.result) {
+        for (const t of buffered) yield { type: "token", text: t };
+        if (buffered.length === 0) {
+          yield { type: "token", text: message.result };
+        }
+      }
+      yield { type: "done", productsChecked: [...productSet] };
+    }
+  }
 }
 
 /**

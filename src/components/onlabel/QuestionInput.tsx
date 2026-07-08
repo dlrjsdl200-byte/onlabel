@@ -1,0 +1,74 @@
+"use client";
+
+import { useState } from "react";
+
+const EXAMPLES = [
+  "Can I take Tylenol and DayQuil together?",
+  "Is it safe to take NyQuil with Tylenol PM?",
+  "Can I take Advil and Aleve at the same time?",
+  "Does DayQuil's decongestant actually work?",
+];
+
+export function QuestionInput({
+  onSubmit,
+  disabled,
+  compact,
+}: {
+  onSubmit?: (q: string) => void;
+  disabled?: boolean;
+  compact?: boolean;
+}) {
+  const [value, setValue] = useState("");
+
+  function submit(q: string) {
+    const text = q.trim();
+    if (!text || disabled) return;
+    onSubmit?.(text);
+  }
+
+  return (
+    <div className="w-full">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          submit(value);
+        }}
+        className="flex gap-2"
+      >
+        <input
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="Ask about your OTC medicines…"
+          disabled={disabled}
+          className="h-12 flex-1 rounded-lg border bg-background px-4 text-base shadow-sm outline-none ring-primary/30 placeholder:text-muted-foreground focus:ring-2 disabled:opacity-60"
+          aria-label="Your OTC medication question"
+        />
+        <button
+          type="submit"
+          disabled={disabled}
+          className="h-12 rounded-lg bg-primary px-6 font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+        >
+          Ask
+        </button>
+      </form>
+      {!compact && (
+        <div className="mt-3 flex flex-wrap justify-center gap-2">
+          {EXAMPLES.map((ex) => (
+            <button
+              key={ex}
+              type="button"
+              onClick={() => {
+                setValue(ex);
+                submit(ex);
+              }}
+              disabled={disabled}
+              className="rounded-full border bg-muted/40 px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
+            >
+              {ex}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
