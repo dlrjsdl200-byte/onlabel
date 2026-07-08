@@ -105,3 +105,10 @@
 - **출처 클릭 = FDA 근거 검증**(D26 tool-receipts 가시화): Sources 칩 중 모노그래프 접지 성분은 클릭 시 팝오버 — §섹션 + **원문 발췌(verbatim, refs 검증)** + **공개 FDA PDF 링크**. 사용자 아이디어(로컬 PDF 경로)는 배포 미작동이라 **발췌+공개URL**로 대체(사용자 확정). 범위=Sources 칩부터(본문 인라인 각주는 스트레치).
 - **커버리지**: 9개 모노그래프 접지 성분(APAP·aspirin·pseudoephedrine·phenylephrine·DXM·guaifenesin·chlorpheniramine·diphenhydramine·doxylamine) = 클릭형. ibuprofen·naproxen·caffeine·2세대 항히스타민 = 평문 칩(모노그래프 인용 없음, 정직). URL은 M012/M013 검증본(B-4)만 사용, 날조 없음.
 - **데모 임팩트**: 플래그십(Tylenol+NyQuil)에서 3개 FDA receipt 칩(APAP M013 / DXM·doxylamine M012) 노출 → "숫자로 반박 + 근거 추적"이 눈에 보임.
+
+## 2026-07-08 (L1 Phase 2 — [C] 분해 + [A'] 무근거 초안 live, transcript claims-2026-07-08T11-04-28-976Z.md)
+- **대조 엔진 실증**: 무근거 generic-LLM 초안 → [C] 원자 claim 분해 → [D] 결정론 FDA 대조가 작동. Case1(Tylenol+NyQuil) 8✅/2❌/6⚠️, Case2(Advil+Aleve) 9✅/3❌/10⚠️. 각 claim에 근거/인용(M013 §M013.20(b)(2) 등) 첨부 = 데모 골든샷.
+- **실제 오류 포착**: (a)verdict "CAUTION" vs 결정론 DANGER → CONTRADICTED, (b)"3,000 mg safer ceiling" vs KB 4,000 → CONTRADICTED, (c)"naproxen 440 mg first dose" vs 라벨 220 → CONTRADICTED(KB에 first-dose 규칙 없음). grounded claim(성분정체·중복·단일용량 650/1000·간격 q4-6h)은 VERIFIED+인용.
+- **🔴 scope 버그 발견·수정**: combination-safety claim이 질문과 **다른 제품쌍**(예 "NSAID+Tylenol 병용 가능")일 때 top-level verify()(Advil+Aleve=danger)에 대조돼 **오판(false CONTRADICTED)**. → Claim에 `assertedProducts` 추가, [D]가 claim 자체 scope로 verify() 재실행하도록 수정 + 회귀테스트. (11 claim tests green)
+- **🟡 잔여 refinement(B-10)**: (1)dose-limit이 "conservative target(3000)"과 "ceiling(4000)"을 구분 못 해 과엄격 CONTRADICTED — 뉘앙스 필요. (2)[C]가 ingredient에 클래스명("NSAID") 넣으면 UNSUPPORTED 노이즈. (3)language claim은 정상적으로 [D-lang](Phase 3) 대기.
+- **다음**: Phase 3 = [D-lang] 격리 LLM verifier + [E] reconciler(결정론 override, 데모 gate 경로). Phase 4 = eval + UI claim 배지.

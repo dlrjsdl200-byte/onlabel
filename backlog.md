@@ -69,3 +69,7 @@
 ## B-9. 인용 receipts 확장 `[P2]`
 - **무엇**: (1) ibuprofen·naproxen·caffeine(M011)·2세대 항히스타민 인용 추가(B-7 소스 확보 후), (2) 본문 산문 인라인 각주(ChatGPT식 위첨자) — LLM이 문장별 인용 앵커 emit해야 해서 복잡+날조 위험, 신중히. (3) 팝오버 바깥클릭 닫기 등 UX 폴리시.
 - **선행**: 현 citations.json은 M012/M013 9종. B-7(NSAID 소스)·M011 캡션 확보 시 확장.
+
+## B-10. L1 claim verifier 정밀화 `[P2]`
+- **무엇**: (1)dose-limit에서 "conservative target"(예 APAP 3,000 권장)과 "label ceiling"(4,000) 구분 — 현재 3,000을 4,000 위반으로 과엄격 CONTRADICTED. (2)[C]가 ingredient에 클래스명("NSAID")을 넣는 경우 처리(클래스 claim 종류 추가 or 무시). (3)single-dose에 naproxen "first dose 440 mg" 같은 라벨 규칙 반영 여부 결정.
+- **왜 P2**: 데모 핵심(verdict·ceiling contradiction)은 이미 정확. 위는 엣지 정밀도.

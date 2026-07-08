@@ -8,8 +8,7 @@
  * plus the grounded basis, so the pipeline can show FDA receipts per claim.
  */
 
-import type { VerifyResult } from "./verify";
-import { ingredientRef, resolveIngredientKey } from "./verify";
+import { verify, ingredientRef, resolveIngredientKey, type VerifyResult } from "./verify";
 import {
   type Claim,
   type ClaimVerdict,
@@ -68,14 +67,23 @@ export function verifyClinicalClaim(
     case "combination-safety": {
       if (!claim.assertedVerdict)
         return unsupported(claim, "claim states no explicit verdict to check");
-      if (claim.assertedVerdict === result.overall)
+      // A combination-safety claim may be about a DIFFERENT product set than the
+      // question (e.g. "you can pair either NSAID with Tylenol"). Check the
+      // claim's own scope so we don't judge it against the wrong verdict.
+      const scoped =
+        claim.assertedProducts && claim.assertedProducts.length >= 2
+          ? verify(claim.assertedProducts)
+          : result;
+      const scope =
+        scoped === result ? "" : ` for ${claim.assertedProducts!.join(" + ")}`;
+      if (claim.assertedVerdict === scoped.overall)
         return verified(
           claim,
-          `deterministic verify() verdict is ${result.overall.toUpperCase()}`,
+          `deterministic verify() verdict${scope} is ${scoped.overall.toUpperCase()}`,
         );
       return contradicted(
         claim,
-        `FDA-grounded verdict is ${result.overall.toUpperCase()}, not ${claim.assertedVerdict.toUpperCase()}`,
+        `FDA-grounded verdict${scope} is ${scoped.overall.toUpperCase()}, not ${claim.assertedVerdict.toUpperCase()}`,
       );
     }
 

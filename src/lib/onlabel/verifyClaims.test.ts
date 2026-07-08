@@ -114,6 +114,23 @@ test("duplication: acetaminophen doubled across products -> VERIFIED (duplicated
   assert.match(v.basis, /duplicated/);
 });
 
+// Scope fix: a combination-safety claim about a DIFFERENT product set (NSAID +
+// Tylenol) must be checked against ITS OWN scope, not the question's verdict.
+test("combination-safety: claim-scoped products override the top-level verdict", () => {
+  const top = verify(["Advil", "Aleve"]); // danger (two NSAIDs)
+  const v = verifyClinicalClaim(
+    {
+      text: "You can safely combine an NSAID with Tylenol.",
+      kind: "combination-safety",
+      assertedVerdict: "ok",
+      assertedProducts: ["Advil", "Tylenol Extra Strength"],
+    },
+    top,
+  );
+  assert.strictEqual(v.status, "VERIFIED");
+  assert.match(v.basis, /Advil \+ Tylenol/);
+});
+
 test("unknown ingredient -> UNSUPPORTED (no fabrication)", () => {
   const r = verify(["Advil"]);
   const v = verifyClinicalClaim(

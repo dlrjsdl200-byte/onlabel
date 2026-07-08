@@ -33,6 +33,10 @@ export interface Claim {
   ingredient?: string;
   /** Product/brand the claim is about, when applicable. */
   product?: string;
+  /** For a combination-safety claim, the specific products it is about — which
+   * may be a DIFFERENT set than the question's products (e.g. a draft that also
+   * comments on pairing with a third drug). [D] checks the claim's own scope. */
+  assertedProducts?: string[];
   /** A numeric amount the draft asserted (e.g. 4000 for "4,000 mg/day"). */
   assertedNumber?: number;
   /** Unit for assertedNumber, e.g. "mg/day", "mg". */
@@ -69,6 +73,12 @@ export const emitClaimsSchema = {
           .optional()
           .describe("active ingredient the claim is about, e.g. 'acetaminophen'"),
         product: z.string().optional().describe("brand/product the claim is about"),
+        assertedProducts: z
+          .array(z.string())
+          .optional()
+          .describe(
+            "for combination-safety: the exact products this claim is about, if it differs from the question (e.g. ['Advil','Tylenol'] when the draft comments on pairing with a third drug)",
+          ),
         assertedNumber: z
           .number()
           .optional()
