@@ -59,3 +59,13 @@
 - **무엇**: (1) ibuprofen(200-400mg q4-6h, max 1200, 10일)·naproxen(220mg q8-12h, first-dose 2정, max 660, 10일) 간격/기간을 **권위 소스에서 확보** — 추출된 M013.txt엔 없음(NSAID 개별 모노그래프/Drug Facts 필요, 결정론 추출·약사 검증). (2) **제품 단위 간격 오버라이드**: 성분 IR 간격 ≠ ER 제형 실제 스케줄(Mucinex ER q12h). 현재 doseForm=ER이면 간격 억제로 회피 중 → products.json에 제품별 `dosing` 오버라이드 필드로 정밀화.
 - **왜 P1**: 지금 ibuprofen/naproxen 빈도·기간 질문은 정직하게 유보하나 접지 답변이면 데모/Impact↑. NSAID는 최다 질문 대상.
 - **선행**: 현 dosing 9종 verify:true의 약사 서명(→verify:false) 먼저.
+
+## B-8. Generic 성분명 해결 (중복 위음성 차단) `[P1 안전]`
+- **무엇**: resolver가 "acetaminophen"/"ibuprofen"/"naproxen" 같은 **일반 성분명**을 제품으로 인식하도록. 현재 브랜드/id 토큰만 매칭 → `verify(["acetaminophen","Tylenol Extra Strength"])`가 ok(실제 danger, APAP 이중). 소비자 실검색은 일반명 다수(시장조사 #12·#16).
+- **왜 P1(안전)**: 위음성 = 초록 OK가 실제 과용을 숨김 = 뉴로심볼릭 코어 신뢰 훼손. 데모에서 심사위원이 "acetaminophen + Tylenol" 쳐보면 드러남.
+- **어떻게**: 입력이 ingredient displayName/aka에 매칭되면 **성분레벨 합성 기여**(대표 mgPerDose로)를 원장에 추가해 중복/누적 계산에 참여시킴. 제품 미매칭이어도 성분은 반영. 회귀 테스트: 위 2케이스 danger + 라벨↔산문 일치.
+- **선행 없음**. verify.ts resolver + ledger 수정. 결정론, LLM 미개입.
+
+## B-9. 인용 receipts 확장 `[P2]`
+- **무엇**: (1) ibuprofen·naproxen·caffeine(M011)·2세대 항히스타민 인용 추가(B-7 소스 확보 후), (2) 본문 산문 인라인 각주(ChatGPT식 위첨자) — LLM이 문장별 인용 앵커 emit해야 해서 복잡+날조 위험, 신중히. (3) 팝오버 바깥클릭 닫기 등 UX 폴리시.
+- **선행**: 현 citations.json은 M012/M013 9종. B-7(NSAID 소스)·M011 캡션 확보 시 확장.

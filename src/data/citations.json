@@ -1,0 +1,74 @@
+{
+  "_meta": {
+    "note": "Monograph receipts for the grounding fence. Quotes are verbatim from the FDA OTC monograph text (deterministic pdftotext extraction, refs/M012.txt / M013.txt), section-cited, with the public FDA URL. Shown when a source is clicked so the FDA basis is verifiable, not a claimed web page.",
+    "urls": {
+      "M012": "https://www.accessdata.fda.gov/drugsatfda_docs/omuf/monographs/OTC%20Monograph_M012-Cough%20Cold%20Allergy%20Bronchodilator%20and%20Antiasthmatic%20Drug%20Products%20for%20OTC%20Human%20Use%2010.14.2022.pdf",
+      "M013": "https://www.accessdata.fda.gov/drugsatfda_docs/omuf/monographs/OTC%20Monograph_M013-Internal%20Analgesic,%20Antipyretic,%20and%20Antirheumatic%20Drug%20Products%20for%20OTC%20Human%20Use%2010.14.2022.pdf"
+    }
+  },
+  "ingredients": {
+    "acetaminophen": {
+      "monograph": "M013",
+      "monographTitle": "Internal Analgesic, Antipyretic, and Antirheumatic Drug Products for OTC Human Use",
+      "section": "§M013.20(b)(2) Directions",
+      "quote": "Adults: Oral dosage is 325 to 650 milligrams every 4 hours or 325 to 500 milligrams every 3 hours or 650 to 1,000 milligrams every 6 hours, while symptoms persist, not to exceed 4,000 milligrams in 24 hours, or as directed by a doctor.",
+      "url": "https://www.accessdata.fda.gov/drugsatfda_docs/omuf/monographs/OTC%20Monograph_M013-Internal%20Analgesic,%20Antipyretic,%20and%20Antirheumatic%20Drug%20Products%20for%20OTC%20Human%20Use%2010.14.2022.pdf"
+    },
+    "aspirin": {
+      "monograph": "M013",
+      "monographTitle": "Internal Analgesic, Antipyretic, and Antirheumatic Drug Products for OTC Human Use",
+      "section": "§M013.20(b)(2) Directions",
+      "quote": "Adults: Oral dosage is 325 to 650 milligrams every 4 hours or 325 to 500 milligrams every 3 hours or 650 to 1,000 milligrams every 6 hours, while symptoms persist, not to exceed 4,000 milligrams in 24 hours, or as directed by a doctor.",
+      "url": "https://www.accessdata.fda.gov/drugsatfda_docs/omuf/monographs/OTC%20Monograph_M013-Internal%20Analgesic,%20Antipyretic,%20and%20Antirheumatic%20Drug%20Products%20for%20OTC%20Human%20Use%2010.14.2022.pdf"
+    },
+    "pseudoephedrine": {
+      "monograph": "M012",
+      "monographTitle": "Cough, Cold, Allergy, Bronchodilator, and Antiasthmatic Drug Products for OTC Human Use",
+      "section": "§M012.20(a)(2) Directions",
+      "quote": "Adults and children 12 years of age and over: 60 milligrams every 4 to 6 hours not to exceed 240 milligrams in 24 hours.",
+      "url": "https://www.accessdata.fda.gov/drugsatfda_docs/omuf/monographs/OTC%20Monograph_M012-Cough%20Cold%20Allergy%20Bronchodilator%20and%20Antiasthmatic%20Drug%20Products%20for%20OTC%20Human%20Use%2010.14.2022.pdf"
+    },
+    "phenylephrine": {
+      "monograph": "M012",
+      "monographTitle": "Cough, Cold, Allergy, Bronchodilator, and Antiasthmatic Drug Products for OTC Human Use",
+      "section": "§M012.20(a)(1) Directions",
+      "quote": "Adults and children 12 years of age and over: 10 milligrams every 4 hours not to exceed 60 milligrams in 24 hours.",
+      "url": "https://www.accessdata.fda.gov/drugsatfda_docs/omuf/monographs/OTC%20Monograph_M012-Cough%20Cold%20Allergy%20Bronchodilator%20and%20Antiasthmatic%20Drug%20Products%20for%20OTC%20Human%20Use%2010.14.2022.pdf"
+    },
+    "dextromethorphan": {
+      "monograph": "M012",
+      "monographTitle": "Cough, Cold, Allergy, Bronchodilator, and Antiasthmatic Drug Products for OTC Human Use",
+      "section": "§M012.14 Directions",
+      "quote": "Adults and children 12 years of age and over: Oral dosage is 10 to 20 milligrams every 4 hours or 30 milligrams every 6 to 8 hours, not to exceed 120 milligrams in 24 hours, or as directed by a doctor.",
+      "url": "https://www.accessdata.fda.gov/drugsatfda_docs/omuf/monographs/OTC%20Monograph_M012-Cough%20Cold%20Allergy%20Bronchodilator%20and%20Antiasthmatic%20Drug%20Products%20for%20OTC%20Human%20Use%2010.14.2022.pdf"
+    },
+    "guaifenesin": {
+      "monograph": "M012",
+      "monographTitle": "Cough, Cold, Allergy, Bronchodilator, and Antiasthmatic Drug Products for OTC Human Use",
+      "section": "§M012.18 Directions",
+      "quote": "Adults and children 12 years of age and over: oral dosage is 200 to 400 milligrams every 4 hours not to exceed 2,400 milligrams in 24 hours.",
+      "url": "https://www.accessdata.fda.gov/drugsatfda_docs/omuf/monographs/OTC%20Monograph_M012-Cough%20Cold%20Allergy%20Bronchodilator%20and%20Antiasthmatic%20Drug%20Products%20for%20OTC%20Human%20Use%2010.14.2022.pdf"
+    },
+    "chlorpheniramine": {
+      "monograph": "M012",
+      "monographTitle": "Cough, Cold, Allergy, Bronchodilator, and Antiasthmatic Drug Products for OTC Human Use",
+      "section": "§M012.12(d)(3) Directions",
+      "quote": "Adults and children 12 years of age and over: oral dosage is 4 milligrams every 4 to 6 hours, not to exceed 24 milligrams in 24 hours, or as directed by a doctor.",
+      "url": "https://www.accessdata.fda.gov/drugsatfda_docs/omuf/monographs/OTC%20Monograph_M012-Cough%20Cold%20Allergy%20Bronchodilator%20and%20Antiasthmatic%20Drug%20Products%20for%20OTC%20Human%20Use%2010.14.2022.pdf"
+    },
+    "diphenhydramine": {
+      "monograph": "M012",
+      "monographTitle": "Cough, Cold, Allergy, Bronchodilator, and Antiasthmatic Drug Products for OTC Human Use",
+      "section": "§M012.12(d)(7) Directions",
+      "quote": "Adults and children 12 years of age and over: oral dosage is 25 to 50 milligrams every 4 to 6 hours, not to exceed 300 milligrams in 24 hours, or as directed by a doctor.",
+      "url": "https://www.accessdata.fda.gov/drugsatfda_docs/omuf/monographs/OTC%20Monograph_M012-Cough%20Cold%20Allergy%20Bronchodilator%20and%20Antiasthmatic%20Drug%20Products%20for%20OTC%20Human%20Use%2010.14.2022.pdf"
+    },
+    "doxylamine": {
+      "monograph": "M012",
+      "monographTitle": "Cough, Cold, Allergy, Bronchodilator, and Antiasthmatic Drug Products for OTC Human Use",
+      "section": "§M012.12(d)(8) Directions",
+      "quote": "Adults and children 12 years of age and over: oral dosage is 7.5 to 12.5 milligrams every 4 to 6 hours, not to exceed 75 milligrams in 24 hours, or as directed by a doctor.",
+      "url": "https://www.accessdata.fda.gov/drugsatfda_docs/omuf/monographs/OTC%20Monograph_M012-Cough%20Cold%20Allergy%20Bronchodilator%20and%20Antiasthmatic%20Drug%20Products%20for%20OTC%20Human%20Use%2010.14.2022.pdf"
+    }
+  }
+}

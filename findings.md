@@ -100,3 +100,8 @@
 - **B-8 해결**: generic 성분명이 원장에 0mg 기여로 참여 → 중복/클래스 탐지 작동, mg는 미조작(D15/D22). `acetaminophen+Tylenol` ok→**caution**("같은 약, 이중복용"), `ibuprofen+Aleve` ok→**danger**(2 NSAID). aka("APAP")도 매칭. 단일 generic/비약물 문자열은 오탐 없음. 회귀테스트 5개 추가.
 - **🟢 NSAID↔NSAID '교체 간격'은 미국 공신력 소스 부재 = 명시적 스코프아웃(사용자 확인)**: ibuprofen↔naproxen에 대해 FDA/DailyMed/MedlinePlus는 **"병용 회피(avoid concomitant use)"만** 권고, "ibuprofen 후 8h 뒤 naproxen" 같은 교체 간격은 **제시하지 않음**. → OnLabel은 교체간격을 만들지 않고 기존대로 **danger("함께 복용 말 것")+간격 유보**가 정답. 이는 데이터 갭이 아니라 근거부재로 인한 스코프 경계. DECISIONS D31.
 - **B-7 정련**: ibuprofen/naproxen의 **개별** 간격·기간(ibuprofen q4-6h·max1200·10d / naproxen q8-12h·max660·10d)은 OTC Drug Facts 라벨(DailyMed)에 존재 → 접지 가능(추가 대상). 그러나 둘 사이 **교체 간격은 접지 불가(소스 없음)** → 영구 유보.
+
+## 2026-07-08 (FDA 인용 receipts UI — Sources 칩 클릭형)
+- **출처 클릭 = FDA 근거 검증**(D26 tool-receipts 가시화): Sources 칩 중 모노그래프 접지 성분은 클릭 시 팝오버 — §섹션 + **원문 발췌(verbatim, refs 검증)** + **공개 FDA PDF 링크**. 사용자 아이디어(로컬 PDF 경로)는 배포 미작동이라 **발췌+공개URL**로 대체(사용자 확정). 범위=Sources 칩부터(본문 인라인 각주는 스트레치).
+- **커버리지**: 9개 모노그래프 접지 성분(APAP·aspirin·pseudoephedrine·phenylephrine·DXM·guaifenesin·chlorpheniramine·diphenhydramine·doxylamine) = 클릭형. ibuprofen·naproxen·caffeine·2세대 항히스타민 = 평문 칩(모노그래프 인용 없음, 정직). URL은 M012/M013 검증본(B-4)만 사용, 날조 없음.
+- **데모 임팩트**: 플래그십(Tylenol+NyQuil)에서 3개 FDA receipt 칩(APAP M013 / DXM·doxylamine M012) 노출 → "숫자로 반박 + 근거 추적"이 눈에 보임.
