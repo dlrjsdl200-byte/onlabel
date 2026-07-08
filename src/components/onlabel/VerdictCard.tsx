@@ -2,6 +2,17 @@ import type { Severity } from "@/lib/onlabel/verify";
 import { VERDICT } from "./verdict";
 import { cn } from "@/lib/utils";
 
+/**
+ * Deterministic scope note shown under every verdict. The check is product-level
+ * only, so a green "OK" must not read as blanket approval: it clarifies that the
+ * answer's prose may still caution about a dosing schedule, prior intake, or
+ * substances (alcohol, caffeine) the verdict did not evaluate. Resolves the
+ * badge<->prose contradiction (Direction C) without inferring anything from the
+ * LLM's text.
+ */
+const SCOPE_NOTE =
+  "Checks the products you named against FDA label maximums — not your dosing schedule, how much you've already taken, or other substances like alcohol or caffeine.";
+
 export function VerdictCard({
   severity,
   summary,
@@ -45,6 +56,9 @@ export function VerdictCard({
         </h2>
         <p className="mt-1.5 text-sm leading-relaxed text-foreground/80">
           {summary}
+        </p>
+        <p className="mt-2 border-t border-foreground/10 pt-2 text-xs leading-relaxed text-foreground/55">
+          {SCOPE_NOTE}
         </p>
       </div>
     </div>
