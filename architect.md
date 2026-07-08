@@ -226,4 +226,30 @@ Skill은 40+ 에이전트(Cursor/Copilot/Gemini CLI...)가 쓰는 오픈 포맷.
 
 ---
 
-*근거: openFDA Drug Label API, RxNorm/RxNav API, Claude Agent SDK 공식 문서(code.claude.com/docs/en/agent-sdk), 2026 할루시네이션 검증 연구(claim-level decomposition + grounding + runtime judge). 작성 2026-07-08.*
+## References (v1 설계 근거)
+
+**데이터 소스 & API**
+- openFDA Drug Label API — https://open.fda.gov/apis/drug/label/ · 인증/rate limit https://open.fda.gov/apis/authentication/
+- openFDA Drug endpoints (NDC 등) — https://open.fda.gov/apis/drug/
+- DailyMed v2 RESTful Web Services — https://dailymed.nlm.nih.gov/dailymed/webservices-help/v2/spls_api.cfm
+- RxNorm/RxNav API — https://lhncbc.nlm.nih.gov/RxNav/APIs/RxNormAPIs.html · Terms of Service https://lhncbc.nlm.nih.gov/RxNav/TermsofService.html
+- NLM Drug Interaction API 폐기(2024-01) — https://www.rxlabelguard.com/blog/nlm-rxnav-drug-interaction-api-discontinued-migration-guide · https://blog.drugbank.com/nih-discontinues-their-drug-interaction-api/
+
+**용량·성분 근거**
+- FDA OTC acetaminophen 용량(GetReliefResponsibly, FDA 캠페인) — https://www.getreliefresponsibly.com/use-pain-medicine-safely/adult-acetaminophen-dosing · NSAID https://www.getreliefresponsibly.com/use-pain-medicine-safely/adult-nsaid-dosage-chart
+- 복합제 용량 — https://www.drugs.com/dosage/acetaminophen-dextromethorphan-guaifenesin-phenylephrine.html
+- FDA 경구 phenylephrine 효능(2023 NDAC 16-0 / 2024-11 제거 제안) — https://www.fda.gov/news-events/press-announcements/fda-proposes-ending-use-oral-phenylephrine-otc-monograph-nasal-decongestant-active-ingredient-after · https://www.fda.gov/drugs/understanding-over-counter-medicines/key-information-about-nonprescription-over-counter-otc-oral-phenylephrine
+
+**Claude Agent SDK**
+- Overview — https://code.claude.com/docs/en/agent-sdk/overview
+- Custom tools (in-process MCP) — https://code.claude.com/docs/en/agent-sdk/custom-tools
+
+**할루시네이션 검증 방법(2026)**
+- claim-level decomposition + grounding + runtime judge; 의료 도메인 grounding 없으면 60%+ — https://zylos.ai/research/2026-01-27-llm-hallucination-detection-mitigation
+- awesome-hallucination-detection (papers) — https://github.com/EdinburghNLP/awesome-hallucination-detection
+
+**포지셔닝(OpenEvidence)**
+- 2026 임상 AI landscape — https://www.iatrox.com/blog/clinical-ai-landscape-2026-chatgpt-openevidence-iatrox-medwise
+- OpenEvidence (PMC) — https://pmc.ncbi.nlm.nih.gov/articles/PMC12101550/
+
+*작성 2026-07-08. v2 심화 설계는 docs/AI-ARCHITECTURE.md.*

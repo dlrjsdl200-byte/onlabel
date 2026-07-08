@@ -124,3 +124,26 @@
 [^safeai]: SAFE-AI — clinical expert knowledge + LLM + strict ontology rules to minimize hallucination. Frontiers/PMC12417475 (Generative AI in consumer health).
 [^bigtech]: Consumer health AI 2026 (ChatGPT Health, Claude for Healthcare, Copilot Health) — documented risk of over-reassurance / failing to reflect urgency. PMC13131313.
 [^dupe]: Therapeutic duplication (e.g., acetaminophen in a cold remedy + a pain reliever) — Drugs.com is rare in flagging it. JMIR MARS review of consumer DDI apps: PMC5895923.
+
+### 정본 논문 (canonical)
+- **CoVe** — Dhuliawala et al., "Chain-of-Verification Reduces Hallucination in Large Language Models" (2023), arXiv:2309.11495.
+- **Self-Refine** — Madaan et al., "Self-Refine: Iterative Refinement with Self-Feedback," NeurIPS 2023.
+- **Reflexion** — Shinn et al., "Reflexion: Language Agents with Verbal Reinforcement Learning," NeurIPS 2023.
+- **Self-Correction 한계** — "The Self-Correction Illusion: LLMs Correct Others but Not Themselves," arXiv:2606.05976 (2026).
+- **Self-correction papers 모음** — https://github.com/ryokamoi/llm-self-correction-papers
+
+### 검증·grounding 방법(2026)
+- 할루시네이션 검출/완화 SOTA(claim-level decomposition + grounding + runtime judge; 의료 grounding 없으면 60%+) — https://zylos.ai/research/2026-01-27-llm-hallucination-detection-mitigation
+- awesome-hallucination-detection — https://github.com/EdinburghNLP/awesome-hallucination-detection
+
+### 뉴로심볼릭·의료 안전
+- Neuro-symbolic clinical AI(런타임 결정론) — Infermedica https://infermedica.com/blog/articles/towards-clinically-validated-neuro-symbolic-ai · Kognitos https://www.kognitos.com/blog/what-is-neurosymbolic-ai/
+- Regulation of clinical AI in the age of agents(UNDCS) — npj Digital Medicine, https://www.nature.com/articles/s41746-026-02420-z
+- VeriGuard: LLM agent safety via verified code — https://arxiv.org/pdf/2510.05156
+- SAFE-AI / consumer health LLM 안전 프레임워크 — https://pmc.ncbi.nlm.nih.gov/articles/PMC12417475/
+- 소비자 헬스 AI 2026(ChatGPT Health, Claude for Healthcare, Copilot Health; 과도한 안심 위험) — https://pmc.ncbi.nlm.nih.gov/articles/PMC13131313/
+
+### 선행 사례(의약품 체커)
+- Consumer DDI 앱 systematic review(MARS) — https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5895923/
+- Drugs.com 상호작용·therapeutic duplication — https://www.drugs.com/drug-interactions/acetaminophen.html
+- Medscape / WebMD interaction checker — https://reference.medscape.com/drug-interactionchecker
