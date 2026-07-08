@@ -21,7 +21,7 @@
         "intervalText": "every 4 to 6 hours (650–1,000 mg every 6 hours, or 325–650 mg every 4 hours)",
         "maxDurationText": "do not use for more than 10 days for pain or 3 days for fever unless directed by a doctor",
         "source": "FDA OTC Monograph M013 §M013.20(b)(2) Directions; 10-day limit §M013.20(b) labeling",
-        "verify": true
+        "verify": false
       }
     },
     "ibuprofen": {
@@ -57,7 +57,7 @@
         "intervalText": "every 4 to 6 hours (325–650 mg every 4 hours, or 650–1,000 mg every 6 hours)",
         "maxDurationText": "do not use for more than 10 days for pain or 3 days for fever unless directed by a doctor",
         "source": "FDA OTC Monograph M013 §M013.20(b)(2) Directions; 10-day limit §M013.20(b)",
-        "verify": true
+        "verify": false
       }
     },
     "dextromethorphan": {
@@ -74,7 +74,7 @@
         "intervalText": "10–20 mg every 4 hours, or 30 mg every 6 to 8 hours",
         "maxDurationText": "if cough lasts more than 7 days (adults), see a doctor",
         "source": "FDA OTC Monograph M012 §M012.14 Directions; cough duration §M012 antitussive labeling",
-        "verify": true
+        "verify": false
       }
     },
     "guaifenesin": {
@@ -89,7 +89,7 @@
         "intervalText": "200–400 mg every 4 hours",
         "maxDurationText": "if cough lasts more than 7 days (adults), see a doctor",
         "source": "FDA OTC Monograph M012 §M012.18 Directions",
-        "verify": true
+        "verify": false
       }
     },
     "pseudoephedrine": {
@@ -106,7 +106,7 @@
         "intervalText": "60 mg every 4 to 6 hours",
         "maxDurationText": "do not use for more than 7 days",
         "source": "FDA OTC Monograph M012 §M012.20(a)(2) Directions; 7-day limit §M012 nasal decongestant labeling",
-        "verify": true
+        "verify": false
       }
     },
     "phenylephrine": {
@@ -128,7 +128,7 @@
         "intervalText": "10 mg every 4 hours",
         "maxDurationText": "do not use for more than 7 days",
         "source": "FDA OTC Monograph M012 §M012.20(a)(1) Directions; 7-day limit §M012 nasal decongestant labeling",
-        "verify": true
+        "verify": false
       }
     },
     "diphenhydramine": {
@@ -143,7 +143,7 @@
         "intervalText": "25–50 mg every 4 to 6 hours",
         "maxDurationText": null,
         "source": "FDA OTC Monograph M012 §M012.12(d)(7) Directions",
-        "verify": true
+        "verify": false
       }
     },
     "chlorpheniramine": {
@@ -158,7 +158,7 @@
         "intervalText": "4 mg every 4 to 6 hours",
         "maxDurationText": null,
         "source": "FDA OTC Monograph M012 §M012.12(d)(3) Directions",
-        "verify": true
+        "verify": false
       }
     },
     "doxylamine": {
@@ -173,7 +173,7 @@
         "intervalText": "7.5–12.5 mg every 4 to 6 hours",
         "maxDurationText": null,
         "source": "FDA OTC Monograph M012 §M012.12(d)(8) Directions",
-        "verify": true
+        "verify": false
       }
     },
     "loratadine": {
