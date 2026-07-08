@@ -1,0 +1,150 @@
+{
+  "_meta": {
+    "description": "Active-ingredient reference for OnLabel. Adult OTC max daily doses. Values grounded in FDA/OTC labeling; entries with verify=true need DailyMed/openFDA confirmation.",
+    "source": "FDA OTC labeling; GetReliefResponsibly (FDA campaign); Drugs.com combination dosing",
+    "reviewedBy": "pending pharmacist review",
+    "updated": "2026-07-08"
+  },
+  "ingredients": {
+    "acetaminophen": {
+      "displayName": "Acetaminophen",
+      "aka": ["APAP", "paracetamol"],
+      "class": "analgesic-antipyretic",
+      "maxDailyMg": 4000,
+      "risk": "Liver damage — the leading cause of acute liver failure in the US. Often hidden in multi-symptom cold/flu and PM products.",
+      "source": "FDA OTC label ceiling (4,000 mg/24h)",
+      "verify": false
+    },
+    "ibuprofen": {
+      "displayName": "Ibuprofen",
+      "aka": [],
+      "class": "nsaid",
+      "maxDailyMg": 1200,
+      "risk": "GI bleeding, kidney and cardiovascular risk. Do not combine with other NSAIDs.",
+      "source": "FDA OTC label (1,200 mg/24h; Rx allows more)",
+      "verify": false
+    },
+    "naproxen": {
+      "displayName": "Naproxen sodium",
+      "aka": [],
+      "class": "nsaid",
+      "maxDailyMg": 660,
+      "risk": "GI bleeding, kidney and cardiovascular risk. Do not combine with other NSAIDs.",
+      "source": "FDA OTC label (660 mg/24h)",
+      "verify": false
+    },
+    "aspirin": {
+      "displayName": "Aspirin",
+      "aka": ["acetylsalicylic acid", "ASA"],
+      "class": "nsaid",
+      "maxDailyMg": 4000,
+      "risk": "GI bleeding; Reye's syndrome in children/teens with viral illness. Is an NSAID.",
+      "source": "FDA OTC analgesic label",
+      "verify": true
+    },
+    "dextromethorphan": {
+      "displayName": "Dextromethorphan",
+      "aka": ["DXM"],
+      "class": "antitussive",
+      "maxDailyMg": 120,
+      "risk": "Excess causes neurologic effects. Common in cough + cold combos.",
+      "source": "OTC labeling",
+      "verify": true
+    },
+    "guaifenesin": {
+      "displayName": "Guaifenesin",
+      "aka": [],
+      "class": "expectorant",
+      "maxDailyMg": 2400,
+      "risk": "Low toxicity.",
+      "source": "OTC labeling",
+      "verify": true
+    },
+    "pseudoephedrine": {
+      "displayName": "Pseudoephedrine",
+      "aka": ["PSE"],
+      "class": "decongestant",
+      "maxDailyMg": 240,
+      "risk": "Raises blood pressure and heart rate. Sold behind the counter.",
+      "source": "OTC labeling",
+      "verify": true
+    },
+    "phenylephrine": {
+      "displayName": "Phenylephrine",
+      "aka": ["PE"],
+      "class": "decongestant",
+      "maxDailyMg": 60,
+      "risk": "Raises blood pressure.",
+      "efficacyNote": "An FDA advisory committee unanimously (16-0) concluded in Sept 2023 that oral phenylephrine is NOT effective as a nasal decongestant; FDA proposed removing it from the OTC monograph (Nov 8, 2024).",
+      "efficacyRefs": [
+        "https://www.fda.gov/news-events/press-announcements/fda-proposes-ending-use-oral-phenylephrine-otc-monograph-nasal-decongestant-active-ingredient-after",
+        "https://www.fda.gov/drugs/understanding-over-counter-medicines/key-information-about-nonprescription-over-counter-otc-oral-phenylephrine"
+      ],
+      "source": "OTC labeling; FDA 2023-2024 efficacy review",
+      "verify": true
+    },
+    "diphenhydramine": {
+      "displayName": "Diphenhydramine",
+      "aka": [],
+      "class": "antihistamine-sedating",
+      "maxDailyMg": 300,
+      "risk": "Sedation and anticholinergic effects; additive with other sedating antihistamines and alcohol.",
+      "source": "OTC labeling",
+      "verify": true
+    },
+    "chlorpheniramine": {
+      "displayName": "Chlorpheniramine",
+      "aka": [],
+      "class": "antihistamine-sedating",
+      "maxDailyMg": 24,
+      "risk": "Sedation; additive with other sedating antihistamines.",
+      "source": "OTC labeling",
+      "verify": true
+    },
+    "doxylamine": {
+      "displayName": "Doxylamine",
+      "aka": [],
+      "class": "antihistamine-sedating",
+      "maxDailyMg": 25,
+      "risk": "Sedation; found in nighttime cold products and sleep aids.",
+      "source": "OTC labeling (sleep-aid ceiling)",
+      "verify": true
+    },
+    "loratadine": {
+      "displayName": "Loratadine",
+      "aka": [],
+      "class": "antihistamine-nonsedating",
+      "maxDailyMg": 10,
+      "risk": "Low sedation.",
+      "source": "OTC labeling",
+      "verify": true
+    },
+    "cetirizine": {
+      "displayName": "Cetirizine",
+      "aka": [],
+      "class": "antihistamine-nonsedating",
+      "maxDailyMg": 10,
+      "risk": "Mild sedation possible.",
+      "source": "OTC labeling",
+      "verify": true
+    },
+    "fexofenadine": {
+      "displayName": "Fexofenadine",
+      "aka": [],
+      "class": "antihistamine-nonsedating",
+      "maxDailyMg": 180,
+      "risk": "Non-sedating.",
+      "source": "OTC labeling",
+      "verify": true
+    },
+    "caffeine": {
+      "displayName": "Caffeine",
+      "aka": [],
+      "class": "stimulant",
+      "maxDailyMg": null,
+      "risk": "Added to some analgesics; jitteriness at high totals.",
+      "source": "OTC labeling",
+      "verify": true
+    }
+  }
+}

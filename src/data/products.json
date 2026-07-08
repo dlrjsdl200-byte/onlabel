@@ -1,0 +1,239 @@
+{
+  "_meta": {
+    "description": "US OTC analgesic + cold/flu product catalog for OnLabel. Per-dose active ingredient amounts (mgPerDose) and label max doses per day. maxDailyContribution = mgPerDose * maxDosesPerDay. Entries with verify=true need DailyMed/openFDA confirmation.",
+    "reviewedBy": "pending pharmacist review",
+    "updated": "2026-07-08"
+  },
+  "products": [
+    {
+      "id": "tylenol-regular",
+      "brand": "Tylenol Regular Strength",
+      "company": "Kenvue",
+      "category": "analgesic",
+      "core": true,
+      "doseForm": "tablet",
+      "maxDosesPerDay": 5,
+      "ingredients": [{ "ingredient": "acetaminophen", "mgPerDose": 650 }],
+      "source": "Tylenol Regular Strength label (2 x 325 mg per dose)",
+      "verify": true
+    },
+    {
+      "id": "tylenol-extra-strength",
+      "brand": "Tylenol Extra Strength",
+      "company": "Kenvue",
+      "category": "analgesic",
+      "core": true,
+      "doseForm": "caplet",
+      "maxDosesPerDay": 3,
+      "ingredients": [{ "ingredient": "acetaminophen", "mgPerDose": 1000 }],
+      "source": "Tylenol Extra Strength label (2 x 500 mg per dose, max 6 caplets/day)",
+      "verify": false
+    },
+    {
+      "id": "advil",
+      "brand": "Advil / Motrin IB",
+      "company": "Kenvue / Haleon",
+      "category": "analgesic",
+      "core": true,
+      "doseForm": "tablet",
+      "maxDosesPerDay": 3,
+      "ingredients": [{ "ingredient": "ibuprofen", "mgPerDose": 400 }],
+      "source": "OTC ibuprofen label (up to 2 x 200 mg per dose, max 1200 mg/day)",
+      "verify": true
+    },
+    {
+      "id": "aleve",
+      "brand": "Aleve",
+      "company": "Bayer",
+      "category": "analgesic",
+      "core": true,
+      "doseForm": "tablet",
+      "maxDosesPerDay": 3,
+      "ingredients": [{ "ingredient": "naproxen", "mgPerDose": 220 }],
+      "source": "Aleve label (220 mg, max 3 tablets/day)",
+      "verify": true
+    },
+    {
+      "id": "bayer-aspirin",
+      "brand": "Bayer Aspirin",
+      "company": "Bayer",
+      "category": "analgesic",
+      "core": true,
+      "doseForm": "tablet",
+      "maxDosesPerDay": 6,
+      "ingredients": [{ "ingredient": "aspirin", "mgPerDose": 650 }],
+      "source": "Aspirin analgesic label (2 x 325 mg per dose)",
+      "verify": true
+    },
+    {
+      "id": "excedrin-extra-strength",
+      "brand": "Excedrin Extra Strength",
+      "company": "Haleon",
+      "category": "analgesic-combo",
+      "core": true,
+      "doseForm": "tablet",
+      "maxDosesPerDay": 2,
+      "ingredients": [
+        { "ingredient": "acetaminophen", "mgPerDose": 500 },
+        { "ingredient": "aspirin", "mgPerDose": 500 },
+        { "ingredient": "caffeine", "mgPerDose": 130 }
+      ],
+      "source": "Excedrin Extra Strength label (2 tablets per dose)",
+      "verify": true
+    },
+    {
+      "id": "dayquil",
+      "brand": "Vicks DayQuil Cold & Flu",
+      "company": "P&G",
+      "category": "cold-flu",
+      "core": true,
+      "doseForm": "liquicap",
+      "maxDosesPerDay": 4,
+      "ingredients": [
+        { "ingredient": "acetaminophen", "mgPerDose": 650 },
+        { "ingredient": "dextromethorphan", "mgPerDose": 20 },
+        { "ingredient": "phenylephrine", "mgPerDose": 10 }
+      ],
+      "source": "DayQuil label (2 LiquiCaps per dose: 2 x 325 mg APAP)",
+      "verify": true
+    },
+    {
+      "id": "nyquil",
+      "brand": "Vicks NyQuil Cold & Flu",
+      "company": "P&G",
+      "category": "cold-flu",
+      "core": true,
+      "doseForm": "liquicap",
+      "maxDosesPerDay": 4,
+      "ingredients": [
+        { "ingredient": "acetaminophen", "mgPerDose": 650 },
+        { "ingredient": "dextromethorphan", "mgPerDose": 30 },
+        { "ingredient": "doxylamine", "mgPerDose": 12.5 }
+      ],
+      "source": "NyQuil label (2 LiquiCaps per dose: 2 x 325 mg APAP)",
+      "verify": true
+    },
+    {
+      "id": "tylenol-cold-flu-severe",
+      "brand": "Tylenol Cold + Flu Severe",
+      "company": "Kenvue",
+      "category": "cold-flu",
+      "core": true,
+      "doseForm": "caplet",
+      "maxDosesPerDay": 4,
+      "ingredients": [
+        { "ingredient": "acetaminophen", "mgPerDose": 650 },
+        { "ingredient": "dextromethorphan", "mgPerDose": 20 },
+        { "ingredient": "guaifenesin", "mgPerDose": 400 },
+        { "ingredient": "phenylephrine", "mgPerDose": 10 }
+      ],
+      "source": "Tylenol Cold + Flu Severe label (2 caplets per dose)",
+      "verify": true
+    },
+    {
+      "id": "mucinex",
+      "brand": "Mucinex",
+      "company": "Reckitt",
+      "category": "cough-expectorant",
+      "core": true,
+      "doseForm": "tablet-er",
+      "maxDosesPerDay": 2,
+      "ingredients": [{ "ingredient": "guaifenesin", "mgPerDose": 1200 }],
+      "source": "Mucinex ER label (up to 2 x 600 mg per dose, every 12h)",
+      "verify": true
+    },
+    {
+      "id": "mucinex-dm",
+      "brand": "Mucinex DM",
+      "company": "Reckitt",
+      "category": "cough-expectorant",
+      "core": true,
+      "doseForm": "tablet-er",
+      "maxDosesPerDay": 2,
+      "ingredients": [
+        { "ingredient": "guaifenesin", "mgPerDose": 1200 },
+        { "ingredient": "dextromethorphan", "mgPerDose": 60 }
+      ],
+      "source": "Mucinex DM ER label (every 12h)",
+      "verify": true
+    },
+    {
+      "id": "sudafed",
+      "brand": "Sudafed (pseudoephedrine)",
+      "company": "Kenvue",
+      "category": "decongestant",
+      "core": true,
+      "doseForm": "tablet",
+      "maxDosesPerDay": 4,
+      "ingredients": [{ "ingredient": "pseudoephedrine", "mgPerDose": 60 }],
+      "source": "Sudafed label (60 mg every 4-6h, max 240 mg/day)",
+      "verify": true
+    },
+    {
+      "id": "sudafed-pe",
+      "brand": "Sudafed PE",
+      "company": "Kenvue",
+      "category": "decongestant",
+      "core": false,
+      "doseForm": "tablet",
+      "maxDosesPerDay": 6,
+      "ingredients": [{ "ingredient": "phenylephrine", "mgPerDose": 10 }],
+      "source": "Sudafed PE label (10 mg every 4h)",
+      "verify": true
+    },
+    {
+      "id": "benadryl",
+      "brand": "Benadryl",
+      "company": "Kenvue",
+      "category": "antihistamine",
+      "core": true,
+      "doseForm": "tablet",
+      "maxDosesPerDay": 6,
+      "ingredients": [{ "ingredient": "diphenhydramine", "mgPerDose": 50 }],
+      "source": "Benadryl label (25-50 mg every 4-6h, max 300 mg/day)",
+      "verify": true
+    },
+    {
+      "id": "zyrtec",
+      "brand": "Zyrtec",
+      "company": "Kenvue",
+      "category": "antihistamine",
+      "core": true,
+      "doseForm": "tablet",
+      "maxDosesPerDay": 1,
+      "ingredients": [{ "ingredient": "cetirizine", "mgPerDose": 10 }],
+      "source": "Zyrtec label (10 mg once daily)",
+      "verify": false
+    },
+    {
+      "id": "tylenol-pm",
+      "brand": "Tylenol PM",
+      "company": "Kenvue",
+      "category": "pm-combo",
+      "core": true,
+      "doseForm": "caplet",
+      "maxDosesPerDay": 1,
+      "ingredients": [
+        { "ingredient": "acetaminophen", "mgPerDose": 1000 },
+        { "ingredient": "diphenhydramine", "mgPerDose": 50 }
+      ],
+      "source": "Tylenol PM label (2 caplets at bedtime; do not exceed 2 caplets/day)",
+      "verify": true
+    },
+    {
+      "id": "advil-cold-sinus",
+      "brand": "Advil Cold & Sinus",
+      "company": "Haleon",
+      "category": "cold-flu",
+      "core": true,
+      "doseForm": "caplet",
+      "maxDosesPerDay": 4,
+      "ingredients": [
+        { "ingredient": "ibuprofen", "mgPerDose": 200 },
+        { "ingredient": "pseudoephedrine", "mgPerDose": 30 }
+      ],
+      "source": "Advil Cold & Sinus label",
+      "verify": true
+    }
+  ]
+}
