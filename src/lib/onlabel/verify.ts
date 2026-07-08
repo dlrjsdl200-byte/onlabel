@@ -12,6 +12,17 @@ import productsData from "../../data/products.json";
 
 export type Severity = "ok" | "caution" | "danger";
 
+/** Dosing schedule ("복용법") extracted deterministically from FDA monographs. */
+export interface IngredientDosing {
+  /** Human-readable dosing interval, e.g. "every 4 to 6 hours". */
+  intervalText: string;
+  /** Human-readable max treatment duration, or null if none applies. */
+  maxDurationText: string | null;
+  source: string;
+  /** true = extracted but not yet pharmacist-confirmed (D22). */
+  verify: boolean;
+}
+
 export interface IngredientRef {
   displayName: string;
   aka: string[];
@@ -22,6 +33,7 @@ export interface IngredientRef {
   efficacyRefs?: string[];
   source: string;
   verify: boolean;
+  dosing?: IngredientDosing;
 }
 
 export interface ProductIngredient {
@@ -78,6 +90,7 @@ export interface IngredientFinding {
   efficacyRefs?: string[];
   source: string;
   needsVerification: boolean;
+  dosing?: IngredientDosing;
 }
 
 export interface ClassFinding {
@@ -321,6 +334,7 @@ export function verify(productNames: string[]): VerifyResult {
       efficacyRefs: ref?.efficacyRefs,
       source: ref?.source ?? "",
       needsVerification: ref?.verify ?? true,
+      dosing: ref?.dosing,
     });
   }
 

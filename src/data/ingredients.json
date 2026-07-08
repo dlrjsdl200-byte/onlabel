@@ -8,12 +8,21 @@
   "ingredients": {
     "acetaminophen": {
       "displayName": "Acetaminophen",
-      "aka": ["APAP", "paracetamol"],
+      "aka": [
+        "APAP",
+        "paracetamol"
+      ],
       "class": "analgesic-antipyretic",
       "maxDailyMg": 4000,
       "risk": "Liver damage — the leading cause of acute liver failure in the US. Often hidden in multi-symptom cold/flu and PM products.",
       "source": "FDA OTC label ceiling (4,000 mg/24h)",
-      "verify": false
+      "verify": false,
+      "dosing": {
+        "intervalText": "every 4 to 6 hours (650–1,000 mg every 6 hours, or 325–650 mg every 4 hours)",
+        "maxDurationText": "do not use for more than 10 days for pain or 3 days for fever unless directed by a doctor",
+        "source": "FDA OTC Monograph M013 §M013.20(b)(2) Directions; 10-day limit §M013.20(b) labeling",
+        "verify": true
+      }
     },
     "ibuprofen": {
       "displayName": "Ibuprofen",
@@ -35,21 +44,38 @@
     },
     "aspirin": {
       "displayName": "Aspirin",
-      "aka": ["acetylsalicylic acid", "ASA"],
+      "aka": [
+        "acetylsalicylic acid",
+        "ASA"
+      ],
       "class": "nsaid",
       "maxDailyMg": 4000,
       "risk": "GI bleeding; Reye's syndrome in children/teens with viral illness. Is an NSAID.",
       "source": "FDA OTC Monograph M013 (Internal Analgesic) §M013.10(b) Dosage: adults not to exceed 4,000 mg in 24 hours.",
-      "verify": false
+      "verify": false,
+      "dosing": {
+        "intervalText": "every 4 to 6 hours (325–650 mg every 4 hours, or 650–1,000 mg every 6 hours)",
+        "maxDurationText": "do not use for more than 10 days for pain or 3 days for fever unless directed by a doctor",
+        "source": "FDA OTC Monograph M013 §M013.20(b)(2) Directions; 10-day limit §M013.20(b)",
+        "verify": true
+      }
     },
     "dextromethorphan": {
       "displayName": "Dextromethorphan",
-      "aka": ["DXM"],
+      "aka": [
+        "DXM"
+      ],
       "class": "antitussive",
       "maxDailyMg": 120,
       "risk": "Excess causes neurologic effects. Common in cough + cold combos.",
       "source": "FDA OTC Cough/Cold/Allergy monograph (M012); Drugs.com professional monograph — 120 mg/24h",
-      "verify": false
+      "verify": false,
+      "dosing": {
+        "intervalText": "10–20 mg every 4 hours, or 30 mg every 6 to 8 hours",
+        "maxDurationText": "if cough lasts more than 7 days (adults), see a doctor",
+        "source": "FDA OTC Monograph M012 §M012.14 Directions; cough duration §M012 antitussive labeling",
+        "verify": true
+      }
     },
     "guaifenesin": {
       "displayName": "Guaifenesin",
@@ -58,20 +84,36 @@
       "maxDailyMg": 2400,
       "risk": "Low toxicity.",
       "source": "FDA OTC Cough/Cold/Allergy monograph (M012); Drugs.com professional monograph — 2,400 mg/24h",
-      "verify": false
+      "verify": false,
+      "dosing": {
+        "intervalText": "200–400 mg every 4 hours",
+        "maxDurationText": "if cough lasts more than 7 days (adults), see a doctor",
+        "source": "FDA OTC Monograph M012 §M012.18 Directions",
+        "verify": true
+      }
     },
     "pseudoephedrine": {
       "displayName": "Pseudoephedrine",
-      "aka": ["PSE"],
+      "aka": [
+        "PSE"
+      ],
       "class": "decongestant",
       "maxDailyMg": 240,
       "risk": "Raises blood pressure and heart rate. Sold behind the counter.",
       "source": "FDA OTC Monograph M012 (Cough/Cold/Allergy) §M012.20(a)(2)-(3) Directions: adults 60 mg every 4-6h, not to exceed 240 mg in 24 hours.",
-      "verify": false
+      "verify": false,
+      "dosing": {
+        "intervalText": "60 mg every 4 to 6 hours",
+        "maxDurationText": "do not use for more than 7 days",
+        "source": "FDA OTC Monograph M012 §M012.20(a)(2) Directions; 7-day limit §M012 nasal decongestant labeling",
+        "verify": true
+      }
     },
     "phenylephrine": {
       "displayName": "Phenylephrine",
-      "aka": ["PE"],
+      "aka": [
+        "PE"
+      ],
       "class": "decongestant",
       "maxDailyMg": 60,
       "risk": "Raises blood pressure.",
@@ -81,7 +123,13 @@
         "https://www.fda.gov/drugs/understanding-over-counter-medicines/key-information-about-nonprescription-over-counter-otc-oral-phenylephrine"
       ],
       "source": "FDA OTC Monograph M012 (Cough/Cold/Allergy) §M012.20(a)(1) Directions: adults 10 mg every 4h, not to exceed 60 mg in 24 hours. Efficacy per FDA 2023-2024 review.",
-      "verify": false
+      "verify": false,
+      "dosing": {
+        "intervalText": "10 mg every 4 hours",
+        "maxDurationText": "do not use for more than 7 days",
+        "source": "FDA OTC Monograph M012 §M012.20(a)(1) Directions; 7-day limit §M012 nasal decongestant labeling",
+        "verify": true
+      }
     },
     "diphenhydramine": {
       "displayName": "Diphenhydramine",
@@ -90,7 +138,13 @@
       "maxDailyMg": 300,
       "risk": "Sedation and anticholinergic effects; additive with other sedating antihistamines and alcohol.",
       "source": "OTC antihistamine labeling; StatPearls (Antihistamines) — 300 mg/24h",
-      "verify": false
+      "verify": false,
+      "dosing": {
+        "intervalText": "25–50 mg every 4 to 6 hours",
+        "maxDurationText": null,
+        "source": "FDA OTC Monograph M012 §M012.12(d)(7) Directions",
+        "verify": true
+      }
     },
     "chlorpheniramine": {
       "displayName": "Chlorpheniramine",
@@ -99,7 +153,13 @@
       "maxDailyMg": 24,
       "risk": "Sedation; additive with other sedating antihistamines.",
       "source": "OTC antihistamine labeling (4 mg q4-6h, max 24 mg/24h)",
-      "verify": false
+      "verify": false,
+      "dosing": {
+        "intervalText": "4 mg every 4 to 6 hours",
+        "maxDurationText": null,
+        "source": "FDA OTC Monograph M012 §M012.12(d)(3) Directions",
+        "verify": true
+      }
     },
     "doxylamine": {
       "displayName": "Doxylamine",
@@ -108,7 +168,13 @@
       "maxDailyMg": 75,
       "risk": "Sedation; found in nighttime cold products and sleep aids.",
       "source": "FDA OTC Monograph M012 (Cough/Cold/Allergy) §M012.12(h) Directions: adults 7.5-12.5 mg every 4-6h, not to exceed 75 mg in 24 hours.",
-      "verify": false
+      "verify": false,
+      "dosing": {
+        "intervalText": "7.5–12.5 mg every 4 to 6 hours",
+        "maxDurationText": null,
+        "source": "FDA OTC Monograph M012 §M012.12(d)(8) Directions",
+        "verify": true
+      }
     },
     "loratadine": {
       "displayName": "Loratadine",

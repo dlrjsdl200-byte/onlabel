@@ -8,7 +8,7 @@
 
 import { tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod";
-import { verify, type VerifyResult } from "./verify";
+import { verify, type VerifyResult, type IngredientFinding } from "./verify";
 
 /**
  * Pure core: run a safety check and format a summary for an LLM to read.
@@ -32,9 +32,16 @@ export function runSafetyCheck(products: string[]): {
   // daily ceiling. Surface them for ALL matched products, not just flagged ones,
   // so the answer states dosing numbers that are grounded in the FDA KB rather
   // than the model's memory. These are the ONLY clinical numbers Claude may state.
-  const dispByIngredient = new Map<string, { name: string; limitMg: number | null }>();
+  const dispByIngredient = new Map<
+    string,
+    { name: string; limitMg: number | null; dosing?: IngredientFinding["dosing"] }
+  >();
   for (const f of result.findings) {
-    dispByIngredient.set(f.ingredient, { name: f.displayName, limitMg: f.limitMg });
+    dispByIngredient.set(f.ingredient, {
+      name: f.displayName,
+      limitMg: f.limitMg,
+      dosing: f.dosing,
+    });
   }
   if (result.matched.length) {
     lines.push("");
@@ -47,7 +54,17 @@ export function runSafetyCheck(products: string[]): {
         const name = meta?.name ?? ing.ingredient;
         const perDay = ing.mgPerDose * p.maxDosesPerDay;
         const ceiling = meta?.limitMg != null ? `${meta.limitMg} mg/day ceiling` : "no established daily ceiling";
-        return `${name} ${ing.mgPerDose} mg/dose, up to ${p.maxDosesPerDay} doses/day = ${perDay} mg/day at label max (${ceiling})`;
+        let line = `${name} ${ing.mgPerDose} mg/dose, up to ${p.maxDosesPerDay} doses/day = ${perDay} mg/day at label max (${ceiling})`;
+        // Direction B — grounded dosing schedule (interval/duration) when present.
+        // The interval is the immediate-release monograph value; it does NOT apply
+        // to extended-release SKUs (e.g. Mucinex ER is q12h, not the IR q4h), so
+        // suppress the interval for ER dose forms and let the fence defer instead.
+        const isExtendedRelease = /\ber\b|extended|-er/.test(p.doseForm.toLowerCase());
+        if (meta?.dosing && !isExtendedRelease) {
+          line += `; interval: ${meta.dosing.intervalText}`;
+          if (meta.dosing.maxDurationText) line += `; duration: ${meta.dosing.maxDurationText}`;
+        }
+        return line;
       });
       lines.push(
         `- ${p.brand}: ${p.unitsPerDose} ${p.doseForm}${p.unitsPerDose === 1 ? "" : "s"}/dose. ${parts.join("; ")}.`,
@@ -55,11 +72,12 @@ export function runSafetyCheck(products: string[]): {
     }
     lines.push("");
     lines.push(
-      "NOT provided by this tool (do not state these — defer to the label or a pharmacist): " +
-        "hours between doses (dosing interval), how many days it is safe to use (duration), any single-dose maximum " +
-        "beyond the mg/dose above, onset or how long a dose lasts, extended-release/crushing guidance, and interactions " +
-        "with alcohol, caffeine, food, or anything not in the catalog. This tool checks the named products against label " +
-        "maximums only — it does not know a quantity or schedule the user describes, nor how much they have already taken.",
+      "State the interval/duration above ONLY for the ingredients that list one; if an ingredient has no interval or " +
+        "duration line, do not state one — defer to the label or a pharmacist. NEVER provided by this tool (always defer): " +
+        "any single-dose maximum beyond the mg/dose above, onset or how long a dose lasts, extended-release/crushing " +
+        "guidance, and interactions with alcohol, caffeine, food, or anything not in the catalog. This tool checks the " +
+        "named products against label maximums only — it does not know a quantity or schedule the user describes, nor how " +
+        "much they have already taken.",
     );
   }
 
