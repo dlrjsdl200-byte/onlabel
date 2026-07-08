@@ -70,4 +70,9 @@
   - **(B) 복용법 데이터 레이어 — 데이터 투자 (backlog B-6)**: KB에 `{intervalHours, maxDurationDays, singleDoseMaxMg, form/ER}` 추가, M012/M013(refs/ 로컬)에서 결정론 추출. 간격·기간·제형 질문을 유보가 아닌 접지 답변으로. LLM 추출 금지(D22).
 - **D30. DB 구축 판정(사용자 질문 확정 답변)**: "성분·복용량·복용법 DB 구축?" → **성분+복용량 DB는 이미 존재**(KB의 mgPerDose/maxDailyMg/maxDosesPerDay/unitsPerDose), 도구가 안 넘길 뿐 → **A로 노출**이 답이지 재구축 아님. 유일하게 진짜 빠진 건 **복용법(간격·기간·1회최대·제형) 유계 레이어**(~9성분/~18제품, B-6). = 새 범위 아니라 용량 축 완성(D28 재확인). 새 대형 DB 구축 불필요.
 
+## 2026-07-08 — Generic 성분명 + NSAID 교체간격 스코프
+
+- **D31. NSAID↔NSAID '교체 간격'은 스코프아웃(근거부재)**: ibuprofen↔naproxen 등 서로 다른 NSAID 사이의 "몇 시간 후 교체 가능" 간격은 **미국 공신력 소스(FDA·DailyMed·MedlinePlus)에 존재하지 않음** — 이들은 "병용 회피(avoid concomitant use)"만 권고. 따라서 OnLabel은 교체 간격을 **생성하지 않고**, verify()의 danger("함께 복용 말 것") + 간격 유보를 유지한다(D27 울타리와 부합). 데이터 갭 아님 = 영구 스코프 경계. 개별 성분 간격(ibuprofen q4-6h·naproxen q8-12h)은 OTC Drug Facts 라벨에서 접지 가능(B-7). 근거: 사용자(약사) 확인 2026-07-08.
+- **D32. Generic 성분명은 원장에 0mg로 참여(B-8)**: 사용자가 브랜드 대신 성분명("acetaminophen","ibuprofen")을 입력하면 resolver가 성분으로 인식해 **중복·클래스 탐지에 참여**시키되, 용량 미상이므로 **0mg 기여**(누적합에 미반영). 이유: `acetaminophen+Tylenol`이 ok로 빠지는 위음성(초록 OK가 실제 이중복용 은폐) 차단 + 임상 숫자 미조작(D15/D22 준수). 중복은 caution, 미상 용량으로 danger 단정은 안 함.
+
 <!-- 새 결정은 이 아래에 날짜 섹션으로 추가 -->

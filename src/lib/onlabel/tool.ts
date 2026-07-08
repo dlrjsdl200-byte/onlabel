@@ -26,6 +26,13 @@ export function runSafetyCheck(products: string[]): {
   if (result.unmatched.length) {
     lines.push(`Not in catalog: ${result.unmatched.join(", ")}`);
   }
+  if (result.genericIngredients.length) {
+    lines.push(
+      `Bare ingredient(s) named (counted for duplication, but amount unknown — do not state a dose or daily total for these): ${result.genericIngredients
+        .map((g) => g.input)
+        .join(", ")}`,
+    );
+  }
 
   // Direction A — grounded dosing surface. Every ingredient finding (including
   // ok-severity ones) already carries per-product mg/dose, units/dose, and the

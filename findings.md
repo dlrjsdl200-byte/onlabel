@@ -88,3 +88,15 @@
   1. **dosing 9종 verify:true** — M012/M013에서 결정론 추출·일일최대 교차검증 완료했으나 **약사 최종 서명 대기**. 확인 후 verify:false 승격.
   2. **ibuprofen·naproxen 간격/기간 = 소스 부재** — 추출된 M013.txt에 없음(경고문에만 등장). 별도 소스(ibuprofen/naproxen 개별 모노그래프 또는 Drug Facts 라벨) 확보 후 채워야 접지 가능. 현재는 정직하게 유보 중.
 - **🟡 데이터 뉘앙스 발견**: 간격은 성분(IR 모노그래프) 단위인데 제형(ER)에 따라 실제 스케줄이 다름(Mucinex ER q12h ≠ guaifenesin IR q4h). 현재 doseForm=ER이면 간격 억제로 회피. 근본 해결은 **제품 단위 간격 오버라이드**(backlog).
+
+## 2026-07-08 (실검색 상위 20 골든 추가 + live — 접지 확증 + 신규 갭)
+> golden 100→120. transcript eval-2026-07-08T10-23-29-193Z.md. 결정론 18/18(교육 2건 verdict 없음), 답변 20/20.
+- **실검색 분포 전반에서 울타리가 견고**: 위험 조합(Tylenol+NyQuil ~5,600mg / MucinexDM+NyQuil 240>120 DXM / Benadryl+TylenolPM ~350>300)은 verdict-first + **접지된 숫자**로 반박; 간격(ibuprofen)·기간(naproxen)·술·유효기간·처방(BP)은 **정직하게 유보/에스컬레이트**("this is me reasoning, not a tool verdict" / "can't confirm... ask a pharmacist"). 임신은 Tylenol 선호 언급 + 에스컬레이트. 성분정체(Mucinex=no APAP, Advil=ibuprofen) 정확.
+- **🔴 신규 안전 갭(높은 가치): generic 성분명 미해결 → 중복 위음성**. verify()의 resolver는 브랜드/id 토큰만 매칭 → `verify(["acetaminophen","Tylenol Extra Strength"])=ok`(실제 danger, APAP 이중), `verify(["ibuprofen","Advil"])=ok`(실제 danger). 실검색 데이터상 소비자는 "ibuprofen/acetaminophen"을 **일반명으로 검색**(#12·#16) → LLM이 그 단어 그대로 도구에 넘기면 중복을 놓쳐 **초록 OK가 실제 과용**일 수 있음. live에서 mkt-ibuprofen-with-nyquil이 "couldn't match a specific ibuprofen product"로 노출. → backlog B-8.
+- **교훈**: 시장접지 골든이 조합편중 골든이 못 잡던 generic-name 위음성을 드러냄. resolver에 **성분명→대표제품(또는 성분레벨 합성 항목)** 매핑 필요.
+
+## 2026-07-08 (B-8 위음성 수정 완료 + NSAID↔NSAID 교체간격 스코프 확정)
+> 커밋: (B-8) verify.ts resolver + ledger. transcript eval-2026-07-08T10-41-59-611Z.md. verify 19 + tool 4 + golden 114/114, live 2/2.
+- **B-8 해결**: generic 성분명이 원장에 0mg 기여로 참여 → 중복/클래스 탐지 작동, mg는 미조작(D15/D22). `acetaminophen+Tylenol` ok→**caution**("같은 약, 이중복용"), `ibuprofen+Aleve` ok→**danger**(2 NSAID). aka("APAP")도 매칭. 단일 generic/비약물 문자열은 오탐 없음. 회귀테스트 5개 추가.
+- **🟢 NSAID↔NSAID '교체 간격'은 미국 공신력 소스 부재 = 명시적 스코프아웃(사용자 확인)**: ibuprofen↔naproxen에 대해 FDA/DailyMed/MedlinePlus는 **"병용 회피(avoid concomitant use)"만** 권고, "ibuprofen 후 8h 뒤 naproxen" 같은 교체 간격은 **제시하지 않음**. → OnLabel은 교체간격을 만들지 않고 기존대로 **danger("함께 복용 말 것")+간격 유보**가 정답. 이는 데이터 갭이 아니라 근거부재로 인한 스코프 경계. DECISIONS D31.
+- **B-7 정련**: ibuprofen/naproxen의 **개별** 간격·기간(ibuprofen q4-6h·max1200·10d / naproxen q8-12h·max660·10d)은 OTC Drug Facts 라벨(DailyMed)에 존재 → 접지 가능(추가 대상). 그러나 둘 사이 **교체 간격은 접지 불가(소스 없음)** → 영구 유보.

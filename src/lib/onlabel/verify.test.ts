@@ -142,4 +142,39 @@ test("bare 'Tylenol' still resolves to Extra Strength default after the fix", ()
   assert.strictEqual(r.assumptions.length, 1);
 });
 
+// B-8 regression: a bare active-ingredient name must still count toward
+// duplication/class overlap, or a generic + brand of the SAME drug is a
+// false-NEGATIVE (green OK on a real double dose).
+test("generic 'acetaminophen' + Tylenol flags acetaminophen duplication", () => {
+  const r = verify(["acetaminophen", "Tylenol Extra Strength"]);
+  assert.strictEqual(r.genericIngredients[0]?.ingredient, "acetaminophen");
+  const apap = r.findings.find((f) => f.ingredient === "acetaminophen");
+  assert.ok(apap?.duplicated, "acetaminophen must be duplicated");
+  assert.notStrictEqual(r.overall, "ok");
+});
+
+test("generic 'ibuprofen' + Aleve flags a two-NSAID danger", () => {
+  const r = verify(["ibuprofen", "Aleve"]);
+  assert.strictEqual(r.overall, "danger");
+  assert.ok(r.classFindings.some((c) => c.className === "nsaid"));
+});
+
+test("generic name contributes 0 mg — no fabricated cumulative total", () => {
+  const r = verify(["acetaminophen", "Tylenol Extra Strength"]);
+  const apap = r.findings.find((f) => f.ingredient === "acetaminophen");
+  // Only Tylenol's real 3,000 mg/day counts; the bare name adds nothing.
+  assert.strictEqual(apap?.totalMaxDailyMg, 3000);
+});
+
+test("a single bare ingredient is not a spurious duplication", () => {
+  const r = verify(["acetaminophen"]);
+  assert.strictEqual(r.overall, "ok");
+});
+
+test("a non-drug string stays unmatched (no over-matching)", () => {
+  const r = verify(["zzz not a drug", "Advil"]);
+  assert.ok(r.unmatched.includes("zzz not a drug"));
+  assert.strictEqual(r.genericIngredients.length, 0);
+});
+
 console.log(`\n${passed} passed`);

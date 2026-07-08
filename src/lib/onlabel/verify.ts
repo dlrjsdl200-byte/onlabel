@@ -108,10 +108,19 @@ export interface Assumption {
   alternatives: string[];
 }
 
+/** A bare active-ingredient name the user typed (e.g. "acetaminophen") with no
+ * product/dose attached. It participates in duplication/class detection but
+ * contributes 0 mg (we do not fabricate an amount we were not given). */
+export interface GenericIngredientMatch {
+  input: string;
+  ingredient: string;
+}
+
 export interface VerifyResult {
   input: string[];
   matched: Product[];
   unmatched: string[];
+  genericIngredients: GenericIngredientMatch[];
   assumptions: Assumption[];
   findings: IngredientFinding[];
   classFindings: ClassFinding[];
@@ -186,6 +195,26 @@ function fuzzyLookup(q: string): Product | null {
 }
 
 /**
+ * Match a free-text input to a bare active-ingredient name (its key, displayName,
+ * or an aka like "APAP"/"paracetamol"). Returns the ingredient key when every
+ * token of an ingredient name appears in the input — so "acetaminophen" and
+ * "acetaminophen 500 mg" match, but a brand like "Tylenol" does not. Only used
+ * for inputs that failed product resolution, so it never shadows a real product.
+ */
+function matchGenericIngredient(name: string): string | null {
+  const toks = new Set(contentTokens(name));
+  if (toks.size === 0) return null;
+  for (const [key, ref] of Object.entries(INGREDIENTS)) {
+    const candidates = [key, ref.displayName, ...(ref.aka ?? [])];
+    for (const cand of candidates) {
+      const ct = contentTokens(cand);
+      if (ct.length && ct.every((t) => toks.has(t))) return key;
+    }
+  }
+  return null;
+}
+
+/**
  * Resolve a free-text product name to a catalog product, surfacing whether a
  * bare brand name was assumed to a default strength SKU. Different-formulation
  * products (e.g. Tylenol PM) are matched by their own exact brand names and are
@@ -256,6 +285,7 @@ export function lookupProduct(name: string): Product | null {
 export function verify(productNames: string[]): VerifyResult {
   const matched: Product[] = [];
   const unmatched: string[] = [];
+  const genericIngredients: GenericIngredientMatch[] = [];
   const assumptions: Assumption[] = [];
   for (const name of productNames) {
     const m = resolveProduct(name);
@@ -268,7 +298,14 @@ export function verify(productNames: string[]): VerifyResult {
           alternatives: m.alternatives.map((a) => a.brand),
         });
       }
-    } else unmatched.push(name);
+      continue;
+    }
+    // Not a catalog product — is it a bare active-ingredient name? If so it still
+    // counts toward duplication/class overlap (B-8: catch "acetaminophen + Tylenol"),
+    // but with an unknown amount it contributes 0 mg — we never invent a dose.
+    const ing = matchGenericIngredient(name);
+    if (ing) genericIngredients.push({ input: name, ingredient: ing });
+    else unmatched.push(name);
   }
 
   // Build ingredient ledger: ingredient -> contributions per product
@@ -287,6 +324,22 @@ export function verify(productNames: string[]): VerifyResult {
       list.push(contribution);
       ledger.set(ing.ingredient, list);
     }
+  }
+
+  // Inject bare active-ingredient inputs (B-8). They count toward duplication and
+  // class overlap but carry 0 mg — an unknown amount we will not invent a value for.
+  for (const gi of genericIngredients) {
+    const contribution: IngredientContribution = {
+      brand: `${INGREDIENTS[gi.ingredient]?.displayName ?? gi.ingredient} (as named, amount not specified)`,
+      maxDailyMg: 0,
+      mgPerDose: 0,
+      unitsPerDose: 0,
+      dosesPerDay: 0,
+      doseForm: "unspecified",
+    };
+    const list = ledger.get(gi.ingredient) ?? [];
+    list.push(contribution);
+    ledger.set(gi.ingredient, list);
   }
 
   // Ingredient-level findings
@@ -387,6 +440,7 @@ export function verify(productNames: string[]): VerifyResult {
     input: productNames,
     matched,
     unmatched,
+    genericIngredients,
     assumptions,
     findings,
     classFindings,
