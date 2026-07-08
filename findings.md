@@ -112,3 +112,11 @@
 - **🔴 scope 버그 발견·수정**: combination-safety claim이 질문과 **다른 제품쌍**(예 "NSAID+Tylenol 병용 가능")일 때 top-level verify()(Advil+Aleve=danger)에 대조돼 **오판(false CONTRADICTED)**. → Claim에 `assertedProducts` 추가, [D]가 claim 자체 scope로 verify() 재실행하도록 수정 + 회귀테스트. (11 claim tests green)
 - **🟡 잔여 refinement(B-10)**: (1)dose-limit이 "conservative target(3000)"과 "ceiling(4000)"을 구분 못 해 과엄격 CONTRADICTED — 뉘앙스 필요. (2)[C]가 ingredient에 클래스명("NSAID") 넣으면 UNSUPPORTED 노이즈. (3)language claim은 정상적으로 [D-lang](Phase 3) 대기.
 - **다음**: Phase 3 = [D-lang] 격리 LLM verifier + [E] reconciler(결정론 override, 데모 gate 경로). Phase 4 = eval + UI claim 배지.
+
+## 2026-07-08 (L1 Phase 3 완료 — [D-lang] 격리 verifier + [E] reconciler, transcript claims-2026-07-08T11-21-38-898Z.md)
+- **종단 파이프라인 live 작동**: [A']무근거초안→[C]분해→[D]하이브리드(임상=결정론/언어=격리LLM)→[E]reconcile. Case1 14✅/1❌/0⚠️, Case2 15✅/2❌/3⚠️.
+- **[E] reconciled = 데모 페이로드**: "일반 LLM이 틀린 것, FDA로 교정" 목록 산출. Case1: verdict CAUTION→**DANGER** 교정. Case2: naproxen "440mg first dose"→라벨 220, "3,000mg"→ceiling 4,000. 안전 판정은 항상 결정론 verify()(DANGER) 승리(D25).
+- **[D-lang] 격리 독립성 실현(CoVe factored)**: 언어 claim을 초안 미조건화로 단건 판정 → 전부 SUPPORTED+의학적 근거("두 NSAID 병용은 이득 없이 위험↑" 등). D24대로 임상 숫자엔 절대 미사용.
+- **scope 수정 검증**: "acetaminophen+한 NSAID 병용 안전" claim이 claim-scope verify(APAP+ibuprofen)=OK로 **정확히 VERIFIED**(이전 false CONTRADICTED 해소).
+- **잔여 = 기존 B-10 한계**(신규 아님): naproxen first-dose 440 규칙 부재, 3000/4000 conservative-vs-ceiling 미구분, "NSAID" 클래스명 claim UNSUPPORTED 노이즈.
+- **다음 = Phase 4**: eval에 claim 파이프라인 반영 + **UI claim 배지/대조 엔진 시각화**(데모 30%) + 배선.

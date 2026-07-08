@@ -43,9 +43,19 @@ async function main() {
     out.push(`### [C]->[D] Claims checked against FDA`);
     for (const v of r.verdicts) {
       const icon = v.status === "VERIFIED" ? "✅" : v.status === "CONTRADICTED" ? "❌" : "⚠️";
-      const det = v.deterministic ? "" : " _(language → LLM)_";
+      const det = v.deterministic ? "" : " _(language → isolated LLM)_";
       out.push(`- ${icon} **${v.status}** [${v.claim.kind}]${det} — "${v.claim.text}"`);
       out.push(`  - basis: ${v.basis}`);
+    }
+    out.push("");
+    out.push(`### [E] Reconciled — deterministic verdict: **${r.reconciled.verdict.toUpperCase()}**`);
+    if (r.reconciled.corrections.length) {
+      out.push(`What a generic LLM got wrong, corrected by FDA data:`);
+      for (const c of r.reconciled.corrections) {
+        out.push(`- ❌ "${c.claimText}" → **${c.correction}**`);
+      }
+    } else {
+      out.push(`No FDA contradictions in the draft.`);
     }
     out.push("");
     console.log(`   ✅${counts.VERIFIED} ❌${counts.CONTRADICTED} ⚠️${counts.UNSUPPORTED} (verdict ${r.verification.overall})`);

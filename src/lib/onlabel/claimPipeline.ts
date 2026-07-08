@@ -10,8 +10,10 @@
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { verify, type VerifyResult } from "./verify";
-import { verifyClaims } from "./verifyClaims";
-import { emitClaimsSchema, type Claim, type ClaimVerdict } from "./claims";
+import { verifyClinicalClaim } from "./verifyClaims";
+import { verifyLanguageClaim } from "./verifyLanguage";
+import { reconcile, type ReconcileResult } from "./reconcile";
+import { emitClaimsSchema, isClinicalKind, type Claim, type ClaimVerdict } from "./claims";
 
 /**
  * [A'] The generic-LLM baseline: a plain, helpful assistant answering from
@@ -93,17 +95,36 @@ export async function decomposeClaims(draft: string): Promise<Claim[]> {
   return captured;
 }
 
+/**
+ * [D] Route every claim: clinical kinds are decided deterministically against
+ * verify()/KB (no LLM), language claims go to the isolated verifier in parallel.
+ */
+export async function verifyAllClaims(
+  claims: Claim[],
+  verification: VerifyResult,
+): Promise<ClaimVerdict[]> {
+  return Promise.all(
+    claims.map((claim) =>
+      isClinicalKind(claim.kind)
+        ? Promise.resolve(verifyClinicalClaim(claim, verification))
+        : verifyLanguageClaim(claim),
+    ),
+  );
+}
+
 export interface ClaimPipelineResult {
   question: string;
   draft: string;
   verification: VerifyResult;
   verdicts: ClaimVerdict[];
+  reconciled: ReconcileResult;
 }
 
 /**
- * Full [A']->[C]->[B/D] pass for the contrast engine: generate an ungrounded
- * draft, decompose it, and check each claim against the deterministic verify()
- * result for the named products. Products are the ground truth for [D].
+ * Full [A']->[C]->[D]->[E] pass for the contrast engine: generate an ungrounded
+ * draft, decompose it, check each claim (clinical deterministically, language in
+ * isolation), and reconcile into the demo payload (deterministic verdict +
+ * corrections + receipts). Products are the ground truth for [D].
  */
 export async function runClaimPipeline(
   question: string,
@@ -112,6 +133,7 @@ export async function runClaimPipeline(
   const draft = await generateUngroundedDraft(question);
   const claims = await decomposeClaims(draft);
   const verification = verify(products);
-  const verdicts = verifyClaims(claims, verification);
-  return { question, draft, verification, verdicts };
+  const verdicts = await verifyAllClaims(claims, verification);
+  const reconciled = reconcile(verification, verdicts);
+  return { question, draft, verification, verdicts, reconciled };
 }
