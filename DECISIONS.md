@@ -28,6 +28,7 @@
 
 - **D15. 뉴로심볼릭 원칙(하드)**: LLM은 **안전 판정을 절대 안 내림.** 판정=결정론 코드(인간검증 KB). LLM은 언어(파싱/설명)와 주장 대조만. 근거: 뉴로심볼릭 임상 AI, Self-Correction Illusion. 상세 docs/AI-ARCHITECTURE.md.
 - **D16. CoVe claim 파이프라인 채택**: 초안→주장 분해→독립 verifier 서브에이전트→reconciler(결정론 판정 override). 자기교정 아닌 독립 검증.
-- **D17. 심화 범위 L1~L4 + eval-first**: eval 하네스(L2) 먼저 baseline → claim 파이프라인(L1) → 실시간 openFDA(L3) → 스킬 서브에이전트(L4) → 그 다음 UI. UI 스펙은 claim 배지 반영 필요.
+- **D17. 심화 범위 L1~L4 + eval-first**: eval 하네스(L2) 먼저 baseline → claim 파이프라인(L1) → openFDA sync(L3) → 스킬 서브에이전트(L4) → 그 다음 UI. UI 스펙은 claim 배지 반영 필요.
+- **D18. openFDA는 빌드타임 sync(런타임 아님)**: 판정 핫패스는 항상 로컬 KB(인메모리·즉시, 네트워크 0). openFDA는 `npm run sync:fda`로 KB를 오프라인 채움·검증. 라이브 fallback은 KB-미스에만·캐시·핫패스 밖(선택/backlog). 근거: 런타임 지연·API장애 회피 + "판정 먼저 즉시" UX 보호 + 뉴로심볼릭(런타임 결정론) 원칙 부합.
 
 <!-- 새 결정은 이 아래에 날짜 섹션으로 추가 -->

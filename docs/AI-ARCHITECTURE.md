@@ -37,8 +37,9 @@
 [A] Generator (LLM)  ── 초안 답변 + 언급 제품/의도 추출 (structured output)
    │
    ▼
-[B] Grounding (도구)  ── ① 결정론 verify()  ② 실시간 openFDA lookup(fallback/enrich)
-   │                      = 인간검증 KB + 라이브 FDA
+[B] Grounding (도구)  ── 결정론 verify() (로컬 KB, 인메모리·즉시)
+   │                      · KB는 openFDA로 빌드타임 sync·검증(런타임 호출 X)
+   │                      · 미지 제품만 캐시된 라이브 fallback(핫패스 밖)
    ▼
 [C] Claim 분해 (LLM, structured)  ── 초안을 원자적 주장으로 분해
    │     예: "둘 다 함께 복용 안전" / "APAP 최대 4000mg" / "매 4시간"
@@ -75,11 +76,14 @@
 
 ---
 
-## 5. 실시간 openFDA grounding (L3)
+## 5. openFDA grounding — **빌드타임 우선**(런타임 지연 회피) (L3)
 
-- 신규 도구 `lookup_fda_label(product)` → `https://api.fda.gov/drug/label.json` 실시간 조회, 활성성분·함량 파싱.
-- KB(정적)= 빠른 캐시 + 약사검증 정본. openFDA = KB 미스 시 fallback + "라이브 FDA" 스토리.
-- 캐시 레이어(`.cache/`, gitignore됨)로 rate limit(240/분) 보호.
+**원칙**: 뉴로심볼릭[^neuro]대로 지식수집은 오프라인, 런타임은 외부호출 없는 결정론. 판정이 네트워크에 막히면 "판정 먼저 즉시" UX(§1)도 깨진다.
+
+- **핫패스 = 로컬 KB** (`src/data/*.json`, 번들 포함) → 인메모리 조회, 마이크로초. **네트워크 0.** 안전 판정은 언제나 여기서.
+- **openFDA = 오프라인 sync 스크립트** `npm run sync:fda` — `https://api.fda.gov/drug/label.json`에서 활성성분·함량을 가져와 **KB를 채우고 검증**(데이터의 `verify:true` 숙제 해결). 개발 중 실행, 결과는 커밋된 JSON.
+- **라이브 fallback(선택)** — KB에 없는 제품일 때만 `lookup_fda_label` 도구를 캐시(`.cache/`, gitignore)와 함께. **핫패스·데모 밖**. 데모 코어(17~37개)는 전부 KB에 있어 호출 안 일어남. 시간 부족 시 backlog로.
+- 근거: 전체 지연은 LLM 생성이 지배하지만, 판정을 로컬로 두면 즉시성 + API 장애 무관 + rate limit(240/분) 걱정 제거.
 
 ---
 
@@ -100,7 +104,7 @@
 | 검증 대상 | 제품만 | **초안의 원자적 주장 각각**(CoVe) |
 | verifier | 없음(단일 에이전트) | **독립 critic 서브에이전트**[D] |
 | 안전 판정 | verify() 재실행 | 동일 + **reconciler가 명시적 override**[E] |
-| grounding | 정적 KB | KB + **실시간 openFDA**[B] |
+| grounding | 정적 KB(수기) | KB + **openFDA 빌드타임 sync**(런타임 즉시 유지)[B] |
 | 스킬 | 파일만 | **서브에이전트로 실제 배선** |
 | 측정 | 없음 | **eval 하네스**[L2] |
 | 원칙 | 암묵 | **뉴로심볼릭 명문화**(LLM은 안전 결정 안 함) |
@@ -111,7 +115,7 @@
 
 1. **L2 eval 하네스 먼저** — 골든셋 + 러너. (변경 전 baseline 측정 = 회귀 안전망)
 2. **L1 claim 파이프라인** — [C] claim 분해 → [D] verifier 서브에이전트 → [E] reconciler. structured output.
-3. **L3 실시간 openFDA** — `lookup_fda_label` 도구 + 캐시.
+3. **L3 openFDA 빌드타임 sync** — `npm run sync:fda`로 KB 채움·검증(런타임 아님). 라이브 fallback은 선택.
 4. **L4 스킬 서브에이전트 배선**.
 5. 각 단계 후 eval 재실행으로 개선 확인 → 그 다음 UI(Day 3 스펙).
 
