@@ -17,13 +17,14 @@
 - [x] **Done =** Tylenol ES + DayQuil → APAP 5600mg > 4000 → 🚫 danger 확인. 커밋+push(public repo)
 - 스크립트: `npm test`, `npm run typecheck`, `npm run dev`
 
-## Day 2 — 7/9(목) · Agent SDK 파이프라인 (headless)
+## Day 2 — 7/9(목) · Agent SDK 파이프라인 (headless) ✅ 완료
 **목표: 질문→답변→검증을 에이전트로 관통(UI 없이 먼저).**
-- [ ] Agent SDK 최소 파이프라인: Answer agent(generator) + verifier 모듈을 in-process 도구로 호출
-- [ ] 구조화 출력: claim 추출 + 약물 엔티티 추출
-- [ ] 첫 Skill `otc-safety-check` (`.claude/skills/`): 방법론 + KB에서 references/
-- [ ] Next.js API route에서 Agent SDK 실행 → JSON 반환(스트리밍 아직 X)
-- **Done =** API에 질문 → 답변 + FDA-grounded 판정(JSON). 커밋.
+- [x] `check_otc_safety` in-process SDK 도구(`createSdkMcpServer`)로 verify() 래핑 — summary + structuredContent
+- [x] 에이전트 러너 `agent.ts`(`runOnLabel`): query()에 도구 물리고, 확인된 제품으로 verify() 재실행해 **결정론적 판정을 응답에 보장**
+- [x] `otc-safety-check` 스킬(`.claude/skills/`) — 정본 방법론 (런타임은 Day 2엔 systemPrompt로 주입, 실제 스킬 로딩은 Day 3 서브에이전트로)
+- [x] `POST /api/check` 라우트(Node 런타임) → answer + verification JSON
+- [x] **Done(구조)** = 도구/러너/라우트 완성. 10/10 테스트 + tsc + eslint + next build 통과.
+- ⚠️ **라이브 LLM 경로는 ANTHROPIC_API_KEY 필요**(미커밋) — 사용자가 .env 넣고 `npm run dev` 후 확인.
 - 서빙 기준: Claude Use.
 
 ## Day 3 — 7/10(금) · 프론트 + 서브에이전트 (★데모 존재 마일스톤★)
