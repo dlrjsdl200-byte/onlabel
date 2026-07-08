@@ -5,7 +5,7 @@
 > 원칙(CLAUDE.md): **항상 작동하는 데모 경로 유지** · 확실한 결정론적 코어부터 → 레이어로 점수 · Demo 우선.
 > 매일 끝: 커밋 + (D3부터) Vercel 배포로 "언제든 보여줄 수 있는" 상태 유지.
 >
-> **📍 현재 위치(2026-07-08 갱신)**: Day 1·2·3 완료(로컬 웹 데모 라이브 동작). **다음 최우선 = Vercel 배포** + 제출물(README·요약·영상). 상세는 memory/onlabel-progress.md · DECISIONS.md.
+> **📍 현재 위치(2026-07-08 갱신)**: Day 1·2·3 완료 + Depth 대량 진행 — **접지 울타리(D+A+C+B)·B-8 위음성 수정·FDA 인용 receipts UI·L1 claim 파이프라인 Phase 1~3 완료**(대조 엔진 live 작동). 골든 122개. **다음 = L1 Phase 4(UI 대조 엔진 시각화)** → 그후 **Vercel 배포 + 제출물(README·요약·3분영상)**. 상세는 memory/onlabel-progress.md · DECISIONS.md · findings.md.
 
 ---
 
@@ -42,15 +42,16 @@
 - 검증: typecheck 통과 · 테스트 10 verifier + 4 tool + 23 golden 그린. 커밋 4개(main, 미푸시).
 - 서빙 기준: Demo(핵심) + Claude Use.
 
-## Day 4 — 7/11(토) · Depth·견고성 + 스트레치
-**목표: "씨름한 craft"로 보이게 다듬는다.**
-- [ ] Skill `otc-red-flag-triage`(임부·소아·간/신장·기간 게이트)
-- [ ] 시나리오 시드 확대(숨은 APAP, PM 중복, 다중 NSAID 등) + 엣지케이스
-- [ ] openFDA **라이브 fallback**(KB 미스 시) + 인용 링크 정확도
-- [ ] 로딩/에러/빈 상태, 카피 다듬기(영어)
-- [ ] **스트레치: MCP 서버**(verifier 래핑) + Claude Desktop에 꽂아 실증 (시간 되면)
-- **Done =** 견고한 데모. Vercel 재배포. 커밋.
-- 서빙 기준: Depth + Impact(오픈 기여).
+## Day 4 — 7/8~ · Depth·견고성 (대량 진행됨) ✅ 대부분 완료
+**목표: "씨름한 craft"로 보이게 다듬는다.** (원계획 항목 대신 접지·검증 Depth로 전환)
+- [x] **접지 울타리 D→A→C→B**(D27~D30): 프롬프트 울타리 + ok제품 KB용량 노출 + 판정카드 scope각주 + 복용법 데이터(9성분, M012/M013). live 검증.
+- [x] **B-8 위음성 수정**(D32): generic 성분명 중복 탐지(acetaminophen+Tylenol=caution). 회귀5.
+- [x] **FDA 인용 receipts UI**(D33): Sources 칩 클릭→모노그래프 verbatim 발췌+공개 FDA URL 팝오버.
+- [x] **시나리오 골든 확대 25→122**: 2차 probe(다양형식) + 실검색 상위20 + generic-name.
+- [x] **L1 claim 파이프라인 Phase 1~3**(§9.4): [C]분해 · [D]하이브리드(임상=결정론/언어=격리LLM) · [E]reconciler. 대조 엔진 live(무근거초안→FDA교정). 테스트 verifyClaims11+reconcile3.
+- [ ] **L1 Phase 4** (진행 중): UI claim 배지 + 대조 엔진 시각화(Demo 30% 핵심).
+- [ ] Skill `otc-red-flag-triage` / openFDA 라이브 fallback / MCP 서버 — 스트레치, 미실시(범위규율).
+- 서빙 기준: Depth + Claude Use.
 
 ## Day 5 — 7/12(일) · 기능 동결 + 제출물 제작
 **목표: 제출 3종 완성. (feature freeze)**
