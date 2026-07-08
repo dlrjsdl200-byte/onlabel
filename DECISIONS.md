@@ -18,4 +18,10 @@
 - **D10. Rx(처방)약 상호작용 = 데모 제외** → backlog B-1. red-flag "처방약 복용 시 약사 상담" 소프트 게이트만 유지.
 - **D11. 제품 카탈로그 = 미국 top브랜드 리밸런싱** (코어 15 ⭐). 회사: Kenvue/Haleon/Bayer/P&G/Reckitt.
 
+## 2026-07-09 — Day 3 UI
+
+- **D12. UI 방향**: 레이아웃=**답변 엔진형**(OpenEvidence 스타일, 판정이 주인공) · 무드=**클리니컬-클린**(Linear/Stripe 톤) · **일반 AI vs OnLabel 대조 장치 명시**(단, 가짜 인용 금지 — illustrative하게).
+- **D13. 시그니처 인터랙션 = "판정 먼저, 설명 나중"**: 결정론적 판정 카드/원장 즉시 렌더 → 산문 SSE 스트리밍. Demo 30%의 핵심.
+- **D14. 컴포넌트 = shadcn/ui** (Tailwind 4), 폰트 Geist, 스트리밍 `POST /api/check/stream`(SSE). 상세: docs/UI-SPEC.md.
+
 <!-- 새 결정은 이 아래에 날짜 섹션으로 추가 -->

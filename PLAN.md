@@ -28,12 +28,14 @@
 - 서빙 기준: Claude Use.
 
 ## Day 3 — 7/10(금) · 프론트 + 서브에이전트 (★데모 존재 마일스톤★)
-**목표: 사람이 타이핑해서 보는 웹 데모 완성.**
-- [ ] 대화형 챗 UI(OpenEvidence 스타일) + **SSE 스트리밍**
-- [ ] 판정 패널: ✅/⚠️/🚫 배지 + FDA DailyMed 인용 링크 + phenylephrine 효능 안내
-- [ ] **Verifier 서브에이전트**(critic 패턴) + Skill `otc-plain-language-counseling`
-- [ ] disclaimer("의료 판단은 약사·의사 상담, 임상 사용 불가")
-- **Done =** 웹에서 "Tylenol + DayQuil?" → grounded 위험 경고. **Vercel preview 배포.** 커밋.
+**목표: 사람이 타이핑해서 보는 웹 데모 완성. 스펙 = docs/UI-SPEC.md (확정).**
+- [ ] shadcn/ui init + 클리니컬-클린 토큰
+- [ ] 정적 컴포넌트(더미): VerdictCard · IngredientLedger · ContrastStrip · EfficacyNote · Sources · Disclaimer · QuestionInput
+- [ ] SSE 스트림 라우트 `POST /api/check/stream`(verification→token→done) + `useOnLabelStream` 훅
+- [ ] "판정 먼저, 설명 나중" 배선 + 예시 칩 + 상태(빈/스트리밍/미매칭/에러)
+- [ ] (선택) Verifier 서브에이전트 + `otc-plain-language-counseling` 스킬 배선
+- [ ] 반응형/다크/접근성 패스
+- **Done =** 웹에서 "Tylenol + DayQuil?" → 판정 카드 즉시 + 산문 스트리밍. **Vercel preview 배포.** 커밋.
 - 서빙 기준: Demo(핵심) + Claude Use.
 
 ## Day 4 — 7/11(토) · Depth·견고성 + 스트레치
