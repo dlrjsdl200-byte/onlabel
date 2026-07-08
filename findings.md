@@ -29,6 +29,9 @@
 - 선행 DB 체커(Drugs.com/Medscape/WebMD)는 자연어·AI·AI답변검증 아님. Drugs.com만 therapeutic duplication(드묾). · 영향: 빈자리 확인.
 - 전체 종합 → docs/AI-ARCHITECTURE.md (v2). 문헌 목록은 architect.md(v1) + AI-ARCHITECTURE.md(v2) References.
 
+## 2026-07-08 (Day 3 — 안 1 구현: 강도 변이 해소)
+- **안 1(D21) 구현 완료**: `resolveProduct()`가 bare 브랜드를 default SKU로 결정론 해소하고 `assumedDefault`+alternatives 신호 반환. verify()가 `assumptions[]`를 VerifyResult에 수집 → UI `AssumptionNote`로 명시. bare "Tylenol"→Extra Strength(가정 표시), 명시적 "extra/regular strength"·다른 포뮬레이션(PM/Cold+Flu)은 정확히 구분. 데이터: tylenol-regular/extra에 brandKey·strengthLabel·isBrandDefault 추가. 회귀 테스트 3개 추가. 골든 23/23 유지(products 배열은 전부 명시적이라 무영향).
+
 ## 2026-07-08 (Day 3 — 다중 SKU 강도 발견)
 - **OTC 브랜드는 강도별 다중 SKU** (약사 검증 중 발견): Benadryl Allergy 25mg vs Extra Strength 50mg/정; Mucinex/Mucinex DM 600mg(regular) vs 1200mg(Maximum Strength)/정. · 영향: "몇 알" 표시는 SKU 의존 → 브랜드명에 강도 못박아 고정(D20). 일일상한 판정은 SKU 무관 동일이라 판정 정확성엔 영향 없음. · 소스: 사용자 제공 제품 라벨 스크린샷(각 SKU Drug Facts).
 - **FDA 모노그래프 5개 성분 상한 결정론 추출 완료**(pdftotext+grep, refs/M013.txt·M012.txt): aspirin 4,000(M013:696) / doxylamine 75(M012:558) / phenylephrine 60(M012:1335) / pseudoephedrine 240(M012:1345) / caffeine=모노그래프 부재(null 유지). **5개 전부 기존 KB값과 정확히 일치** → verify:true→false 승격 준비됨(약사 확인 대기).

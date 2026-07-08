@@ -32,6 +32,12 @@ export interface ProductIngredient {
 export interface Product {
   id: string;
   brand: string;
+  /** Groups same-formulation strength variants, e.g. "tylenol". */
+  brandKey?: string;
+  /** Human strength label, e.g. "Extra Strength". */
+  strengthLabel?: string;
+  /** The variant a bare brand name resolves to. */
+  isBrandDefault?: boolean;
   company: string;
   category: string;
   core: boolean;
@@ -82,14 +88,30 @@ export interface ClassFinding {
   message: string;
 }
 
+/** A bare brand name we resolved to a default strength SKU (surfaced to the user). */
+export interface Assumption {
+  input: string;
+  resolvedTo: string;
+  alternatives: string[];
+}
+
 export interface VerifyResult {
   input: string[];
   matched: Product[];
   unmatched: string[];
+  assumptions: Assumption[];
   findings: IngredientFinding[];
   classFindings: ClassFinding[];
   overall: Severity;
   summary: string;
+}
+
+export interface ProductMatch {
+  product: Product;
+  /** True when a bare brand was resolved to its default strength SKU. */
+  assumedDefault: boolean;
+  /** Other strength variants of the same brand family. */
+  alternatives: Product[];
 }
 
 const INGREDIENTS = (ingredientsData as { ingredients: Record<string, IngredientRef> })
@@ -106,25 +128,76 @@ function normalize(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
-/** Resolve a free-text product name to a catalog product. */
-export function lookupProduct(name: string): Product | null {
-  const q = normalize(name);
-  if (!q) return null;
-  // exact-ish match on id or brand first
-  for (const p of PRODUCTS) {
-    if (normalize(p.id) === q || normalize(p.brand) === q) return p;
-  }
-  // contains match (query in brand, or brand-head in query)
+/** Distinctive first token of a strength label, e.g. "Extra Strength" -> "extra". */
+function strengthToken(label?: string): string | null {
+  if (!label) return null;
+  return normalize(label).split(" ")[0] || null;
+}
+
+/** Existing fuzzy matcher: contains / token overlap. */
+function fuzzyLookup(q: string): Product | null {
   for (const p of PRODUCTS) {
     const brand = normalize(p.brand);
     if (brand.includes(q) || q.includes(normalize(p.id))) return p;
   }
-  // token overlap: first significant token of query appears in brand
   for (const p of PRODUCTS) {
     const brand = normalize(p.brand);
     if (q.split(" ").some((t) => t.length >= 4 && brand.includes(t))) return p;
   }
   return null;
+}
+
+/**
+ * Resolve a free-text product name to a catalog product, surfacing whether a
+ * bare brand name was assumed to a default strength SKU. Different-formulation
+ * products (e.g. Tylenol PM) are matched by their own exact brand names and are
+ * never grouped into a strength family.
+ */
+export function resolveProduct(name: string): ProductMatch | null {
+  const q = normalize(name);
+  if (!q) return null;
+  const tokens = q.split(" ");
+
+  // 1. Exact id/brand match — an explicit choice, no assumption.
+  for (const p of PRODUCTS) {
+    if (normalize(p.id) === q || normalize(p.brand) === q) {
+      return { product: p, assumedDefault: false, alternatives: [] };
+    }
+  }
+
+  // 2. Strength family: query names a brand that has >1 strength variant.
+  const familyKeys = new Set(
+    PRODUCTS.map((p) => p.brandKey).filter((k): k is string => !!k),
+  );
+  for (const key of familyKeys) {
+    if (!tokens.includes(key)) continue;
+    const members = PRODUCTS.filter((p) => p.brandKey === key);
+    if (members.length < 2) continue;
+    // Did the user name a strength (e.g. "extra", "regular")?
+    const explicit = members.find((m) => {
+      const t = strengthToken(m.strengthLabel);
+      return t !== null && tokens.includes(t);
+    });
+    if (explicit) {
+      return { product: explicit, assumedDefault: false, alternatives: [] };
+    }
+    // Bare brand -> default SKU, surfaced as an assumption.
+    const def = members.find((m) => m.isBrandDefault) ?? members[0];
+    return {
+      product: def,
+      assumedDefault: true,
+      alternatives: members.filter((m) => m.id !== def.id),
+    };
+  }
+
+  // 3. Fallback fuzzy match.
+  const p = fuzzyLookup(q);
+  return p ? { product: p, assumedDefault: false, alternatives: [] } : null;
+}
+
+/** Resolve a free-text product name to a catalog product. */
+export function lookupProduct(name: string): Product | null {
+  return resolveProduct(name)?.product ?? null;
 }
 
 /**
@@ -134,10 +207,19 @@ export function lookupProduct(name: string): Product | null {
 export function verify(productNames: string[]): VerifyResult {
   const matched: Product[] = [];
   const unmatched: string[] = [];
+  const assumptions: Assumption[] = [];
   for (const name of productNames) {
-    const p = lookupProduct(name);
-    if (p) matched.push(p);
-    else unmatched.push(name);
+    const m = resolveProduct(name);
+    if (m) {
+      matched.push(m.product);
+      if (m.assumedDefault) {
+        assumptions.push({
+          input: name,
+          resolvedTo: m.product.brand,
+          alternatives: m.alternatives.map((a) => a.brand),
+        });
+      }
+    } else unmatched.push(name);
   }
 
   // Build ingredient ledger: ingredient -> contributions per product
@@ -251,7 +333,16 @@ export function verify(productNames: string[]): VerifyResult {
 
   const summary = buildSummary(overall, findings, classFindings, unmatched);
 
-  return { input: productNames, matched, unmatched, findings, classFindings, overall, summary };
+  return {
+    input: productNames,
+    matched,
+    unmatched,
+    assumptions,
+    findings,
+    classFindings,
+    overall,
+    summary,
+  };
 }
 
 function buildSummary(

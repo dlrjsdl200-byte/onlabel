@@ -1,5 +1,6 @@
 import type { VerifyResult } from "@/lib/onlabel/verify";
 import { VerdictCard } from "./VerdictCard";
+import { AssumptionNote } from "./AssumptionNote";
 import { ContrastStrip } from "./ContrastStrip";
 import { IngredientLedger } from "./IngredientLedger";
 import { EfficacyNote } from "./EfficacyNote";
@@ -32,6 +33,8 @@ export function AnswerView({
       <ContrastStrip severity={result.overall} />
 
       <VerdictCard severity={result.overall} summary={result.summary} />
+
+      <AssumptionNote assumptions={result.assumptions} />
 
       {result.unmatched.length > 0 && (
         <p className="rounded-lg border bg-muted/40 px-4 py-2 text-sm text-muted-foreground">

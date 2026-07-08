@@ -84,4 +84,33 @@ test("no single catalog product is danger on its own", () => {
   }
 });
 
+// Strength-variant resolution (안 1): bare brand -> default SKU, surfaced.
+test("bare 'Tylenol' resolves to Extra Strength as a surfaced assumption", () => {
+  const r = verify(["Tylenol", "DayQuil"]);
+  const t = r.matched.find((p) => p.brandKey === "tylenol");
+  assert.ok(t, "a tylenol-family product should match");
+  assert.strictEqual(t!.brand, "Tylenol Extra Strength", "default SKU is Extra Strength");
+  assert.strictEqual(r.assumptions.length, 1, "one assumption should be surfaced");
+  assert.strictEqual(r.assumptions[0].input, "Tylenol");
+  assert.strictEqual(r.assumptions[0].resolvedTo, "Tylenol Extra Strength");
+  assert.ok(
+    r.assumptions[0].alternatives.includes("Tylenol Regular Strength"),
+    "alternatives should list the other strength",
+  );
+});
+
+// Explicit strength is honored and NOT flagged as an assumption.
+test("explicit 'Tylenol Regular Strength' is not an assumption", () => {
+  const r = verify(["Tylenol Regular Strength"]);
+  assert.strictEqual(r.matched[0].brand, "Tylenol Regular Strength");
+  assert.strictEqual(r.assumptions.length, 0, "explicit strength has no assumption");
+});
+
+// Different-formulation product is never grouped into the strength family.
+test("'Tylenol PM' resolves to itself, not a strength variant", () => {
+  const r = verify(["Tylenol PM"]);
+  assert.strictEqual(r.matched[0].brand, "Tylenol PM");
+  assert.strictEqual(r.assumptions.length, 0);
+});
+
 console.log(`\n${passed} passed`);

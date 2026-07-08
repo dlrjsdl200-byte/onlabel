@@ -8,6 +8,8 @@
     {
       "id": "tylenol-regular",
       "brand": "Tylenol Regular Strength",
+      "brandKey": "tylenol",
+      "strengthLabel": "Regular Strength",
       "company": "Kenvue",
       "category": "analgesic",
       "core": true,
@@ -21,6 +23,9 @@
     {
       "id": "tylenol-extra-strength",
       "brand": "Tylenol Extra Strength",
+      "brandKey": "tylenol",
+      "strengthLabel": "Extra Strength",
+      "isBrandDefault": true,
       "company": "Kenvue",
       "category": "analgesic",
       "core": true,
