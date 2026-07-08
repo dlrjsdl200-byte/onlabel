@@ -43,3 +43,7 @@ Thumbs.db
 refs/
 # Dev screenshots — regenerated on demand
 docs/screenshots/
+# Live eval transcripts (paid-call Q/A logs) — regenerated per run, can be large
+evals/transcripts/
+# Generated eval report — regenerated per run; curated baseline is evals/BASELINE.md
+evals/report.md
