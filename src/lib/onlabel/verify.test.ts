@@ -4,6 +4,7 @@
  */
 import assert from "node:assert";
 import { verify } from "./verify";
+import productsData from "../../data/products.json";
 
 let passed = 0;
 function test(name: string, fn: () => void) {
@@ -66,6 +67,21 @@ test("Unknown product is reported as unmatched", () => {
   const r = verify(["Nonexistent Brand XYZ"]);
   assert.strictEqual(r.unmatched.length, 1);
   assert.strictEqual(r.matched.length, 0);
+});
+
+// Invariant: any single product at its own label max must not be "danger".
+// A single compliant OTC product cannot exceed an ingredient's daily limit;
+// if it does, that ingredient's maxDailyMg is set too low (data error).
+test("no single catalog product is danger on its own", () => {
+  const products = (productsData as { products: { brand: string }[] }).products;
+  for (const p of products) {
+    const r = verify([p.brand]);
+    assert.notStrictEqual(
+      r.overall,
+      "danger",
+      `${p.brand} flags danger alone — an ingredient limit is likely too low`,
+    );
+  }
 });
 
 console.log(`\n${passed} passed`);

@@ -105,9 +105,9 @@
       "displayName": "Doxylamine",
       "aka": [],
       "class": "antihistamine-sedating",
-      "maxDailyMg": 25,
+      "maxDailyMg": 75,
       "risk": "Sedation; found in nighttime cold products and sleep aids.",
-      "source": "OTC labeling (sleep-aid ceiling)",
+      "source": "OTC antihistamine labeling (~75 mg/day; sleep-aid single dose is 25 mg). NyQuil label max delivers 50 mg/day, so daily ceiling must be >= 50.",
       "verify": true
     },
     "loratadine": {
