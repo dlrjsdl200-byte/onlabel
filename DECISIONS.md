@@ -39,4 +39,13 @@
 - **D21. 강도 변이(Type B) 처리 = 안 1 채택 (구현은 SSE 배선 이후)**: 같은 성분 다른 강도(Tylenol 325/500/650, Benadryl 25/50 등)는 **강도별 별도 항목 + 브랜드당 default SKU 지정 + 가정 명시(surfaced assumption)**로 처리. bare "Tylenol"→default(Extra Strength 500mg)로 결정론 해소하되 UI에 "assumed strength, tap to change" 노출. Type A(성분 구성 다름: Tylenol PM/Cold+Flu)는 지금처럼 별도 항목 유지. `lookupProduct` 수정 필요(default 우선 + 가정 신호). **착수 순서: UI SSE 배선 먼저 → 그다음 이 강도 정밀화.** 상세 backlog B-5.
 - **D22. FDA 모노그래프 상한 검증 완료(B-4)**: refs/M013·M012 PDF를 pdftotext+grep 결정론 추출, 약사 확인. 5개 성분(aspirin 4000·pseudoephedrine 240·phenylephrine 60·doxylamine 75·caffeine 부재/null) 전부 기존 KB값과 일치 → `verify:true→false` 승격, source에 모노그래프 조항 인용. LLM 미개입.
 
+## 2026-07-08 — AI Architecture v2.1 (파이프라인 전수 감사)
+
+> 감사 방법·근거는 findings.md 2026-07-08 감사 섹션, 상세 교정은 docs/AI-ARCHITECTURE.md §9.
+
+- **D23. 불변 결정 규칙 (파이프라인 조준)**: **CoVe·독립 verifier의 가치 = generator의 환각 자유도에 비례.** → 파이프라인은 환각이 실재하는 곳(**grounding 없는 초안 = 일반 LLM pass**)에 조준한다. 이미 차단된 곳(우리의 제약된·KB-override된 산문) 재확인은 부분 중복(theater). 근거: CoVe **factored 변형**이 joint를 이기는 유일 이유 = 검증이 초안에 conditioning 안 되는 독립성(arXiv:2309.11495). **이 규칙이 배선 결정을 연역적으로 고정 — 재논의 시 규칙부터 적용해 답이 안 흔들리게 한다.**
+- **D24. [D] Verifier = 하이브리드 (뉴로심볼릭 끝까지 관철)**: [C]에서 claim을 kind로 분해하고 라우팅 — **dose/duplication/interaction 등 임상 숫자 claim은 LLM verifier에 절대 안 보냄 → verify() findings에 결정론 대조.** 언어/framing claim만 독립 LLM verifier 서브에이전트(격리 컨텍스트). 이유: D15 하드룰(LLM은 안전 판정 안 함)을 파이프라인 마지막까지 유지. **현 v2 설계("[D]가 모든 claim 검증")의 구멍 교정** — LLM이 용량 숫자를 판정하는 순간 원칙 위반.
+- **D25. 전달 = 경로 분리**: **데모** = ship 전 gate로 무근거 초안을 grounded 교정본으로 시연(대조 엔진, D12) / **프로덕션** = 잔여 drift용 경량 degradable post-hoc net. 데모 코어(verdict-first 스냅 + SSE 스트리밍) 불변. reconciler[E]의 안전 판정 override는 이미 결정론이 수행하므로 [E]는 산문 교정만 담당.
+- **D26. ✓ VERIFIED 배지 = FDA 추적성(tool receipts)**: 발화 안 하는 VERIFIED도 "모든 문장이 FDA로 추적됨" 투명성 아티팩트로 포지셔닝 — theater 아님. 근거: 2026 tool-receipts 실무 패턴(arXiv:2603.10060).
+
 <!-- 새 결정은 이 아래에 날짜 섹션으로 추가 -->

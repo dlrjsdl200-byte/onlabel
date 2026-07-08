@@ -121,6 +121,37 @@
 
 ---
 
+## 9. v2.1 감사 교정 (2026-07-08 파이프라인 전수 감사)
+
+전수 감사 결과 v2 파이프라인에 **뉴로심볼릭 하드룰이 [D]에서 새는 구멍**과 **조준 대상 오류**를 발견해 아래로 교정한다(결정: DECISIONS D23~D26 / 근거: findings 2026-07-08 감사).
+
+### 9.1 불변 결정 규칙 (D23)
+**CoVe·독립 verifier의 가치 = generator의 환각 자유도에 비례.** 파이프라인은 환각이 실재하는 곳(grounding 없는 초안)에 조준하고, 이미 차단된 곳(제약된·override된 우리 산문)엔 쓰지 않는다. 근거: CoVe **factored 변형**(§7 [^cove], arXiv:2309.11495) — 검증이 초안에 conditioning 안 되는 독립성이 joint 대비 우위의 유일 원인. 이 규칙에서 배선 결정이 연역되므로 재논의 시 규칙부터 적용한다.
+
+### 9.2 [D] 하이브리드 verifier (핵심 교정, D24)
+[C]에서 claim을 kind로 분해 → kind별 라우팅:
+- **임상 숫자 claim**(dose·duplication·interaction) → **결정론 KB(verify() findings)에 대조. LLM 배제.** (D15 하드룰 관철)
+- **언어/framing claim** → 독립 LLM verifier 서브에이전트(격리 컨텍스트, Self-Correction Illusion 회피).
+
+이유: v2의 "[D]가 모든 claim 검증"은 LLM이 용량 숫자를 판정하게 만들어 뉴로심볼릭 원칙을 위반. kind-split이 원칙을 파이프라인 끝까지 유지. 2026 판정 아키텍처의 per-claim routing(FactualAccuracy)과 정합.
+
+### 9.3 조준 + 전달 (D25, D26)
+- 파이프라인 검증 대상 = **grounding 없는 pass(일반 LLM 실제 출력)** → 대조 엔진(D12)으로 논지 실증. 우리 답 재확인 아님.
+- 전달 경로 분리: **데모**=ship 전 gate로 교정 시연 / **프로덕션**=잔여 drift 경량 degradable net. 데모 코어(verdict-first+SSE) 불변.
+- **✓ VERIFIED 배지 = "모든 문장 FDA 추적성"**(tool receipts, arXiv:2603.10060) — 발화 안 해도 투명성 자산.
+
+### 9.4 구현 순서 (감사 반영, §8 대체)
+1. **L2 eval baseline** (`npm run eval`) — 변경 전 baseline 측정(회귀 안전망).
+2. **[C] claim 분해 + kind 태그** — structured output(zod), `emit_claims` 도구 강제 호출.
+3. **[D] 하이브리드 verifier** — 임상=결정론 KB 라우팅 / 언어=격리 LLM 서브에이전트.
+4. **[E] reconciler** — 결정론 override + 경로별 전달(데모 gate / 프로덕션 net).
+5. eval 재실행으로 개선 측정 → UI claim 배지.
+
+### 9.5 감사에서 확정 안 한 것 (열림)
+- 데모 gate 경로에서 무근거 초안을 "얼마나 naive하게" 둘지(완전 무툴 vs 약한 힌트) — 데모 스크립트 짤 때 결정.
+
+---
+
 ## References
 [^cove]: Chain-of-Verification (CoVe): draft → decompose into verifiable claims → independent verification → synthesize. LLMs answer simple verification questions more accurately than the complex original. https://learnprompting.org/docs/advanced/self_criticism/chain_of_verification
 [^selfcorr]: "The Self-Correction Illusion: LLMs Correct Others but Not Themselves." https://arxiv.org/pdf/2606.05976

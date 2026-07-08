@@ -45,3 +45,12 @@
 - **스킬 로딩 vs 개발 CLAUDE.md 충돌**: `settingSources:["project"]`로 스킬 로드하면 **개발용 루트 CLAUDE.md(내 작업규칙)까지 런타임 에이전트에 섞임.** · 영향: Day 2는 systemPrompt로 방법론 주입(스킬 파일은 정본 유지), 실제 스킬 로딩은 Day 3에 **격리 프롬프트 서브에이전트(AgentDefinition)**로 배선 예정.
 - **결정론적 판정 보장 패턴**: 응답 verification을 LLM 출력 파싱이 아니라, 도구가 확인한 products로 verify()를 **다시 돌려** 붙임 → LLM이 어떻게 말하든 판정은 코드 진실.
 - **효능 노트는 severity 무관 항상 노출**: phenylephrine 같은 효능 이슈는 용량/중복과 별개라 ok 판정에서도 표시하도록 수정.
+
+## 2026-07-08 (AI 아키텍처 파이프라인 전수 감사 — 문헌 재검증)
+> 결과 확정 결정은 DECISIONS.md D23~D26, 설계 반영은 docs/AI-ARCHITECTURE.md §9.
+- **CoVe factored 변형 = [D] 독립성의 정본 근거**: joint를 이기는 유일 이유 = 검증이 초안에 conditioning 안 됨(독립성). → CoVe는 "환각 가능한 generator"를 전제로 존재하는 장치. 우리 generator는 이미 grounding+판정 override로 제약 → **우리 산문 재확인은 부분 중복**. 파이프라인은 무근거 초안으로 조준해야 가치 발생(D23). · 출처: arXiv:2309.11495.
+- **[D] 설계 구멍 발견(핵심)**: 현 v2는 "[D] 서브에이전트가 모든 claim 검증"인데, **임상 숫자 claim을 LLM이 판정하면 D15 하드룰 위반**. → kind-split 하이브리드로 교정(D24): 임상 claim=결정론 KB 대조, 언어 claim만 독립 LLM.
+- **2026 판정 아키텍처 = claim마다 KB조회/tool-call 라우팅**: FactualAccuracy atomic decomposition + per-claim routing. 우리 [C] kind 태그 → [D] 라우팅과 정확히 일치. · 출처: futureagi 2026 architectural deep dive.
+- **gate-before-ship vs 스트리밍 긴장 해소**: 안전 판정은 이미 결정론이라 gate 완료 상태. 산문만 남음 → 데모=ship 전 gate, 프로덕션=경량 net(D25). · 출처: braintrust 2026 hallucination tools.
+- **tool receipts**: 발화 안 하는 ✓ 배지도 정당한 검증 아티팩트(FDA 추적성). · 출처: arXiv:2603.10060.
+- **flip-flop 근본 원인 진단**: 결정 규칙 없이 매번 새 각도(레이턴시→theater)로 즉흥 판단해서 답이 바뀜. → D23 불변 규칙 수립으로 재발 방지.
