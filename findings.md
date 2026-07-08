@@ -10,6 +10,12 @@
 - **경구 phenylephrine 효능 부정** — FDA 2023-09 자문위 16-0, 2024-11-08 OTC 모노그래프 제거 제안. · 출처: fda.gov 보도자료/소비자안내. · 영향: PE 포함 제품에 "효능 없음" 안내 + 레퍼런스 = 약사 차별 포인트.
 - **데이터 소스 검증**: openFDA(무료·키선택), DailyMed v2(무료), RxNorm/RxNav(무료·20req/s), RxClass(무료) 전부 사용 가능. · 영향: 무료 소스만으로 KB 완결 가능.
 
+## 2026-07-09 (데이터 추출 방법 — LLM 오염 회피)
+- **WebFetch로 의료 용량 추출 금지**: WebFetch는 가져온 내용을 작은 LLM이 요약/응답 → 숫자 오염 위험. 뉴로심볼릭 원칙 위반. 용량 추출은 결정론(pdftotext+grep)만.
+- **FDA accessdata PDF는 Akamai 봇 차단**: curl/WebFetch 302→abuse-detection-apology. 자동 다운로드 불가, 사람 브라우저 필요. (URL/도구 문제 아님)
+- **pdftotext 설치 확인**(/mingw64/bin/pdftotext) → PDF만 확보되면 결정론 추출 가능.
+- 올바른 워크플로: 사람이 M013/M012 브라우저 다운로드 → pdftotext raw 추출 → grep 용량줄 → 약사 검증. backlog B-4.
+
 ## 2026-07-09 (Eval 골든셋 — 데이터 버그 적발)
 - **eval-first가 즉시 버그 잡음**: 골든셋 결정론 라벨을 verify()에 대조하다가 발견 — **doxylamine 일일한도 25mg이 NyQuil label 최대(50mg/일)보다 낮아 NyQuil 단독이 danger로 오판**(false positive). → 항히스타민 한도 ~75mg으로 수정. · 영향: 데모 신뢰성 사고 예방.
 - **불변식 도출**: "성분 일일한도 >= 어떤 단일 제품의 label 최대." 위반 시 데이터 오류. → verify.test.ts에 "모든 단일 제품은 혼자 danger 아님" 불변식 테스트 추가.
