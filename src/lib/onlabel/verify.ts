@@ -134,17 +134,42 @@ function strengthToken(label?: string): string | null {
   return normalize(label).split(" ")[0] || null;
 }
 
-/** Existing fuzzy matcher: contains / token overlap. */
+/** Filler words that carry no product identity ("Advil Cold & Sinus" == "...and..."). */
+const STOP = new Set(["and", "with", "the", "for", "plus", "a", "an"]);
+
+function contentTokens(s: string): string[] {
+  return normalize(s)
+    .split(" ")
+    .filter((t) => t && !STOP.has(t));
+}
+
+/**
+ * Specificity-aware fuzzy matcher. Scores every product by how many of its own
+ * name tokens the query covers, and picks the most-specific match — so
+ * "Advil Cold and Sinus" resolves to the multi-word `advil-cold-sinus` rather
+ * than being shadowed by the shorter `advil`. Ties break toward fuller coverage,
+ * then earlier catalog order (canonical SKU first).
+ */
 function fuzzyLookup(q: string): Product | null {
+  const qset = new Set(contentTokens(q));
+  if (qset.size === 0) return null;
+  let best: Product | null = null;
+  let bestScore = -1;
   for (const p of PRODUCTS) {
-    const brand = normalize(p.brand);
-    if (brand.includes(q) || q.includes(normalize(p.id))) return p;
+    const pTokens = contentTokens(p.brand + " " + p.id);
+    const pset = new Set(pTokens);
+    let overlap = 0;
+    for (const t of pset) if (qset.has(t)) overlap++;
+    if (overlap === 0) continue;
+    // Prefer matching more of the product's distinctive tokens (overlap), then
+    // higher coverage fraction (how fully the product name is named).
+    const score = overlap * 1000 + (overlap / pset.size) * 100;
+    if (score > bestScore) {
+      bestScore = score;
+      best = p;
+    }
   }
-  for (const p of PRODUCTS) {
-    const brand = normalize(p.brand);
-    if (q.split(" ").some((t) => t.length >= 4 && brand.includes(t))) return p;
-  }
-  return null;
+  return best;
 }
 
 /**
@@ -181,6 +206,17 @@ export function resolveProduct(name: string): ProductMatch | null {
     if (explicit) {
       return { product: explicit, assumedDefault: false, alternatives: [] };
     }
+    // Only collapse to the family default for a BARE brand. If the query carries
+    // other distinctive tokens (e.g. "Tylenol Cold and Flu Severe"), it names a
+    // different SKU — fall through to the specificity-aware fuzzy match instead
+    // of silently resolving to the family default.
+    const strengthTokens = new Set(
+      members.map((m) => strengthToken(m.strengthLabel)).filter(Boolean) as string[],
+    );
+    const residual = tokens.filter(
+      (t) => t !== key && !STOP.has(t) && !strengthTokens.has(t),
+    );
+    if (residual.length > 0) break;
     // Bare brand -> default SKU, surfaced as an assumption.
     const def = members.find((m) => m.isBrandDefault) ?? members[0];
     return {

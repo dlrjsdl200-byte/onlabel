@@ -113,4 +113,33 @@ test("'Tylenol PM' resolves to itself, not a strength variant", () => {
   assert.strictEqual(r.assumptions.length, 0);
 });
 
+// Regression: the LLM writes "and" where the label prints "&" / "+". A short
+// SKU id must not shadow a more specific multi-word product, and a distinct SKU
+// must not collapse to the brand's strength-family default. Both previously
+// produced a false-NEGATIVE verdict (danger -> ok), the worst failure mode.
+test("'Advil Cold and Sinus' resolves to the combo SKU (not plain Advil)", () => {
+  const r = verify(["Advil Cold and Sinus"]);
+  assert.strictEqual(r.matched[0]?.id, "advil-cold-sinus");
+});
+
+test("Sudafed + 'Advil Cold and Sinus' still flags pseudoephedrine danger", () => {
+  const r = verify(["Sudafed", "Advil Cold and Sinus"]);
+  const pse = r.findings.find((f) => f.ingredient === "pseudoephedrine");
+  assert.ok(pse && pse.duplicated && pse.exceedsLimit, "PSE duplicated over limit");
+  assert.strictEqual(r.overall, "danger");
+});
+
+test("'Tylenol Cold and Flu Severe' does not collapse to a plain Tylenol SKU", () => {
+  const r = verify(["Tylenol Cold and Flu Severe"]);
+  assert.strictEqual(r.matched[0]?.id, "tylenol-cold-flu-severe");
+  assert.strictEqual(r.assumptions.length, 0, "a named distinct SKU is not an assumption");
+});
+
+// Guard: the fix must not break bare-brand default resolution.
+test("bare 'Tylenol' still resolves to Extra Strength default after the fix", () => {
+  const r = verify(["Tylenol"]);
+  assert.strictEqual(r.matched[0]?.id, "tylenol-extra-strength");
+  assert.strictEqual(r.assumptions.length, 1);
+});
+
 console.log(`\n${passed} passed`);

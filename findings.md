@@ -54,3 +54,8 @@
 - **gate-before-ship vs 스트리밍 긴장 해소**: 안전 판정은 이미 결정론이라 gate 완료 상태. 산문만 남음 → 데모=ship 전 gate, 프로덕션=경량 net(D25). · 출처: braintrust 2026 hallucination tools.
 - **tool receipts**: 발화 안 하는 ✓ 배지도 정당한 검증 아티팩트(FDA 추적성). · 출처: arXiv:2603.10060.
 - **flip-flop 근본 원인 진단**: 결정 규칙 없이 매번 새 각도(레이턴시→theater)로 즉흥 판단해서 답이 바뀜. → D23 불변 규칙 수립으로 재발 방지.
+
+## 2026-07-08 (eval 러너 구축 + live baseline이 잡은 실제 버그)
+- **답변층 grader 아티팩트 6건(baseline 44/50)**: 전부 파이프라인 답변은 정확, grader 결함. bare `mustNotClaim:"safe"`가 "safer"/"safe approach" 같은 정당한 안전 표현에 오탐, `mustMention:"doctor"`가 "OB/pharmacist" 동의어 놓침. → grader 부정어 인식 + golden을 구체 구절로 하드닝. 근거/상세: evals/BASELINE.md.
+- **🔴 제품 resolver false-negative(고심각, 데모 치명적)**: transcript 검토로 발견. LLM이 라벨의 "&"/"+"를 자연스럽게 "and"로 쓰면(`"Advil Cold and Sinus"`) `fuzzyLookup`이 짧은 id "advil"에 먼저 걸려 **plain Advil로 매칭 → pseudoephedrine 누락 → danger를 ok로 오판**(PSE 360>240인데 초록 OK 카드). `"Tylenol Cold and Flu Severe"`도 strength-family가 tylenol 기본값으로 붕괴. · 영향: 안전 코어 위음성 + LLM이 잘못된 ok를 산문에서 뒤집어 **판정 카드↔산문 모순**(뉴로심볼릭 위반 유발). · 수정: resolver를 특이도 기반 스코어 매칭 + stopword("and") 처리 + family 붕괴 방지 residual 가드로 교체. 회귀 테스트 4개(verify.test.ts) + eval 답변층에 **live 판정 assertion** 추가(재발 시 FAIL). 결정론이라 재호출 없이 검증.
+- **eval 갭 교훈**: 결정론층은 golden의 정규 철자를, 답변층은 산문만 봐서 둘 다 live 판정 오류를 놓쳤음. → 답변층이 verify(productsChecked)를 expected와 대조하도록 보강. **transcript 강제 기록이 이 버그를 드러냄**(답변이 스스로 폭로) — 유료 I/O 기록의 실전 가치 입증.
