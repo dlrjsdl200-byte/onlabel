@@ -78,3 +78,13 @@
 - **긍정 신호(데모 자산)**: 질적 안전 행동은 이미 강함 — regimen 과용·2NSAID danger·술+PM·오개념·crush(ER) 전부 옳게 처리. 문제는 "틀린 답"이 아니라 **"비접지 이유로 맞는 답" + "카드↔산문 모순"**. 둘 다 새 대형 DB가 아니라 (D)울타리+(A)노출로 교정 가능.
 - **DB 결론 확정**: 성분+일일용량 DB는 **이미 존재**, 도구가 안 넘길 뿐(→A로 노출). 진짜 빠진 건 **"복용법" 유계 레이어 = {intervalHours, maxDurationDays, singleDoseMaxMg, form/ER flag}** ~9성분, M012/M013(refs/ 로컬)에서 결정론 추출(B-6 확장). 새 범위 아님, 용량 축 완성(D28).
 - **개선방향 순서 재조정 D→A→C→B(근거 기반)**: C(판정↔산문 모순 + 수량 캐비엇)를 B 앞으로. 이유: 모순은 **데모에서 즉시 보이는 리스크**이고 프롬프트/UX 튜닝이라 저비용; B는 데이터 추출 투자. D(울타리)→A(기존 용량 노출)→C(모순 해소+"제품 단위만 검사, 복용 수량 미반영" 캐비엇)→B(복용법 데이터). DECISIONS D29에 기록.
+
+## 2026-07-08 (D+A+C+B 구현 완료 — 접지 울타리 가동)
+> 커밋 82cd8ae(D+A) · 08565d1(C) · 7398f9e(B). 검증: tsc·14+4 unit·golden 96/96·live(8+6) green.
+- **D+A 라이브 확증**: onset-aleve/duration-advil/interval 등 비접지 숫자가 이제 유보로 전환(onset-advil처럼 일관). 용량 숫자는 tool.ts가 ok 제품 포함 KB에서 노출 → 접지. "제품 단위만 검사, 술/커피/수량 미반영" 캐비엇이 산문에 자동 등장.
+- **C**: VerdictCard에 결정론적 scope 각주 상시 노출 → 초록 OK가 "포괄 승인"으로 오독되지 않음. LLM 텍스트 추론 없음.
+- **B 라이브 확증**: "타이레놀 얼마나 자주?" → **"every 4-6 hours, 10일(통증)/3일(발열)"** 접지(이전엔 회피). Aleve(naproxen)·Advil(ibuprofen) 간격/기간은 데이터 없어 **명시적 유보**("won't guess from general knowledge"). Mucinex(ER)는 IR 간격 억제.
+- **🟡 검수 대기 항목 2건(다음 세션 최우선)**:
+  1. **dosing 9종 verify:true** — M012/M013에서 결정론 추출·일일최대 교차검증 완료했으나 **약사 최종 서명 대기**. 확인 후 verify:false 승격.
+  2. **ibuprofen·naproxen 간격/기간 = 소스 부재** — 추출된 M013.txt에 없음(경고문에만 등장). 별도 소스(ibuprofen/naproxen 개별 모노그래프 또는 Drug Facts 라벨) 확보 후 채워야 접지 가능. 현재는 정직하게 유보 중.
+- **🟡 데이터 뉘앙스 발견**: 간격은 성분(IR 모노그래프) 단위인데 제형(ER)에 따라 실제 스케줄이 다름(Mucinex ER q12h ≠ guaifenesin IR q4h). 현재 doseForm=ER이면 간격 억제로 회피. 근본 해결은 **제품 단위 간격 오버라이드**(backlog).

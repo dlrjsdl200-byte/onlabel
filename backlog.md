@@ -54,3 +54,8 @@
 ---
 
 *작성 2026-07-08. 관련: architect.md, data/otc-knowledge-base.md*
+
+## B-7. 복용법 데이터 잔여분 (ibuprofen·naproxen 소스 + ER 간격) `[P1]`
+- **무엇**: (1) ibuprofen(200-400mg q4-6h, max 1200, 10일)·naproxen(220mg q8-12h, first-dose 2정, max 660, 10일) 간격/기간을 **권위 소스에서 확보** — 추출된 M013.txt엔 없음(NSAID 개별 모노그래프/Drug Facts 필요, 결정론 추출·약사 검증). (2) **제품 단위 간격 오버라이드**: 성분 IR 간격 ≠ ER 제형 실제 스케줄(Mucinex ER q12h). 현재 doseForm=ER이면 간격 억제로 회피 중 → products.json에 제품별 `dosing` 오버라이드 필드로 정밀화.
+- **왜 P1**: 지금 ibuprofen/naproxen 빈도·기간 질문은 정직하게 유보하나 접지 답변이면 데모/Impact↑. NSAID는 최다 질문 대상.
+- **선행**: 현 dosing 9종 verify:true의 약사 서명(→verify:false) 먼저.
