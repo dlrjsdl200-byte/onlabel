@@ -24,4 +24,10 @@
 - **D13. 시그니처 인터랙션 = "판정 먼저, 설명 나중"**: 결정론적 판정 카드/원장 즉시 렌더 → 산문 SSE 스트리밍. Demo 30%의 핵심.
 - **D14. 컴포넌트 = shadcn/ui** (Tailwind 4), 폰트 Geist, 스트리밍 `POST /api/check/stream`(SSE). 상세: docs/UI-SPEC.md.
 
+## 2026-07-09 — AI Architecture v2 (문헌 기반 심화)
+
+- **D15. 뉴로심볼릭 원칙(하드)**: LLM은 **안전 판정을 절대 안 내림.** 판정=결정론 코드(인간검증 KB). LLM은 언어(파싱/설명)와 주장 대조만. 근거: 뉴로심볼릭 임상 AI, Self-Correction Illusion. 상세 docs/AI-ARCHITECTURE.md.
+- **D16. CoVe claim 파이프라인 채택**: 초안→주장 분해→독립 verifier 서브에이전트→reconciler(결정론 판정 override). 자기교정 아닌 독립 검증.
+- **D17. 심화 범위 L1~L4 + eval-first**: eval 하네스(L2) 먼저 baseline → claim 파이프라인(L1) → 실시간 openFDA(L3) → 스킬 서브에이전트(L4) → 그 다음 UI. UI 스펙은 claim 배지 반영 필요.
+
 <!-- 새 결정은 이 아래에 날짜 섹션으로 추가 -->
