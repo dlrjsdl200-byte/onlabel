@@ -7,15 +7,15 @@
 
 ---
 
-## Day 1 — 7/8(수, 오늘·부분) · 데이터 + 결정론적 코어
+## Day 1 — 7/8(수) · 데이터 + 결정론적 코어 ✅ 완료
 **목표: 가장 확실하고 가장 중요한 자산(순수 코드)부터 못 박는다.**
-- [ ] 스캐폴드: Next.js(App Router) 생성, repo 구조, LICENSE(MIT), README 스켈레톤(영어)
-- [ ] `@anthropic-ai/claude-agent-sdk` 설치, `ANTHROPIC_API_KEY` env 세팅(.env.example)
-- [ ] KB → 구조화 JSON (`data/products.json`, `data/ingredients.json`): 성분·함량·일일최대. 코어 15종 ⭐ 우선
-- [ ] **결정론적 verifier 모듈 v1** (`lib/verify.ts`): `lookupIngredients` · `buildLedger` · `checkDuplication` · `checkMaxDose`
-- [ ] 유닛테스트: `Tylenol Extra Strength + DayQuil` → APAP 중복 🚫 정답 반환
-- **Done =** 터미널에서 verify() 핵심 시나리오 통과. 커밋.
-- 서빙 기준: Demo/Depth. 리스크 최저(순수 코드).
+- [x] 스캐폴드: Next.js 16(App Router, TS, Tailwind) + LICENSE(MIT) + README(영어)
+- [x] `@anthropic-ai/claude-agent-sdk` 0.3.204 설치 + `.env.example`
+- [x] KB → JSON: `src/data/ingredients.json`(성분 15) + `src/data/products.json`(US OTC 17). source/verify 플래그 포함
+- [x] **결정론적 verifier** `src/lib/onlabel/verify.ts`: lookupProduct · 원장 · checkDuplication · checkMaxDose · 계열중복
+- [x] 유닛테스트 `verify.test.ts` 6/6 통과 (`npm test`), `tsc` 클린
+- [x] **Done =** Tylenol ES + DayQuil → APAP 5600mg > 4000 → 🚫 danger 확인. 커밋+push(public repo)
+- 스크립트: `npm test`, `npm run typecheck`, `npm run dev`
 
 ## Day 2 — 7/9(목) · Agent SDK 파이프라인 (headless)
 **목표: 질문→답변→검증을 에이전트로 관통(UI 없이 먼저).**
