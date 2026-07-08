@@ -10,6 +10,11 @@
 - **경구 phenylephrine 효능 부정** — FDA 2023-09 자문위 16-0, 2024-11-08 OTC 모노그래프 제거 제안. · 출처: fda.gov 보도자료/소비자안내. · 영향: PE 포함 제품에 "효능 없음" 안내 + 레퍼런스 = 약사 차별 포인트.
 - **데이터 소스 검증**: openFDA(무료·키선택), DailyMed v2(무료), RxNorm/RxNav(무료·20req/s), RxClass(무료) 전부 사용 가능. · 영향: 무료 소스만으로 KB 완결 가능.
 
+## 2026-07-09 (Eval 골든셋 — 데이터 버그 적발)
+- **eval-first가 즉시 버그 잡음**: 골든셋 결정론 라벨을 verify()에 대조하다가 발견 — **doxylamine 일일한도 25mg이 NyQuil label 최대(50mg/일)보다 낮아 NyQuil 단독이 danger로 오판**(false positive). → 항히스타민 한도 ~75mg으로 수정. · 영향: 데모 신뢰성 사고 예방.
+- **불변식 도출**: "성분 일일한도 >= 어떤 단일 제품의 label 최대." 위반 시 데이터 오류. → verify.test.ts에 "모든 단일 제품은 혼자 danger 아님" 불변식 테스트 추가.
+- 골든셋 설계 근거: 계층화+고위험 수집, negative(과잉경고 방지), 의료 sycophancy/obfuscated(SycoEval-EM/CARES/PatientSafetyBench). 25개, evals/golden.json.
+
 ## 2026-07-09 (AI 아키텍처 리서치)
 - **문헌이 우리 논지를 증명**: 빅테크 소비자 헬스 AI(2026 ChatGPT Health, Claude for Healthcare, Copilot Health)의 문서화된 실패 = "과도하게 안심시킴 / urgency 반영 못 함" = OnLabel이 노리는 바로 그 실패. · 영향: 포지셔닝 정당화.
 - **CoVe(Chain-of-Verification)** = 우리 claim 파이프라인의 정본. draft→claim 분해→독립 검증→종합. · 영향: L1 설계 근거.
