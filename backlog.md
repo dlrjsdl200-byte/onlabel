@@ -20,6 +20,8 @@
 - **제품 조성** (15/17 제품 verify:true) → **`npm run sync:fda`**: openFDA API로 제품 라벨 성분·함량 빌드타임 적재. (= L3)
 - **성분 일일한도** (5개: aspirin·pseudoephedrine·phenylephrine·doxylamine·caffeine) → **FDA 모노그래프 M013(진통)·M012(감기)**.
 
+**진행(2026-07-08)**: 성분한도 5개 ✅ 완료 — M013·M012·M011 결정론 추출·검증, verify:false 승격(D22). 제품조성 15개(openFDA sync)는 미착수. **전체 OTC 모노그래프 세트(M001~M032+NM900)를 refs/에 로컬 확보**(gitignore) — 진통·감기 밖 29개는 범위 확장 시 쓸 자산(지금 미처리).
+
 ⚠️ **추출 방법 = 결정론적, LLM 금지.** 이유: 의료 용량 숫자가 LLM(WebFetch의 요약 모델 등)을 거치면 오염(할루시네이션) 위험 → 뉴로심볼릭 원칙 위반.
 - PDF는 **Akamai 봇 차단**이라 자동(curl/WebFetch) 다운로드 불가 → **사람 브라우저로 다운로드** 필요.
 - 추출은 **pdftotext(설치됨) + grep**으로 "not to exceed X mg/24h" 원문 추출 → 약사 검증 → verify:false + 모노그래프 인용.

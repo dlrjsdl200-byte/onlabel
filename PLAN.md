@@ -37,7 +37,7 @@
 - [x] "판정 먼저, 설명 나중" 배선 + 예시 칩 + 상태(빈/스트리밍/미매칭/에러) — 라이브 playwright 실증
 - [ ] (선택) Verifier 서브에이전트 + 스킬 배선 — 미실시(→ L1 파이프라인으로, backlog/AI-ARCHITECTURE)
 - [ ] 반응형/다크/접근성 패스 — 미실시(폴리시 잔여)
-- [ ] **Vercel preview 배포 — 미완(다음 세션 최우선, Demo 30% 위해 필수)**
+- [ ] **Vercel 배포 — 제출 직전 기계작업으로 연기**(로컬 `npm run dev`로 언제든 실물 확인 가능하므로 지금 시간 안 씀. 약 5분, feature freeze 후 1회).
 - **추가 선행(원래 Day4/B-4)**: FDA 모노그래프 5개 성분 상한 결정론 추출·검증(verify:false 승격, D22) · 용법 원장 unitsPerDose(D19) · 다중 SKU 강도 고정(D20) · 강도 변이 해소+가정 명시 안1(D21).
 - 검증: typecheck 통과 · 테스트 10 verifier + 4 tool + 23 golden 그린. 커밋 4개(main, 미푸시).
 - 서빙 기준: Demo(핵심) + Claude Use.

@@ -29,6 +29,10 @@
 - 선행 DB 체커(Drugs.com/Medscape/WebMD)는 자연어·AI·AI답변검증 아님. Drugs.com만 therapeutic duplication(드묾). · 영향: 빈자리 확인.
 - 전체 종합 → docs/AI-ARCHITECTURE.md (v2). 문헌 목록은 architect.md(v1) + AI-ARCHITECTURE.md(v2) References.
 
+## 2026-07-08 (Day 3 — caffeine 출처 확정 + 전체 모노그래프 아카이브)
+- **caffeine 일일상한 = FDA 모노그래프에 부재**: M011(Stimulant) §M011.50(d)는 회당 100-200mg, q3-4h만 명시하고 **"not to exceed X in 24 hours" 24시간 상한이 없음**. → maxDailyMg=null 유지가 정답(1600 등 계산 삽입은 FDA 근거 아닌 내 산수라 하드룰 위반). 출처를 M011로 정확화. 이제 verify:false 5개 전부 모노그래프 인용 완비.
+- **전체 OTC 모노그래프 세트 로컬 확보**(refs/, M001~M032+NM900 33개, gitignore). OnLabel 범위(진통·감기)엔 M013·M012·M011만 관련 — 나머지 29개는 범위 밖. **미래 범위 확장(전체 OTC 커버) 시 결정론 추출 자산**으로 보관. 지금 처리 안 함(scope 규율).
+
 ## 2026-07-08 (Day 3 — 안 1 구현: 강도 변이 해소)
 - **안 1(D21) 구현 완료**: `resolveProduct()`가 bare 브랜드를 default SKU로 결정론 해소하고 `assumedDefault`+alternatives 신호 반환. verify()가 `assumptions[]`를 VerifyResult에 수집 → UI `AssumptionNote`로 명시. bare "Tylenol"→Extra Strength(가정 표시), 명시적 "extra/regular strength"·다른 포뮬레이션(PM/Cold+Flu)은 정확히 구분. 데이터: tylenol-regular/extra에 brandKey·strengthLabel·isBrandDefault 추가. 회귀 테스트 3개 추가. 골든 23/23 유지(products 배열은 전부 명시적이라 무영향).
 

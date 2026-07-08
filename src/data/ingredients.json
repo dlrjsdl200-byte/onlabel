@@ -143,7 +143,7 @@
       "class": "stimulant",
       "maxDailyMg": null,
       "risk": "Added to some analgesics; jitteriness at high totals.",
-      "source": "No OTC monograph daily ceiling — caffeine is an adjunct, not an analgesic active ingredient in FDA Monograph M013. Limit intentionally null (duplication still flagged).",
+      "source": "FDA OTC Monograph M011 (Stimulant) §M011.50(d) Directions: adults 100-200 mg per dose, not more often than every 3-4h. The monograph states no 24-hour ceiling, so maxDailyMg is intentionally null (duplication is still flagged).",
       "verify": false
     }
   }
