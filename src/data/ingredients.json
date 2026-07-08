@@ -48,8 +48,8 @@
       "class": "antitussive",
       "maxDailyMg": 120,
       "risk": "Excess causes neurologic effects. Common in cough + cold combos.",
-      "source": "OTC labeling",
-      "verify": true
+      "source": "FDA OTC Cough/Cold/Allergy monograph (M012); Drugs.com professional monograph — 120 mg/24h",
+      "verify": false
     },
     "guaifenesin": {
       "displayName": "Guaifenesin",
@@ -57,8 +57,8 @@
       "class": "expectorant",
       "maxDailyMg": 2400,
       "risk": "Low toxicity.",
-      "source": "OTC labeling",
-      "verify": true
+      "source": "FDA OTC Cough/Cold/Allergy monograph (M012); Drugs.com professional monograph — 2,400 mg/24h",
+      "verify": false
     },
     "pseudoephedrine": {
       "displayName": "Pseudoephedrine",
@@ -66,7 +66,7 @@
       "class": "decongestant",
       "maxDailyMg": 240,
       "risk": "Raises blood pressure and heart rate. Sold behind the counter.",
-      "source": "OTC labeling",
+      "source": "Standard OTC max 240 mg/24h (60 mg q4-6h); confirm against FDA OTC monograph M012",
       "verify": true
     },
     "phenylephrine": {
@@ -89,8 +89,8 @@
       "class": "antihistamine-sedating",
       "maxDailyMg": 300,
       "risk": "Sedation and anticholinergic effects; additive with other sedating antihistamines and alcohol.",
-      "source": "OTC labeling",
-      "verify": true
+      "source": "OTC antihistamine labeling; StatPearls (Antihistamines) — 300 mg/24h",
+      "verify": false
     },
     "chlorpheniramine": {
       "displayName": "Chlorpheniramine",
@@ -98,8 +98,8 @@
       "class": "antihistamine-sedating",
       "maxDailyMg": 24,
       "risk": "Sedation; additive with other sedating antihistamines.",
-      "source": "OTC labeling",
-      "verify": true
+      "source": "OTC antihistamine labeling (4 mg q4-6h, max 24 mg/24h)",
+      "verify": false
     },
     "doxylamine": {
       "displayName": "Doxylamine",
@@ -116,8 +116,8 @@
       "class": "antihistamine-nonsedating",
       "maxDailyMg": 10,
       "risk": "Low sedation.",
-      "source": "OTC labeling",
-      "verify": true
+      "source": "OTC label — 10 mg once daily",
+      "verify": false
     },
     "cetirizine": {
       "displayName": "Cetirizine",
@@ -125,8 +125,8 @@
       "class": "antihistamine-nonsedating",
       "maxDailyMg": 10,
       "risk": "Mild sedation possible.",
-      "source": "OTC labeling",
-      "verify": true
+      "source": "OTC label — 10 mg once daily",
+      "verify": false
     },
     "fexofenadine": {
       "displayName": "Fexofenadine",
@@ -134,8 +134,8 @@
       "class": "antihistamine-nonsedating",
       "maxDailyMg": 180,
       "risk": "Non-sedating.",
-      "source": "OTC labeling",
-      "verify": true
+      "source": "OTC label — 180 mg once daily (or 60 mg twice daily)",
+      "verify": false
     },
     "caffeine": {
       "displayName": "Caffeine",
