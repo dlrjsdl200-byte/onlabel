@@ -75,4 +75,8 @@
 - **D31. NSAID↔NSAID '교체 간격'은 스코프아웃(근거부재)**: ibuprofen↔naproxen 등 서로 다른 NSAID 사이의 "몇 시간 후 교체 가능" 간격은 **미국 공신력 소스(FDA·DailyMed·MedlinePlus)에 존재하지 않음** — 이들은 "병용 회피(avoid concomitant use)"만 권고. 따라서 OnLabel은 교체 간격을 **생성하지 않고**, verify()의 danger("함께 복용 말 것") + 간격 유보를 유지한다(D27 울타리와 부합). 데이터 갭 아님 = 영구 스코프 경계. 개별 성분 간격(ibuprofen q4-6h·naproxen q8-12h)은 OTC Drug Facts 라벨에서 접지 가능(B-7). 근거: 사용자(약사) 확인 2026-07-08.
 - **D32. Generic 성분명은 원장에 0mg로 참여(B-8)**: 사용자가 브랜드 대신 성분명("acetaminophen","ibuprofen")을 입력하면 resolver가 성분으로 인식해 **중복·클래스 탐지에 참여**시키되, 용량 미상이므로 **0mg 기여**(누적합에 미반영). 이유: `acetaminophen+Tylenol`이 ok로 빠지는 위음성(초록 OK가 실제 이중복용 은폐) 차단 + 임상 숫자 미조작(D15/D22 준수). 중복은 caution, 미상 용량으로 danger 단정은 안 함.
 
+## 2026-07-08 — FDA 인용 receipts UI
+
+- **D33. 출처 인용 = 발췌+공개 FDA URL(로컬 PDF 경로 기각)**: 답변 근거를 클릭 검증 가능하게 노출. Sources 칩 중 모노그래프 접지 성분은 클릭 시 팝오버(§섹션 + 원문 verbatim 발췌 + 공개 FDA PDF 링크). 사용자 초안(로컬 PDF 파일 경로)은 refs/가 gitignore·미배포이고 절대경로가 로컬 전용이라 배포에서 무효 → **발췌문구 + 공개 FDA URL**로 대체(사용자 확정). 범위=Sources 칩(본문 인라인 각주는 B-9 스트레치, LLM 인용 날조 위험 때문에 신중). 발췌는 refs 결정론 추출 검증본, URL은 B-4 확인된 M012/M013만(날조 금지, D26 tool-receipts 강화).
+
 <!-- 새 결정은 이 아래에 날짜 섹션으로 추가 -->
