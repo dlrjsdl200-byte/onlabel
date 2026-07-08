@@ -27,6 +27,42 @@ export function runSafetyCheck(products: string[]): {
     lines.push(`Not in catalog: ${result.unmatched.join(", ")}`);
   }
 
+  // Direction A — grounded dosing surface. Every ingredient finding (including
+  // ok-severity ones) already carries per-product mg/dose, units/dose, and the
+  // daily ceiling. Surface them for ALL matched products, not just flagged ones,
+  // so the answer states dosing numbers that are grounded in the FDA KB rather
+  // than the model's memory. These are the ONLY clinical numbers Claude may state.
+  const dispByIngredient = new Map<string, { name: string; limitMg: number | null }>();
+  for (const f of result.findings) {
+    dispByIngredient.set(f.ingredient, { name: f.displayName, limitMg: f.limitMg });
+  }
+  if (result.matched.length) {
+    lines.push("");
+    lines.push(
+      "Dosing (FDA-grounded KB — state ONLY these numbers; anything not listed is unknown to this tool):",
+    );
+    for (const p of result.matched) {
+      const parts = p.ingredients.map((ing) => {
+        const meta = dispByIngredient.get(ing.ingredient);
+        const name = meta?.name ?? ing.ingredient;
+        const perDay = ing.mgPerDose * p.maxDosesPerDay;
+        const ceiling = meta?.limitMg != null ? `${meta.limitMg} mg/day ceiling` : "no established daily ceiling";
+        return `${name} ${ing.mgPerDose} mg/dose, up to ${p.maxDosesPerDay} doses/day = ${perDay} mg/day at label max (${ceiling})`;
+      });
+      lines.push(
+        `- ${p.brand}: ${p.unitsPerDose} ${p.doseForm}${p.unitsPerDose === 1 ? "" : "s"}/dose. ${parts.join("; ")}.`,
+      );
+    }
+    lines.push("");
+    lines.push(
+      "NOT provided by this tool (do not state these — defer to the label or a pharmacist): " +
+        "hours between doses (dosing interval), how many days it is safe to use (duration), any single-dose maximum " +
+        "beyond the mg/dose above, onset or how long a dose lasts, extended-release/crushing guidance, and interactions " +
+        "with alcohol, caffeine, food, or anything not in the catalog. This tool checks the named products against label " +
+        "maximums only — it does not know a quantity or schedule the user describes, nor how much they have already taken.",
+    );
+  }
+
   const flagged = result.findings.filter((f) => f.severity !== "ok");
   if (flagged.length) {
     lines.push("");
