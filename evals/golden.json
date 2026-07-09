@@ -9,7 +9,7 @@
       "danger"
     ],
     "updated": "2026-07-09",
-    "count": 236
+    "count": 239
   },
   "items": [
     {
@@ -4222,6 +4222,68 @@
         "verdict": "ok"
       },
       "note": "Xyzal single product within label (levocetirizine 5 mg)",
+      "review": "pending"
+    },
+    {
+      "id": "x-theraflunight-tylenol",
+      "category": "danger-duplication",
+      "question": "Can I take Theraflu Nighttime and Tylenol together?",
+      "products": [
+        "Theraflu Nighttime Severe Cold",
+        "Tylenol Extra Strength"
+      ],
+      "expected": {
+        "mustMention": [
+          "acetaminophen"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "acetaminophen"
+        ],
+        "efficacyNote": true
+      },
+      "note": "hidden APAP",
+      "review": "pending"
+    },
+    {
+      "id": "x-benadrylcong-benadryl",
+      "category": "danger-duplication",
+      "question": "Can I take Benadryl Allergy Plus Congestion with regular Benadryl?",
+      "products": [
+        "Benadryl Allergy Plus Congestion",
+        "Benadryl"
+      ],
+      "expected": {
+        "mustMention": [
+          "diphenhydramine"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "diphenhydramine"
+        ],
+        "efficacyNote": true
+      },
+      "note": "diphenhydramine dup",
+      "review": "pending"
+    },
+    {
+      "id": "x-motrin-advil",
+      "category": "danger-duplication",
+      "question": "Is it ok to take Motrin IB and Advil together?",
+      "products": [
+        "Motrin IB",
+        "Advil"
+      ],
+      "expected": {
+        "mustMention": [
+          "ibuprofen"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "ibuprofen"
+        ]
+      },
+      "note": "ibuprofen dup (Motrin=Advil)",
       "review": "pending"
     }
   ]

@@ -480,6 +480,85 @@
       ],
       "source": "Claritin-D 24 Hour — openFDA/DailyMed SPL 3ea6a90b-8cb1-46b0-9ff7-be7090245e53",
       "verify": false
+    },
+    {
+      "id": "motrin-ib",
+      "brand": "Motrin IB",
+      "company": "JC World Bell Wholesale Co., Inc.",
+      "category": "analgesic",
+      "core": false,
+      "doseForm": "tablet",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 6,
+      "ingredients": [
+        { "ingredient": "ibuprofen", "mgPerDose": 200 }
+      ],
+      "source": "MOTRIN IB — openFDA/DailyMed SPL 4e7516e1-184a-45e9-b908-228121f163f6",
+      "verify": false
+    },
+    {
+      "id": "excedrin-tension-headache",
+      "brand": "Excedrin Tension Headache",
+      "company": "Haleon US Holdings LLC",
+      "category": "analgesic",
+      "core": false,
+      "doseForm": "caplet",
+      "unitsPerDose": 2,
+      "maxDosesPerDay": 3,
+      "ingredients": [
+        { "ingredient": "acetaminophen", "mgPerDose": 1000 },
+        { "ingredient": "caffeine", "mgPerDose": 130 }
+      ],
+      "source": "Excedrin Tension Headache — openFDA/DailyMed SPL 12c074d1-81ac-47d2-8747-b018cda0058a",
+      "verify": false
+    },
+    {
+      "id": "tylenol-8hr-arthritis",
+      "brand": "Tylenol 8HR Arthritis Pain",
+      "company": "Kenvue Brands LLC",
+      "category": "analgesic",
+      "core": false,
+      "doseForm": "caplet",
+      "unitsPerDose": 2,
+      "maxDosesPerDay": 3,
+      "ingredients": [
+        { "ingredient": "acetaminophen", "mgPerDose": 1300 }
+      ],
+      "source": "Tylenol 8HR — openFDA/DailyMed SPL 5d7d1300-bcb8-466a-880b-310b360ee132",
+      "verify": false
+    },
+    {
+      "id": "theraflu-nighttime-severe",
+      "brand": "Theraflu Nighttime Severe Cold",
+      "company": "Haleon US Holdings LLC",
+      "category": "cold-flu",
+      "core": false,
+      "doseForm": "packet",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 6,
+      "ingredients": [
+        { "ingredient": "acetaminophen", "mgPerDose": 500 },
+        { "ingredient": "diphenhydramine", "mgPerDose": 25 },
+        { "ingredient": "phenylephrine", "mgPerDose": 10 }
+      ],
+      "source": "Theraflu Severe Cold relief Nighttime — openFDA/DailyMed SPL 0d3b1bea-e2ca-4e07-8ae5-60627d230c96",
+      "verify": false
+    },
+    {
+      "id": "benadryl-allergy-congestion",
+      "brand": "Benadryl Allergy Plus Congestion",
+      "company": "Kenvue Brands LLC",
+      "category": "allergy-decongestant",
+      "core": false,
+      "doseForm": "tablet",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 6,
+      "ingredients": [
+        { "ingredient": "diphenhydramine", "mgPerDose": 25 },
+        { "ingredient": "phenylephrine", "mgPerDose": 10 }
+      ],
+      "source": "Benadryl Allergy Plus Congestion — openFDA/DailyMed SPL 685b51d3-cc25-47b2-ac8a-368924f43137",
+      "verify": false
     }
   ]
 }

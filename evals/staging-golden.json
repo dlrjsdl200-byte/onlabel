@@ -1,8 +1,1 @@
-{
-  "items": [
-    { "id": "x101-example-REPLACE-ME", "category": "danger-duplication",
-      "question": "Can I take <Brand A> with <Brand B>?", "products": ["<Brand A>", "<Brand B>"],
-      "expected": { "mustMention": ["acetaminophen"] },
-      "note": "Template — replace. Do NOT add a verdict; verify() computes it." }
-  ]
-}
+{ "items": [ { "id":"x101-example-REPLACE-ME","category":"danger-duplication","question":"Can I take <A> with <B>?","products":["<A>","<B>"],"expected":{"mustMention":["acetaminophen"]},"note":"Template — verify() computes verdict." } ] }
