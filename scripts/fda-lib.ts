@@ -106,7 +106,10 @@ export function selectSku(
  * levocetirizine) from cross-matching. */
 export function strengthOf(text: string, ingredientKey: string): number | null {
   const base = ingredientKey.replace(/[^a-z]/gi, "");
-  const re = new RegExp(`\\b${base}[a-z\\s]{0,25}?(\\d+(?:\\.\\d+)?)\\s*mg`, "i");
+  // Allow salt/qualifier words between the name and the number ("polistirex
+  // equivalent to 30 mg", "maleate, USP 2 mg"); non-greedy so it takes the
+  // nearest number belonging to this ingredient.
+  const re = new RegExp(`\\b${base}[a-z\\s,]{0,45}?(\\d+(?:\\.\\d+)?)\\s*mg`, "i");
   const m = text.match(re);
   return m ? Number(m[1]) : null;
 }
@@ -140,6 +143,29 @@ export function maxUnitsPerDay(dir: string): number | null {
     dir.match(new RegExp(`not\\s+(?:take\\s+)?(?:more\\s+than|to\\s+exceed)\\s+${NUM}\\s+${UNIT}[^.]*24[\\s-]*${HOUR}`, "i")) ||
     dir.match(new RegExp(`${NUM}\\s+${UNIT}\\s+(?:in|per)\\s+(?:any\\s+)?24[\\s-]*${HOUR}`, "i"));
   return m ? num(m[1]) : null;
+}
+
+/** The volume a liquid's strength is stated per: "Active ingredient (in each 5
+ * mL) ... 30 mg" -> 5. */
+export function labelVolume(active: string): number | null {
+  const m = active.match(/in each\s+(\d+(?:\.\d+)?)\s*mL/i);
+  return m ? Number(m[1]) : null;
+}
+
+/** The adult dose volume in mL from the directions: "...over 30 mL", "adults ...
+ * 10 mL", "2 teaspoons" (x5 mL), "1 tablespoon" (x15 mL). Prefers a volume that
+ * follows an adult marker so a children's mL doesn't win. */
+export function doseVolume(dir: string): number | null {
+  const near = "(?:over|adults?)[^.]{0,40}?";
+  const ml =
+    dir.match(new RegExp(`${near}(\\d+(?:\\.\\d+)?)\\s*mL`, "i")) ||
+    dir.match(/(\d+(?:\.\d+)?)\s*mL/i);
+  if (ml) return Number(ml[1]);
+  const tsp = dir.match(new RegExp(`${near}(\\d+(?:\\.\\d+)?)\\s*(?:teaspoon|tsp)`, "i"));
+  if (tsp) return Number(tsp[1]) * 5;
+  const tbsp = dir.match(new RegExp(`${near}(\\d+(?:\\.\\d+)?)\\s*(?:tablespoon|tbsp)`, "i"));
+  if (tbsp) return Number(tbsp[1]) * 15;
+  return null;
 }
 
 /** Fetch OTC label candidates for the primary brand token (the scorer narrows). */

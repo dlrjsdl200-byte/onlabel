@@ -20,6 +20,8 @@ import {
   maxUnitsPerDay,
   fetchCandidates,
   recognizedIngredients,
+  labelVolume,
+  doseVolume,
 } from "./fda-lib";
 
 /** IDENTITY only — no strengths/limits. Those are extracted from the label. */
@@ -55,9 +57,9 @@ const SPECS: Spec[] = [
     ingredients: ["aspirin", "caffeine"], doseForm: "caplet", category: "analgesic" },
   // ── cold/flu (mix of solid + liquid — reveals liquid/combo bugs) ──
   { id: "dayquil-severe", brand: "Vicks DayQuil Severe", primaryToken: "dayquil",
-    ingredients: ["acetaminophen", "dextromethorphan", "guaifenesin", "phenylephrine"], doseForm: "liquicap", category: "cold-flu" },
+    ingredients: ["acetaminophen", "dextromethorphan", "guaifenesin", "phenylephrine"], doseForm: "liquid", category: "cold-flu" },
   { id: "nyquil-severe", brand: "Vicks NyQuil Severe", primaryToken: "nyquil",
-    ingredients: ["acetaminophen", "dextromethorphan", "doxylamine", "phenylephrine"], doseForm: "liquicap", category: "cold-flu" },
+    ingredients: ["acetaminophen", "dextromethorphan", "doxylamine", "phenylephrine"], doseForm: "liquid", category: "cold-flu" },
   { id: "mucinex-fast-max", brand: "Mucinex Fast-Max Severe", primaryToken: "mucinex",
     ingredients: ["acetaminophen", "dextromethorphan", "guaifenesin", "phenylephrine"], doseForm: "caplet", category: "cold-flu" },
   { id: "mucinex-dm-max", brand: "Maximum Strength Mucinex DM", primaryToken: "mucinex",
@@ -87,7 +89,7 @@ const SPECS: Spec[] = [
     ingredients: ["acetaminophen", "dextromethorphan", "guaifenesin", "phenylephrine"], doseForm: "caplet", category: "cold-flu" },
   // ── sleep ──
   { id: "zzzquil", brand: "ZzzQuil Nighttime Sleep-Aid", primaryToken: "zzzquil",
-    ingredients: ["diphenhydramine"], doseForm: "liquicap", category: "sleep" },
+    ingredients: ["diphenhydramine"], doseForm: "liquid", category: "sleep" },
   { id: "unisom-pm-pain", brand: "Unisom PM Pain", primaryToken: "unisom",
     ingredients: ["acetaminophen", "diphenhydramine"], doseForm: "caplet", category: "pm-combo" },
   // ── liquid / new-form (expected bugs to log) ──
@@ -119,13 +121,18 @@ async function build(spec: Spec) {
 
   const foundSet = recognizedIngredients(active);
   const extraIng = [...foundSet].filter((i) => !expected.has(i));
-  // A single-dose packet/powder/liquid is one "unit" per dose by definition (the
-  // packet or the measured dose IS the unit) — not a typed clinical number. The
-  // strength "(in each packet / each 10 mL)" is then the per-dose amount.
-  const singleUnitForm = /packet|powder|stick|liquid|syrup|suspension|solution/i.test(spec.doseForm);
+  // A liquid states strength per a volume ("in each 5 mL ... 30 mg") and a dose as
+  // a measured volume ("adults 10 mL"). Its per-dose amount is strength scaled by
+  // doseVolume/labelVolume — the measured dose IS the unit (unitsPerDose = 1). A
+  // packet/powder is likewise one unit per dose. Neither is a typed number.
+  const isLiquid =
+    /liquid|syrup|suspension|solution/i.test(spec.doseForm) || /in each\s+\d/i.test(active);
+  const labelVol = isLiquid ? labelVolume(active) : null;
+  const doseVol = isLiquid ? doseVolume(dir) : null;
+  const singleUnitForm = isLiquid || /packet|powder|stick/i.test(spec.doseForm);
   const units = unitsPerDose(dir) ?? (singleUnitForm ? 1 : null);
-  // "take once daily / once a day" with no 24-h cap means one dose per day.
-  const onceDaily = /once\s+(?:a\s+day|daily)/i.test(dir);
+  // "take once daily / once a day" or "only one dose per day" -> one dose per day.
+  const onceDaily = /once\s+(?:a\s+day|daily)|one\s+dose[^.]*per\s+day/i.test(dir);
   const maxUnits = maxUnitsPerDay(dir) ?? (onceDaily && units != null ? units : null);
   const maxDoses = units && maxUnits ? maxUnits / units : null;
 
@@ -133,14 +140,23 @@ async function build(spec: Spec) {
   console.log(`  DailyMed:    https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=${setId}`);
   console.log(`  active_ingredient: ${active}`);
   console.log(`  directions(head): ${dir.slice(0, 160)}…`);
+  if (isLiquid) console.log(`  liquid: labelVol=${labelVol ?? "?"} mL, doseVol=${doseVol ?? "?"} mL`);
   if (extraIng.length)
     console.log(`  ⚠️ label also lists ingredient(s) not in our KB: ${extraIng.join(", ")} — needs a new ingredient entry`);
 
   const ings = spec.ingredients.map((k) => {
-    const perUnit = strengthOf(active, k);
-    const mgPerDose = perUnit != null && units != null ? perUnit * units : null;
-    if (perUnit == null) console.log(`  ⚠️ could not extract strength for ${k}`);
-    return { ingredient: k, perUnit, mgPerDose };
+    const perLabel = strengthOf(active, k); // mg per labelVol (liquid) or per unit (solid)
+    let mgPerDose: number | null = null;
+    if (perLabel != null) {
+      mgPerDose =
+        isLiquid && labelVol != null && doseVol != null
+          ? Math.round((perLabel * doseVol) / labelVol * 100) / 100 // scale by dose volume
+          : units != null
+            ? perLabel * units
+            : null;
+    }
+    if (perLabel == null) console.log(`  ⚠️ could not extract strength for ${k}`);
+    return { ingredient: k, perUnit: perLabel, mgPerDose };
   });
 
   const ok = units != null && maxDoses != null && ings.every((i) => i.mgPerDose != null);

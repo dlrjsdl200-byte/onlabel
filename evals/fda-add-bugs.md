@@ -6,14 +6,14 @@ iteration (backlog B-18). Deterministic extraction, no LLM (D22).
 
 Legend of the 30-spec batch (2026-07-09): **5 clean-added**, 25 with issues below.
 
-## A. Liquid per-mL / dose-volume not modeled (new dose form) — B-18 Fix 5
-The tool has no per-mL model: liquids state strength "in each 5 mL" and dose as
-"2 tsp (10 mL)", so `strengthOf` may miss it and there is no unit count.
-- `delsym` (DXM ER suspension) — strength not extracted
-- `robitussin-dm` — strength not extracted + matched a combo "value pack"
-- `dimetapp-cold-cough` — brompheniramine/DXM/phenylephrine strengths not extracted
-- `childrens-benadryl` — matched adult Benadryl; liquid strength differs
-- `bc-powder` — aspirin strength not extracted (powder "per stick")
+## A. Liquid per-mL / dose-volume — ✅ MODELED
+`fda-lib` now extracts labelVolume ("in each N mL") + doseVolume (adult "N mL",
+"N tsp"×5, "N tbsp"×15) and computes mgPerDose = strength × doseVol / labelVol;
+`strengthOf` gap widened for salt phrasings ("polistirex equivalent to 30 mg").
+- RECOVERED + added: `dayquil-severe`, `nyquil-severe`, `robitussin-dm`, `zzzquil`
+- still open: `delsym` (max/day not parsed — Delsym phrasing), `dimetapp-cold-cough`
+  (needs a `brompheniramine` ingredient KB entry), `childrens-*` (weight-based,
+  held), `bc-powder`/`goodys` (powder "per stick" + no-match)
 
 ## B. Directions phrasing not parsed (units/max = null)
 ✅ **FIXED (2 recovered)**: added the "12 years and older: N tablet" verb-less

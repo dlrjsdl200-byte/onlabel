@@ -625,6 +625,73 @@
       ],
       "source": "Mucinex Sinus-Max Pressure, Pain and Cough — openFDA/DailyMed SPL 8905706b-b9da-4520-8cf2-87d7c125edf3",
       "verify": false
+    },
+    {
+      "id": "dayquil-severe",
+      "brand": "Vicks DayQuil Severe",
+      "company": "The Procter & Gamble Manufacturing Company",
+      "category": "cold-flu",
+      "core": false,
+      "doseForm": "liquid",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 4,
+      "ingredients": [
+        { "ingredient": "acetaminophen", "mgPerDose": 650 },
+        { "ingredient": "dextromethorphan", "mgPerDose": 20 },
+        { "ingredient": "guaifenesin", "mgPerDose": 400 },
+        { "ingredient": "phenylephrine", "mgPerDose": 10 }
+      ],
+      "source": "Vicks DayQuil Severe Cold and Flu — openFDA/DailyMed SPL 5bbe271e-0344-4926-991c-3115756b908e",
+      "verify": false
+    },
+    {
+      "id": "nyquil-severe",
+      "brand": "Vicks NyQuil Severe",
+      "company": "The Procter & Gamble Manufacturing Company",
+      "category": "cold-flu",
+      "core": false,
+      "doseForm": "liquid",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 4,
+      "ingredients": [
+        { "ingredient": "acetaminophen", "mgPerDose": 650 },
+        { "ingredient": "dextromethorphan", "mgPerDose": 20 },
+        { "ingredient": "doxylamine", "mgPerDose": 12.5 },
+        { "ingredient": "phenylephrine", "mgPerDose": 10 }
+      ],
+      "source": "Vicks NyQuil Severe Cold and Flu — openFDA/DailyMed SPL 390d0187-a6f4-4387-a528-9eb70e250db1",
+      "verify": false
+    },
+    {
+      "id": "robitussin-dm",
+      "brand": "Robitussin DM",
+      "company": "Haleon US Holdings LLC",
+      "category": "cough-expectorant",
+      "core": false,
+      "doseForm": "liquid",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 6,
+      "ingredients": [
+        { "ingredient": "guaifenesin", "mgPerDose": 200 },
+        { "ingredient": "dextromethorphan", "mgPerDose": 20 }
+      ],
+      "source": "ROBITUSSIN COUGH PLUS CHEST CONGESTION DM — openFDA/DailyMed SPL 4908b326-e1da-44ca-8087-7e41a16c27b0",
+      "verify": false
+    },
+    {
+      "id": "zzzquil",
+      "brand": "ZzzQuil Nighttime Sleep-Aid",
+      "company": "Lil' Drug Store Products, Inc.",
+      "category": "sleep",
+      "core": false,
+      "doseForm": "liquid",
+      "unitsPerDose": 2,
+      "maxDosesPerDay": 1,
+      "ingredients": [
+        { "ingredient": "diphenhydramine", "mgPerDose": 50 }
+      ],
+      "source": "ZzzQuil — openFDA/DailyMed SPL 0b2777be-85d4-443d-b65f-6750e0ba97ba",
+      "verify": false
     }
   ]
 }

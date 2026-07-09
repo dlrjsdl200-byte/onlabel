@@ -1,1 +1,1 @@
-{ "items": [ { "id":"x101-example-REPLACE-ME","category":"danger-duplication","question":"Can I take <A> with <B>?","products":["<A>","<B>"],"expected":{"mustMention":["acetaminophen"]},"note":"Template — verify() computes verdict." } ] }
+{ "items": [ { "id":"x101-example","category":"danger-duplication","question":"Can I take <A> with <B>?","products":["<A>","<B>"],"expected":{"mustMention":["acetaminophen"]},"note":"Template — verify() computes verdict." } ] }

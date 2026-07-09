@@ -9,7 +9,7 @@
       "danger"
     ],
     "updated": "2026-07-09",
-    "count": 241
+    "count": 244
   },
   "items": [
     {
@@ -4325,6 +4325,68 @@
         ]
       },
       "note": "guaifenesin dup",
+      "review": "pending"
+    },
+    {
+      "id": "x-dayquilsev-tylenol",
+      "category": "danger-duplication",
+      "question": "Can I take DayQuil Severe and Tylenol together?",
+      "products": [
+        "Vicks DayQuil Severe",
+        "Tylenol Extra Strength"
+      ],
+      "expected": {
+        "mustMention": [
+          "acetaminophen"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "acetaminophen"
+        ],
+        "efficacyNote": true
+      },
+      "note": "hidden APAP (liquid)",
+      "review": "pending"
+    },
+    {
+      "id": "x-robitussindm-mucinexdm",
+      "category": "danger-duplication",
+      "question": "Is it ok to take Robitussin DM with Mucinex DM?",
+      "products": [
+        "Robitussin DM",
+        "Mucinex DM"
+      ],
+      "expected": {
+        "mustMention": [
+          "guaifenesin"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "guaifenesin",
+          "dextromethorphan"
+        ]
+      },
+      "note": "guaifenesin dup (liquid+ER)",
+      "review": "pending"
+    },
+    {
+      "id": "x-zzzquil-unisom",
+      "category": "caution-class",
+      "question": "Can I take ZzzQuil and Unisom together to sleep?",
+      "products": [
+        "ZzzQuil",
+        "Unisom"
+      ],
+      "expected": {
+        "mustMention": [
+          "antihistamine"
+        ],
+        "verdict": "caution",
+        "classFlagged": [
+          "antihistamine-sedating"
+        ]
+      },
+      "note": "diphenhydramine + doxylamine sedating",
       "review": "pending"
     }
   ]
