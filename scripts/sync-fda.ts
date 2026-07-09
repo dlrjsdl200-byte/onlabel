@@ -26,44 +26,114 @@ interface KBProduct {
   brand: string;
   unitsPerDose: number;
   maxDosesPerDay: number;
+  doseForm: string;
   ingredients: KBIngredient[];
   verify: boolean;
 }
 const PRODUCTS = (productsData as { products: KBProduct[] }).products;
 
-/**
- * Pharmacist-curated DailyMed set_id per product (AUTHORITATIVE). openFDA lists
- * many SKUs per brand (kids, 12-hour, PM, private label), so a brand search can
- * silently hit the wrong label — a value that happens to match is not proof of
- * the right SKU. When a set_id is pinned here, we fetch THAT exact label instead
- * of guessing by brand. Fill these from https://dailymed.nlm.nih.gov (search the
- * product, copy the setid from the URL). Empty = falls back to brand search
- * (report only, not authoritative).
- */
-const SET_ID: Record<string, string> = {
-  // "advil": "xxxxxxxx-xxxx-...",  ← pharmacist pins the exact OTC 200 mg SKU
+/** openFDA brand-name search token per product (the core brand to fetch, then a
+ * deterministic scorer picks the right SKU among the results — see selectSku). */
+const BRAND_QUERY: Record<string, string> = {
+  "tylenol-regular": "tylenol+regular",
+  "tylenol-extra-strength": "tylenol+extra+strength",
+  advil: "advil",
+  aleve: "aleve",
+  "bayer-aspirin": "bayer+aspirin",
+  "excedrin-extra-strength": "excedrin",
+  dayquil: "dayquil",
+  nyquil: "nyquil",
+  "tylenol-cold-flu-severe": "tylenol+cold",
+  mucinex: "mucinex",
+  "mucinex-dm": "mucinex+dm",
+  sudafed: "sudafed",
+  "sudafed-pe": "sudafed+pe",
+  benadryl: "benadryl",
+  zyrtec: "zyrtec",
+  "tylenol-pm": "tylenol+pm",
+  "advil-cold-sinus": "advil+cold",
 };
 
-/** openFDA search query per product (brand + a distinguishing ingredient). */
-const QUERY: Record<string, string> = {
-  "tylenol-regular": 'openfda.brand_name:"tylenol+regular+strength"',
-  "tylenol-extra-strength": 'openfda.brand_name:"tylenol+extra+strength"',
-  advil: 'openfda.brand_name.exact:"Advil"',
-  aleve: 'openfda.brand_name:"aleve"+AND+active_ingredient:"naproxen"',
-  "bayer-aspirin": 'openfda.brand_name:"bayer"+AND+active_ingredient:"aspirin"',
-  "excedrin-extra-strength": 'openfda.brand_name:"excedrin+extra+strength"',
-  dayquil: 'openfda.brand_name:"dayquil"',
-  nyquil: 'openfda.brand_name:"nyquil"',
-  "tylenol-cold-flu-severe": 'openfda.brand_name:"tylenol+cold+%26+flu+severe"',
-  mucinex: 'openfda.brand_name:"mucinex"+AND+active_ingredient:"guaifenesin"+AND+active_ingredient:"dextromethorphan"',
-  "mucinex-dm": 'openfda.brand_name:"mucinex+dm"',
-  sudafed: 'openfda.brand_name:"sudafed"+AND+active_ingredient:"pseudoephedrine"',
-  "sudafed-pe": 'openfda.brand_name:"sudafed+pe"',
-  benadryl: 'openfda.brand_name:"benadryl"+AND+active_ingredient:"diphenhydramine"',
-  zyrtec: 'openfda.brand_name:"zyrtec"+AND+active_ingredient:"cetirizine"',
-  "tylenol-pm": 'openfda.brand_name:"tylenol+pm"',
-  "advil-cold-sinus": 'openfda.brand_name:"advil+cold"',
-};
+/** Active-ingredient base names we recognize (openFDA appends salt forms). */
+const ING_BASES = [
+  "acetaminophen", "ibuprofen", "naproxen", "aspirin", "caffeine",
+  "dextromethorphan", "phenylephrine", "guaifenesin", "doxylamine",
+  "pseudoephedrine", "diphenhydramine", "cetirizine",
+];
+
+/** SKU-variant tokens that mark a DIFFERENT product than a plain brand — used to
+ * penalize a candidate whose brand carries a variant our target doesn't. */
+const VARIANT_TOKENS = new Set([
+  "kids", "children", "childrens", "infant", "infants", "junior", "jr", "pediatric",
+  "pm", "nighttime", "night", "sleep", "12", "24", "hour", "extended", "er",
+  "sinus", "chest", "congestion", "severe", "maximum", "max", "migraine",
+  "back", "body", "arthritis", "tension", "liquid", "gummies", "dissolve",
+  "chewable", "dye", "free", "berry", "cherry", "grape", "orange", "menthol",
+  "intense", "complete", "cooling", "warming", "honey", "vapocool", "flavor",
+]);
+
+function words(s: string): string[] {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean);
+}
+
+/** Base ingredient names present in an openFDA active_ingredient text. */
+function recognizedIngredients(activeText: string): Set<string> {
+  const t = activeText.toLowerCase();
+  return new Set(ING_BASES.filter((b) => t.includes(b)));
+}
+
+function setEq(a: Set<string>, b: Set<string>): boolean {
+  return a.size === b.size && [...a].every((x) => b.has(x));
+}
+
+/**
+ * Deterministically choose the SKU among openFDA candidates that IS our product:
+ * its active-ingredient SET must equal our KB's ingredient set (identity, not the
+ * amounts we're verifying), and its brand name must carry the fewest extra
+ * variant tokens (so "Kids", "12 Hour", "PM" SKUs lose to the plain product).
+ * Selection never looks at strengths — those stay the thing we verify.
+ */
+function selectSku(
+  candidates: Record<string, unknown>[],
+  ourBrand: string,
+  ourIngredients: Set<string>,
+  primaryToken: string,
+  ourDoseForm: string,
+): Record<string, unknown> | null {
+  const brandToks = new Set(words(ourBrand.replace(/\(.*?\)/g, "")));
+  // Our catalog products are all solid oral forms; reject a liquid/kids SKU whose
+  // per-unit strength differs only because the formulation differs.
+  const wantSolid = /tablet|caplet|capsule|liquicap|gelcap|geltab/i.test(ourDoseForm);
+  let best: Record<string, unknown> | null = null;
+  let bestScore = -Infinity;
+  for (const c of candidates) {
+    const active = ((c.active_ingredient as string[]) ?? []).join(" ");
+    const rset = recognizedIngredients(active);
+    if (!setEq(rset, ourIngredients)) continue; // wrong ingredient set = wrong product
+    const cbrand = ((c.openfda as { brand_name?: string[] })?.brand_name ?? []).join(" ");
+    // HARD requirement: the candidate must actually be this brand — rejects a
+    // store-brand / wrong-category product that merely shares the ingredient set
+    // (e.g. a phenylephrine hemorrhoid cream matching "Sudafed PE").
+    if (!words(cbrand).includes(primaryToken)) continue;
+    const extra = words(cbrand).filter(
+      (w) => !brandToks.has(w) && !ourIngredients.has(w) && w.length > 1,
+    );
+    const variantPenalty = extra.filter((w) => VARIANT_TOKENS.has(w)).length;
+    const otc =
+      ((c.openfda as { product_type?: string[] })?.product_type ?? []).some((t) =>
+        /OTC/i.test(t),
+      ) ? 1 : 0;
+    const form = ((c.dosage_form as string[]) ?? []).join(" ");
+    const liquidMismatch =
+      wantSolid && /solution|suspension|syrup|liquid|elixir/i.test(form) ? 1 : 0;
+    const score = 1000 - 500 * liquidMismatch - 25 * variantPenalty - extra.length + 5 * otc;
+    if (score > bestScore) {
+      bestScore = score;
+      best = c;
+    }
+  }
+  return best;
+}
 
 /** Regex base for each ingredient key (openFDA uses salt forms after the base). */
 function strengthOf(text: string, ingredientKey: string): number | null {
@@ -93,20 +163,19 @@ interface Row {
   setId: string;
   lines: string[];
   flags: number;
-  pinned: boolean;
 }
 
-async function fetchLabel(query: string): Promise<Record<string, unknown> | null> {
-  const url = `https://api.fda.gov/drug/label.json?search=${query}&limit=1`;
+/** Fetch OTC label candidates for the primary brand token (broad); the scorer
+ * narrows to the right SKU by ingredient set + brand-variant distance. Querying
+ * the single strong token avoids openFDA's weak multi-token AND behaviour. */
+async function fetchCandidates(primaryToken: string): Promise<Record<string, unknown>[]> {
+  const url =
+    `https://api.fda.gov/drug/label.json?search=` +
+    `openfda.brand_name:${primaryToken}+AND+openfda.product_type:"HUMAN+OTC+DRUG"&limit=100`;
   const res = await fetch(url);
-  if (!res.ok) return null;
+  if (!res.ok) return [];
   const json = (await res.json()) as { results?: Record<string, unknown>[] };
-  return json.results?.[0] ?? null;
-}
-
-/** Fetch the exact pinned label by DailyMed set_id (authoritative, unambiguous). */
-async function fetchBySetId(setId: string): Promise<Record<string, unknown> | null> {
-  return fetchLabel(`set_id:"${setId}"`);
+  return json.results ?? [];
 }
 
 function mark(kb: number | string, fda: number | string | null): string {
@@ -120,26 +189,22 @@ async function main() {
   const rows: Row[] = [];
 
   for (const p of targets) {
-    const pinned = SET_ID[p.id];
-    const q = QUERY[p.id];
+    const brandToken = BRAND_QUERY[p.id] ?? words(p.brand)[0];
+    const primaryToken = brandToken.split("+")[0];
+    const ourIngredients = new Set(p.ingredients.map((i) => i.ingredient));
     let label: Record<string, unknown> | null = null;
     try {
-      label = pinned ? await fetchBySetId(pinned) : q ? await fetchLabel(q) : null;
+      const candidates = await fetchCandidates(primaryToken);
+      label = selectSku(candidates, p.brand, ourIngredients, primaryToken, p.doseForm);
     } catch {
       label = null;
     }
-    const row: Row = {
-      id: p.id,
-      brand: p.brand,
-      fdaBrand: "",
-      setId: "",
-      lines: [],
-      flags: 0,
-      pinned: !!pinned,
-    };
+    const row: Row = { id: p.id, brand: p.brand, fdaBrand: "", setId: "", lines: [], flags: 0 };
 
     if (!label) {
-      row.lines.push(`  ⚠️ no openFDA match — pin a DailyMed set_id or fix the search term`);
+      row.lines.push(
+        `  ⚠️ no OTC SKU whose ingredient set == {${[...ourIngredients].join(", ")}} — review brand token or KB ingredients`,
+      );
       row.flags++;
       rows.push(row);
       continue;
@@ -185,19 +250,18 @@ async function main() {
   out.push(`Legend: ✓ KB matches openFDA · ✗ mismatch (review) · ? could not extract.\n`);
 
   for (const r of rows) {
-    const prov = r.pinned ? "PINNED set_id (authoritative)" : "brand search (⚠️ verify SKU)";
     const status = r.flags === 0 ? "✓ clean" : `⚠️ ${r.flags} flag(s)`;
     const cite = r.setId
       ? `https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=${r.setId}`
       : "(no set_id)";
-    out.push(`## ${r.id} — ${status} · ${prov}`);
-    out.push(`KB brand: ${r.brand}  ·  openFDA: ${r.fdaBrand}`);
+    out.push(`## ${r.id} — ${status}`);
+    out.push(`KB brand: ${r.brand}  ·  openFDA SKU (auto-selected): ${r.fdaBrand}`);
     out.push(`DailyMed: ${cite}`);
     out.push("```");
     out.push(...r.lines);
     out.push("```\n");
     console.log(
-      `${r.flags === 0 ? "✓" : "⚠️"} ${r.id.padEnd(24)} ${r.pinned ? "[pinned]" : "[search]"} openFDA="${r.fdaBrand}"  flags=${r.flags}`,
+      `${r.flags === 0 ? "✓" : "⚠️"} ${r.id.padEnd(24)} openFDA="${r.fdaBrand}"  flags=${r.flags}`,
     );
   }
 
