@@ -256,6 +256,55 @@
       ],
       "source": "Advil Cold & Sinus label (1 caplet every 4-6h) [DailyMed SPL 0da9ed22-bfb4-d61b-110b-0c7760332a98]",
       "verify": false
+    },
+    {
+      "id": "advil-pm",
+      "brand": "Advil PM",
+      "company": "Haleon US Holdings LLC",
+      "category": "pm-combo",
+      "core": false,
+      "doseForm": "caplet",
+      "unitsPerDose": 2,
+      "maxDosesPerDay": 1,
+      "ingredients": [
+        { "ingredient": "ibuprofen", "mgPerDose": 400 },
+        { "ingredient": "diphenhydramine", "mgPerDose": 50 }
+      ],
+      "source": "ADVIL PM — openFDA/DailyMed SPL 405afdb4-c157-1d88-f232-848063ba4714",
+      "verify": false
+    },
+    {
+      "id": "aleve-pm",
+      "brand": "Aleve PM",
+      "company": "Bayer HealthCare LLC.",
+      "category": "pm-combo",
+      "core": false,
+      "doseForm": "caplet",
+      "unitsPerDose": 2,
+      "maxDosesPerDay": 1,
+      "ingredients": [
+        { "ingredient": "naproxen", "mgPerDose": 440 },
+        { "ingredient": "diphenhydramine", "mgPerDose": 50 }
+      ],
+      "source": "Aleve PM — openFDA/DailyMed SPL 82891458-ab0d-459a-8602-dcebd22c3010",
+      "verify": false
+    },
+    {
+      "id": "theraflu-severe",
+      "brand": "Theraflu Severe Cold",
+      "company": "Haleon US Holdings LLC",
+      "category": "cold-flu",
+      "core": false,
+      "doseForm": "packet",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 6,
+      "ingredients": [
+        { "ingredient": "acetaminophen", "mgPerDose": 500 },
+        { "ingredient": "dextromethorphan", "mgPerDose": 20 },
+        { "ingredient": "phenylephrine", "mgPerDose": 10 }
+      ],
+      "source": "THERAFLU Severe Cold Relief Daytime — openFDA/DailyMed SPL 7d902237-a990-4c5e-875b-291e124e143b",
+      "verify": false
     }
   ]
 }

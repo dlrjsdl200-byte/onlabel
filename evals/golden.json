@@ -8,8 +8,8 @@
       "caution",
       "danger"
     ],
-    "updated": "2026-07-08",
-    "count": 223
+    "updated": "2026-07-09",
+    "count": 228
   },
   "items": [
     {
@@ -3970,6 +3970,106 @@
         "verdict": "caution"
       },
       "note": "x100 expansion",
+      "review": "pending"
+    },
+    {
+      "id": "x-advilpm-benadryl",
+      "category": "danger-class",
+      "question": "Can I take Advil PM and Benadryl together to sleep?",
+      "products": [
+        "Advil PM",
+        "Benadryl"
+      ],
+      "expected": {
+        "mustMention": [
+          "diphenhydramine"
+        ],
+        "mustNotClaim": [
+          "safe to take together"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "diphenhydramine"
+        ]
+      },
+      "note": "Advil PM + Benadryl: diphenhydramine duplication",
+      "review": "pending"
+    },
+    {
+      "id": "x-advilpm-advil",
+      "category": "danger-duplication",
+      "question": "Is it ok to take Advil PM with regular Advil for pain?",
+      "products": [
+        "Advil PM",
+        "Advil"
+      ],
+      "expected": {
+        "mustMention": [
+          "ibuprofen"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "ibuprofen"
+        ]
+      },
+      "note": "Advil PM + Advil: ibuprofen duplication",
+      "review": "pending"
+    },
+    {
+      "id": "x-theraflu-tylenol",
+      "category": "danger-duplication",
+      "question": "Can I take Theraflu Severe Cold and Tylenol together?",
+      "products": [
+        "Theraflu Severe Cold",
+        "Tylenol Extra Strength"
+      ],
+      "expected": {
+        "mustMention": [
+          "acetaminophen"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "acetaminophen"
+        ],
+        "efficacyNote": true
+      },
+      "note": "Theraflu hidden acetaminophen + Tylenol",
+      "review": "pending"
+    },
+    {
+      "id": "x-alevepm-aleve",
+      "category": "danger-duplication",
+      "question": "Can I take Aleve PM and Aleve on the same day?",
+      "products": [
+        "Aleve PM",
+        "Aleve"
+      ],
+      "expected": {
+        "mustMention": [
+          "naproxen"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "naproxen"
+        ]
+      },
+      "note": "Aleve PM + Aleve: naproxen duplication",
+      "review": "pending"
+    },
+    {
+      "id": "x-advilpm-alone",
+      "category": "single-ok",
+      "question": "How much Advil PM can I take?",
+      "products": [
+        "Advil PM"
+      ],
+      "expected": {
+        "mustMention": [
+          "ibuprofen"
+        ],
+        "verdict": "ok"
+      },
+      "note": "Advil PM single product within label",
       "review": "pending"
     }
   ]
