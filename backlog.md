@@ -73,3 +73,14 @@
 ## B-10. L1 claim verifier 정밀화 `[P2]`
 - **무엇**: (1)dose-limit에서 "conservative target"(예 APAP 3,000 권장)과 "label ceiling"(4,000) 구분 — 현재 3,000을 4,000 위반으로 과엄격 CONTRADICTED. (2)[C]가 ingredient에 클래스명("NSAID")을 넣는 경우 처리(클래스 claim 종류 추가 or 무시). (3)single-dose에 naproxen "first dose 440 mg" 같은 라벨 규칙 반영 여부 결정.
 - **왜 P2**: 데모 핵심(verdict·ceiling contradiction)은 이미 정확. 위는 엣지 정밀도.
+
+## B-11. 제품 이름 해소 견고화 (resolution robustness) `[P1 안전]`
+> x100 live에서 실패 3건 전부 verifier가 아니라 **이름→제품 해소** divergence. verify() 코어는 무결.
+- **무엇**: (1) **"regular" 의미 모호**: "regular Tylenol"을 resolver가 Regular Strength SKU(325mg)로 해소하나, 소비자는 대개 *"보통/일반 Tylenol"*(=흔한 ES)를 뜻함 → verdict가 danger↔caution으로 갈림. "regular/normal/plain + 브랜드"는 **strength 토큰이 아니라 bare 브랜드(default SKU)로 처리**해야 자연스러움. (2) **경계 SKU 판정 민감성**: Tylenol PM + Regular(danger) vs + ES(caution) — APAP 중복은 SKU 무관하게 **최소 caution**은 유지되도록 메시지/판정 견고화(모호성으로 verdict가 뒤집혀도 "중복 경고"는 불변). (3) **가정노트 fire 확대**: 명시 strength라도 모호어("regular")면 assumption으로 노출.
+- **왜 P1(안전)**: 심사위원/사용자가 "regular Tylenol" 같은 자연어 입력 시 판정이 갈리면 신뢰 훼손. AssumptionNote 노출은 이미 OK(bare 브랜드는 fire), 문제는 해소 의미론.
+- **어떻게**: resolveProduct에서 "regular/normal/plain/standard"를 strength 토큰에서 제외(→ bare 브랜드 default 경로) + 회귀테스트("regular Tylenol"→ES default+assumption). 결정론, LLM 미개입.
+
+## B-12. 의도 분류 + 추천 포지셔닝 `[P2]`
+> x100에서 발견된 스코프 뉘앙스(버그 아님, 정의 공백).
+- **무엇**: (1) **비교 vs 조합 구분**: "Mucinex와 Mucinex DM 차이?"가 두 제품명 언급→도구가 둘 다 검사→중복 danger. 정보성 질문에 조합검사 발동(합리적이나 fact 질문엔 과함). (2) **열린 추천 포지셔닝**: 제품 없이 "열/두통에 뭐 먹지?"→시스템이 Tylenol/Advil 일반추천. OnLabel=검사기 vs 추천기 미결. → DECISIONS로 스코프 확정(안전차선=묻기/유보 권장 vs 도움=일반옵션).
+- **왜 P2**: 데모엔 무해(둘 다 안전한 답). 정의만 명확히.
