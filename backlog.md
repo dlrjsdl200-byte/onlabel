@@ -74,9 +74,12 @@
 - **무엇**: (1) ibuprofen·naproxen·caffeine(M011)·2세대 항히스타민 인용 추가(B-7 소스 확보 후), (2) 본문 산문 인라인 각주(ChatGPT식 위첨자) — LLM이 문장별 인용 앵커 emit해야 해서 복잡+날조 위험, 신중히. (3) 팝오버 바깥클릭 닫기 등 UX 폴리시.
 - **선행**: 현 citations.json은 M012/M013 9종. B-7(NSAID 소스)·M011 캡션 확보 시 확장.
 
-## B-10. L1 claim verifier 정밀화 `[P2]`
-- **무엇**: (1)dose-limit에서 "conservative target"(예 APAP 3,000 권장)과 "label ceiling"(4,000) 구분 — 현재 3,000을 4,000 위반으로 과엄격 CONTRADICTED. (2)[C]가 ingredient에 클래스명("NSAID")을 넣는 경우 처리(클래스 claim 종류 추가 or 무시). (3)single-dose에 naproxen "first dose 440 mg" 같은 라벨 규칙 반영 여부 결정.
-- **왜 P2**: 데모 핵심(verdict·ceiling contradiction)은 이미 정확. 위는 엣지 정밀도.
+## B-10. L1 claim verifier 정밀화 `[P1 신뢰 — 대조엔진 센터피스 직결]`
+> **승격 2026-07-09**: 대조 엔진을 데모 센터피스로 강화(c130478)하며 라이브 캡처(Tylenol ES+DayQuil)에서 **잘못된 반박(false CONTRADICTED)** 발견. 대조 엔진의 논지("일반 AI는 틀리고 우리는 FDA로 정확히 반박")는 **우리 교정이 실제로 옳아야** 성립 — 맞는 말을 틀렸다고 반박하면 논지 역훼손. 심사위원이 잡으면 치명.
+- **🔴 (0) per-pill vs per-dose 입도 불일치 (신규, 최우선)**: generic AI가 *"Tylenol ES is 500 mg per pill"*(알약당 500mg = **사실**)이라 했는데, verifier가 *per-dose(1000mg = 2정)*와 비교해 **CONTRADICTED "1000/650 mg, not 500 mg"**로 표시. 마찬가지로 "DayQuil 325 mg per dose"도. **claim의 단위(per-pill/per-dose)를 파악해 같은 단위끼리 비교**하거나, 모호하면 반박하지 말 것(오반박 방지). transcript: `evals/transcripts/` + 스크린샷 contrast-2-result.
+- (1) dose-limit "conservative target"(APAP 3,000 권장) vs "label ceiling"(4,000) 구분 — 현재 3,000 진술을 4,000 위반으로 과엄격 CONTRADICTED. (라이브에서도 "ceiling is 3,000"→"4,000, not 3,000" 반박 확인. 3,000은 Tylenol 브랜드 권장치라 "틀림"이 아니라 "보수적 목표"로 다뤄야.)
+- (2) [C]가 ingredient에 클래스명("NSAID")을 넣는 경우 처리. (3) single-dose naproxen "first dose 440 mg" 라벨 규칙 반영 여부.
+- **왜 P1**: verdict·ceiling 판정 자체는 정확하나, **대조 엔진이 데모 전면(Demo 30+Impact 25)에 나오면서 오반박이 신뢰 리스크로 승격**. 범위: `verifyClaims.ts` dose 비교 로직. 결정론, LLM 미개입.
 
 ## B-11. 제품 이름 해소 견고화 (resolution robustness) `[✅ DONE 2026-07-09]`
 > **해결됨**: `verify.ts`에 `COLLOQUIAL_DEFAULT` 도입 — step2에서 "regular/normal/plain/standard/ordinary"를 강도 토큰이 아닌 default 신호로 처리 → bare-brand default(ES)+assumption으로 수렴. verify.test.ts 신규 4케이스 그린, 골든 214/214 정합, tsc 0. 정식 전체명("Tylenol Regular Strength")은 step1 exact로 danger 유지(안전방향 불변). 상세: findings.md 2026-07-09.
