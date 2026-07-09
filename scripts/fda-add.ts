@@ -34,14 +34,49 @@ interface Spec {
 }
 
 const SPECS: Spec[] = [
-  { id: "advil-pm", brand: "Advil PM", primaryToken: "advil",
-    ingredients: ["ibuprofen", "diphenhydramine"], doseForm: "caplet", category: "pm-combo" },
-  { id: "aleve-pm", brand: "Aleve PM", primaryToken: "aleve",
-    ingredients: ["naproxen", "diphenhydramine"], doseForm: "caplet", category: "pm-combo" },
-  { id: "theraflu-severe", brand: "Theraflu Severe Cold", primaryToken: "theraflu",
-    ingredients: ["acetaminophen", "dextromethorphan", "phenylephrine"], doseForm: "packet", category: "cold-flu" },
-  { id: "goodys-powder", brand: "Goody's Extra Strength Headache Powder", primaryToken: "goody",
-    ingredients: ["acetaminophen", "aspirin", "caffeine"], doseForm: "packet", category: "analgesic" },
+  // single-ingredient allergy (also grounds the new ingredient's daily ceiling)
+  { id: "claritin", brand: "Claritin", primaryToken: "claritin",
+    ingredients: ["loratadine"], doseForm: "tablet", category: "allergy" },
+  { id: "allegra", brand: "Allegra Allergy", primaryToken: "allegra",
+    ingredients: ["fexofenadine"], doseForm: "tablet", category: "allergy" },
+  { id: "xyzal", brand: "Xyzal Allergy", primaryToken: "xyzal",
+    ingredients: ["levocetirizine"], doseForm: "tablet", category: "allergy" },
+  { id: "chlor-trimeton", brand: "Chlor-Trimeton Allergy", primaryToken: "chlor",
+    ingredients: ["chlorpheniramine"], doseForm: "tablet", category: "allergy" },
+  { id: "unisom-sleeptabs", brand: "Unisom SleepTabs", primaryToken: "unisom",
+    ingredients: ["doxylamine"], doseForm: "tablet", category: "sleep" },
+  // allergy + decongestant combos
+  { id: "claritin-d", brand: "Claritin-D", primaryToken: "claritin",
+    ingredients: ["loratadine", "pseudoephedrine"], doseForm: "tablet", category: "allergy-decongestant" },
+  { id: "allegra-d", brand: "Allegra-D", primaryToken: "allegra",
+    ingredients: ["fexofenadine", "pseudoephedrine"], doseForm: "tablet", category: "allergy-decongestant" },
+  { id: "zyrtec-d", brand: "Zyrtec-D", primaryToken: "zyrtec",
+    ingredients: ["cetirizine", "pseudoephedrine"], doseForm: "tablet", category: "allergy-decongestant" },
+  // analgesic combos
+  { id: "advil-dual-action", brand: "Advil Dual Action", primaryToken: "advil",
+    ingredients: ["ibuprofen", "acetaminophen"], doseForm: "caplet", category: "analgesic" },
+  { id: "excedrin-migraine", brand: "Excedrin Migraine", primaryToken: "excedrin",
+    ingredients: ["acetaminophen", "aspirin", "caffeine"], doseForm: "caplet", category: "analgesic" },
+  { id: "midol-complete", brand: "Midol Complete", primaryToken: "midol",
+    ingredients: ["acetaminophen", "caffeine", "pyrilamine"], doseForm: "caplet", category: "analgesic" },
+  // cold/flu combos
+  { id: "dayquil-severe", brand: "Vicks DayQuil Severe", primaryToken: "dayquil",
+    ingredients: ["acetaminophen", "dextromethorphan", "guaifenesin", "phenylephrine"], doseForm: "liquicap", category: "cold-flu" },
+  { id: "nyquil-severe", brand: "Vicks NyQuil Severe", primaryToken: "nyquil",
+    ingredients: ["acetaminophen", "dextromethorphan", "doxylamine", "phenylephrine"], doseForm: "liquicap", category: "cold-flu" },
+  { id: "tylenol-sinus-severe", brand: "Tylenol Sinus Severe", primaryToken: "tylenol",
+    ingredients: ["acetaminophen", "guaifenesin", "phenylephrine"], doseForm: "caplet", category: "cold-flu" },
+  { id: "sudafed-pe-pressure-pain", brand: "Sudafed PE Pressure + Pain", primaryToken: "sudafed",
+    ingredients: ["acetaminophen", "phenylephrine"], doseForm: "caplet", category: "cold-flu" },
+  { id: "coricidin-hbp", brand: "Coricidin HBP Cough & Cold", primaryToken: "coricidin",
+    ingredients: ["chlorpheniramine", "dextromethorphan"], doseForm: "tablet", category: "cold-flu" },
+  { id: "advil-allergy-sinus", brand: "Advil Allergy Sinus", primaryToken: "advil",
+    ingredients: ["ibuprofen", "chlorpheniramine", "phenylephrine"], doseForm: "tablet", category: "cold-flu" },
+  // new dose form: liquid / suspension
+  { id: "childrens-tylenol", brand: "Children's Tylenol", primaryToken: "tylenol",
+    ingredients: ["acetaminophen"], doseForm: "suspension", category: "analgesic" },
+  { id: "dimetapp-cold-allergy", brand: "Dimetapp Cold & Allergy", primaryToken: "dimetapp",
+    ingredients: ["brompheniramine", "phenylephrine"], doseForm: "liquid", category: "cold-flu" },
   { id: "robitussin-dm", brand: "Robitussin DM", primaryToken: "robitussin",
     ingredients: ["guaifenesin", "dextromethorphan"], doseForm: "liquid", category: "cold-flu" },
 ];
@@ -64,9 +99,10 @@ async function build(spec: Spec) {
 
   const foundSet = recognizedIngredients(active);
   const extraIng = [...foundSet].filter((i) => !expected.has(i));
-  // A single-dose packet/powder is one unit per dose by definition (not a typed
-  // clinical number — a packet IS the unit). Amounts still come from the label.
-  const singleUnitForm = /packet|powder|stick/i.test(spec.doseForm);
+  // A single-dose packet/powder/liquid is one "unit" per dose by definition (the
+  // packet or the measured dose IS the unit) — not a typed clinical number. The
+  // strength "(in each packet / each 10 mL)" is then the per-dose amount.
+  const singleUnitForm = /packet|powder|stick|liquid|syrup|suspension|solution/i.test(spec.doseForm);
   const units = unitsPerDose(dir) ?? (singleUnitForm ? 1 : null);
   const maxUnits = maxUnitsPerDay(dir);
   const maxDoses = units && maxUnits ? maxUnits / units : null;
@@ -106,6 +142,18 @@ async function build(spec: Spec) {
   };
   console.log(`  ---- proposed products.json entry (verify against DailyMed link) ----`);
   console.log(JSON.stringify(entry, null, 2).split("\n").map((l) => "  " + l).join("\n"));
+
+  // For a SINGLE-ingredient product, the label's "no more than N units in 24 h"
+  // times the per-unit strength IS that ingredient's daily ceiling — grounded, not
+  // typed. Emit it so a new ingredients.json entry can cite this SPL.
+  if (spec.ingredients.length === 1) {
+    const only = ings[0];
+    const dailyMax = only.perUnit != null && maxUnits != null ? only.perUnit * maxUnits : null;
+    console.log(
+      `  ---- ingredient daily ceiling (single-ingredient SKU) ----\n` +
+        `  ${only.ingredient}: maxDailyMg = ${dailyMax ?? "?"}  (= ${only.perUnit ?? "?"} mg/unit × ${maxUnits ?? "?"} units/24h)  source: DailyMed SPL ${setId}`,
+    );
+  }
 }
 
 async function main() {

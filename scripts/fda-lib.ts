@@ -3,12 +3,23 @@
  * Pure, deterministic — regex over structured openFDA label text, no LLM (D22).
  */
 
-/** Active-ingredient base names we recognize (openFDA appends salt forms). */
+/** Active-ingredient base names we recognize (openFDA appends salt forms).
+ * Order matters: longer/more-specific names first so a substring test doesn't let
+ * a shorter base shadow a longer one. */
 export const ING_BASES = [
   "acetaminophen", "ibuprofen", "naproxen", "aspirin", "caffeine",
   "dextromethorphan", "phenylephrine", "guaifenesin", "doxylamine",
   "pseudoephedrine", "diphenhydramine", "cetirizine",
+  // allergy / antihistamine expansion
+  "loratadine", "fexofenadine", "levocetirizine", "chlorpheniramine",
+  "brompheniramine", "pyrilamine",
 ];
+
+/** Per-dose amount for a liquid: "(in each 5 mL) ... 160 mg" -> {perDose:160}. The
+ * unit IS the dose volume, so per-dose == the labeled strength (no ×units). */
+export function liquidStrengthOf(text: string, ingredientKey: string): number | null {
+  return strengthOf(text, ingredientKey);
+}
 
 /** SKU-variant tokens that mark a DIFFERENT product than a plain brand. */
 export const VARIANT_TOKENS = new Set([

@@ -9,7 +9,7 @@
       "danger"
     ],
     "updated": "2026-07-09",
-    "count": 228
+    "count": 232
   },
   "items": [
     {
@@ -4070,6 +4070,82 @@
         "verdict": "ok"
       },
       "note": "Advil PM single product within label",
+      "review": "pending"
+    },
+    {
+      "id": "x-advildual-tylenol",
+      "category": "danger-duplication",
+      "question": "Can I take Advil Dual Action and Tylenol together?",
+      "products": [
+        "Advil Dual Action",
+        "Tylenol Extra Strength"
+      ],
+      "expected": {
+        "mustMention": [
+          "acetaminophen"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "acetaminophen"
+        ]
+      },
+      "note": "Advil Dual Action contains acetaminophen — hidden APAP duplication with Tylenol",
+      "review": "pending"
+    },
+    {
+      "id": "x-coricidin-benadryl",
+      "category": "caution-class",
+      "question": "Is it ok to take Coricidin HBP with Benadryl?",
+      "products": [
+        "Coricidin HBP",
+        "Benadryl"
+      ],
+      "expected": {
+        "mustMention": [
+          "antihistamine"
+        ],
+        "verdict": "caution",
+        "classFlagged": [
+          "antihistamine-sedating"
+        ]
+      },
+      "note": "chlorpheniramine + diphenhydramine — two sedating antihistamines",
+      "review": "pending"
+    },
+    {
+      "id": "x-allegrad-sudafed",
+      "category": "danger-duplication",
+      "question": "Can I take Allegra-D and Sudafed together for congestion?",
+      "products": [
+        "Allegra-D",
+        "Sudafed"
+      ],
+      "expected": {
+        "mustMention": [
+          "pseudoephedrine"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "pseudoephedrine"
+        ]
+      },
+      "note": "Allegra-D contains pseudoephedrine — decongestant duplication",
+      "review": "pending"
+    },
+    {
+      "id": "x-excedrinmig-alone",
+      "category": "single-ok",
+      "question": "How many Excedrin Migraine can I take?",
+      "products": [
+        "Excedrin Migraine"
+      ],
+      "expected": {
+        "mustMention": [
+          "acetaminophen"
+        ],
+        "verdict": "ok"
+      },
+      "note": "Excedrin Migraine single product within label",
       "review": "pending"
     }
   ]

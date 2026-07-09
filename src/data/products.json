@@ -305,6 +305,120 @@
       ],
       "source": "THERAFLU Severe Cold Relief Daytime — openFDA/DailyMed SPL 7d902237-a990-4c5e-875b-291e124e143b",
       "verify": false
+    },
+    {
+      "id": "allegra-d",
+      "brand": "Allegra-D",
+      "company": "A-S Medication Solutions",
+      "category": "allergy-decongestant",
+      "core": false,
+      "doseForm": "tablet",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 2,
+      "ingredients": [
+        { "ingredient": "fexofenadine", "mgPerDose": 60 },
+        { "ingredient": "pseudoephedrine", "mgPerDose": 120 }
+      ],
+      "source": "ALLEGRA-D — openFDA/DailyMed SPL 705e1087-61cb-43c3-8675-f56626a1707b",
+      "verify": false
+    },
+    {
+      "id": "zyrtec-d",
+      "brand": "Zyrtec-D",
+      "company": "Kenvue Brands LLC",
+      "category": "allergy-decongestant",
+      "core": false,
+      "doseForm": "tablet",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 2,
+      "ingredients": [
+        { "ingredient": "cetirizine", "mgPerDose": 5 },
+        { "ingredient": "pseudoephedrine", "mgPerDose": 120 }
+      ],
+      "source": "ZYRTEC-D — openFDA/DailyMed SPL f1ecf9ba-1c03-7fb7-e053-2a95a90a875a",
+      "verify": false
+    },
+    {
+      "id": "advil-dual-action",
+      "brand": "Advil Dual Action",
+      "company": "Select Consumer Group",
+      "category": "analgesic",
+      "core": false,
+      "doseForm": "caplet",
+      "unitsPerDose": 2,
+      "maxDosesPerDay": 3,
+      "ingredients": [
+        { "ingredient": "ibuprofen", "mgPerDose": 250 },
+        { "ingredient": "acetaminophen", "mgPerDose": 500 }
+      ],
+      "source": "ADVIL DUAL ACTION WITH ACETAMINOPHEN — openFDA/DailyMed SPL 55cd65fc-91bf-4979-e063-6294a90ab9b7",
+      "verify": false
+    },
+    {
+      "id": "excedrin-migraine",
+      "brand": "Excedrin Migraine",
+      "company": "Select Consumer Group",
+      "category": "analgesic",
+      "core": false,
+      "doseForm": "caplet",
+      "unitsPerDose": 2,
+      "maxDosesPerDay": 1,
+      "ingredients": [
+        { "ingredient": "acetaminophen", "mgPerDose": 500 },
+        { "ingredient": "aspirin", "mgPerDose": 500 },
+        { "ingredient": "caffeine", "mgPerDose": 130 }
+      ],
+      "source": "Excedrin Migraine — openFDA/DailyMed SPL 3caa4adf-abe3-67c3-e063-6294a90a87a4",
+      "verify": false
+    },
+    {
+      "id": "tylenol-sinus-severe",
+      "brand": "Tylenol Sinus Severe",
+      "company": "JC World Bell Wholesale Co., Inc.",
+      "category": "cold-flu",
+      "core": false,
+      "doseForm": "caplet",
+      "unitsPerDose": 2,
+      "maxDosesPerDay": 5,
+      "ingredients": [
+        { "ingredient": "acetaminophen", "mgPerDose": 650 },
+        { "ingredient": "guaifenesin", "mgPerDose": 400 },
+        { "ingredient": "phenylephrine", "mgPerDose": 10 }
+      ],
+      "source": "Tylenol Sinus Severe — openFDA/DailyMed SPL 1560b3a0-fe81-4e33-b581-20b43511dba3",
+      "verify": false
+    },
+    {
+      "id": "sudafed-pe-pressure-pain",
+      "brand": "Sudafed PE Pressure + Pain",
+      "company": "Kenvue Brands LLC",
+      "category": "cold-flu",
+      "core": false,
+      "doseForm": "caplet",
+      "unitsPerDose": 2,
+      "maxDosesPerDay": 5,
+      "ingredients": [
+        { "ingredient": "acetaminophen", "mgPerDose": 650 },
+        { "ingredient": "phenylephrine", "mgPerDose": 10 }
+      ],
+      "source": "SUDAFED PE Pressure Plus Pain — openFDA/DailyMed SPL 8538c291-9ce9-4866-b268-f4cbdb52f5bd",
+      "verify": false
+    },
+    {
+      "id": "coricidin-hbp",
+      "brand": "Coricidin HBP Cough & Cold",
+      "company": "Bayer HealthCare LLC.",
+      "category": "cold-flu",
+      "core": false,
+      "doseForm": "tablet",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 4,
+      "ingredients": [
+        { "ingredient": "chlorpheniramine", "mgPerDose": 4 },
+        { "ingredient": "dextromethorphan", "mgPerDose": 30 }
+      ],
+      "source": "Coricidin HBP Cough and Cold — openFDA/DailyMed SPL b1cd7d9f-0ab4-21ce-e053-2a95a90a8c3d",
+      "verify": false
     }
   ]
 }
