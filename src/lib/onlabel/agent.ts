@@ -13,13 +13,44 @@
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { onlabelServer, CHECK_OTC_SAFETY_TOOL } from "./tool";
 import { verify, type VerifyResult } from "./verify";
+import { userNamedProducts, hasRedFlagContext } from "./provenance";
+
+/**
+ * Turn a raw product set into the verdict shown to the user, applying the
+ * deterministic checker (D34) and red-flag (D35) gates:
+ *  - keep only products the USER named (never verdict LLM-inferred products), and
+ *  - if the question carries a red-flag context AND the verdict would be a green
+ *    "ok", suppress it (defer to the prose) — but NEVER hide a caution/danger.
+ * Returns the products actually verified and the (possibly suppressed) result.
+ */
+function gatedVerification(
+  question: string,
+  rawProducts: string[],
+): { productsChecked: string[]; verification: VerifyResult | null } {
+  const productsChecked = userNamedProducts(question, rawProducts);
+  if (productsChecked.length === 0) return { productsChecked, verification: null };
+  const verification = verify(productsChecked);
+  if (verification.overall === "ok" && hasRedFlagContext(question)) {
+    // Don't reassure with a green badge on a pregnancy/pediatric/condition
+    // question the arithmetic can't personalize for; let the prose defer.
+    return { productsChecked, verification: null };
+  }
+  return { productsChecked, verification };
+}
 
 const SYSTEM_PROMPT = `You are OnLabel, a medication-safety assistant for US consumers.
 Consumers think in brand names; danger hides in active ingredients. Catch
 active-ingredient duplication and dose ceilings that generic AI answers miss.
 
+You are a CHECKER, not a recommender. You verify products the user actually
+names; you do not pick medicines for them.
+
 Method (always, in order):
-1. Identify the OTC products in the question (use the exact brand names given).
+1. Identify the OTC products the user EXPLICITLY named (use the exact brand names
+   given). Only pass products the user named to the tool — never products you
+   inferred. If the user names no specific product (only symptoms, e.g. "what can
+   I take for a cold?"), do NOT call the tool: briefly give general, non-branded
+   guidance and ask what they are taking or considering.
 2. Call the check_otc_safety tool with those product names. Its verdict is your
    source of truth.
 3. Ground your answer in the tool result and never contradict it. If DANGER, lead
@@ -56,6 +87,13 @@ The grounding fence (most important rule — this is what makes OnLabel trustwor
 Scope & safety:
 - Scope: US OTC pain relievers and cold/flu products. If a prescription drug is
   mentioned, advise consulting a pharmacist.
+- Red-flag context (pregnancy, breastfeeding, a child/infant, or a major
+  condition like liver/kidney disease, ulcer, high blood pressure, heart disease):
+  the OTC label limits the tool checks do NOT personalize for these. Do not
+  present an "OK" as reassurance. Say plainly that the standard limits may not be
+  safe for their situation and to confirm the specific choice and dose with a
+  pharmacist or physician. Still surface any duplication/overdose danger the tool
+  finds.
 - Always add: this is not medical advice; confirm with a pharmacist or physician.
 
 Style: plain, calm, non-clinical language. Lead directly with the answer — do not
@@ -105,13 +143,12 @@ export async function* streamOnLabel(
   const buffered: string[] = [];
 
   function makeVerification(): OnLabelEvent | null {
-    const productsChecked = [...productSet];
-    if (productsChecked.length === 0) return null;
-    return {
-      type: "verification",
-      verification: verify(productsChecked),
-      productsChecked,
-    };
+    const { productsChecked, verification } = gatedVerification(
+      questionText,
+      [...productSet],
+    );
+    if (!verification) return null; // no user-named products, or red-flag ok → defer
+    return { type: "verification", verification, productsChecked };
   }
 
   for await (const message of query({
@@ -177,7 +214,10 @@ export async function* streamOnLabel(
           yield { type: "token", text: message.result };
         }
       }
-      yield { type: "done", productsChecked: [...productSet] };
+      yield {
+        type: "done",
+        productsChecked: gatedVerification(questionText, [...productSet]).productsChecked,
+      };
     }
   }
 }
@@ -215,8 +255,9 @@ export async function runOnLabel(questionText: string): Promise<OnLabelResponse>
     }
   }
 
-  const productsChecked = [...productSet];
-  const verification = productsChecked.length ? verify(productsChecked) : null;
+  // Checker (D34) + red-flag (D35) gates: verdict only on user-named products,
+  // and no green "ok" badge on a red-flag context.
+  const { productsChecked, verification } = gatedVerification(questionText, [...productSet]);
 
   return { answer, verification, productsChecked };
 }
