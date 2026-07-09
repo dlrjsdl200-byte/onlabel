@@ -75,10 +75,29 @@
 - **왜 P2**: 데모 핵심(verdict·ceiling contradiction)은 이미 정확. 위는 엣지 정밀도.
 
 ## B-11. 제품 이름 해소 견고화 (resolution robustness) `[P1 안전]`
-> x100 live에서 실패 3건 전부 verifier가 아니라 **이름→제품 해소** divergence. verify() 코어는 무결.
-- **무엇**: (1) **"regular" 의미 모호**: "regular Tylenol"을 resolver가 Regular Strength SKU(325mg)로 해소하나, 소비자는 대개 *"보통/일반 Tylenol"*(=흔한 ES)를 뜻함 → verdict가 danger↔caution으로 갈림. "regular/normal/plain + 브랜드"는 **strength 토큰이 아니라 bare 브랜드(default SKU)로 처리**해야 자연스러움. (2) **경계 SKU 판정 민감성**: Tylenol PM + Regular(danger) vs + ES(caution) — APAP 중복은 SKU 무관하게 **최소 caution**은 유지되도록 메시지/판정 견고화(모호성으로 verdict가 뒤집혀도 "중복 경고"는 불변). (3) **가정노트 fire 확대**: 명시 strength라도 모호어("regular")면 assumption으로 노출.
-- **왜 P1(안전)**: 심사위원/사용자가 "regular Tylenol" 같은 자연어 입력 시 판정이 갈리면 신뢰 훼손. AssumptionNote 노출은 이미 OK(bare 브랜드는 fire), 문제는 해소 의미론.
-- **어떻게**: resolveProduct에서 "regular/normal/plain/standard"를 strength 토큰에서 제외(→ bare 브랜드 default 경로) + 회귀테스트("regular Tylenol"→ES default+assumption). 결정론, LLM 미개입.
+> 발견: 2026-07-09 x100 확장 골든 live(101문항). **실패 3건 전부 verifier가 아니라 "이름→제품 해소" divergence.** verify() 결정론 코어는 단 한 번도 안 틀림 — 취약한 이음새는 자연어→SKU 매핑.
+
+### 증상 (Symptom)
+- `x100-txpm-tylenol`("Tylenol PM + regular Tylenol") — 골든 danger인데 live caution. LLM이 "regular"를 떨구고 "Tylenol"만 도구에 넘김 → ES default 해소 → 합계가 경계 아래 → caution.
+- `x100-fact-mucinexdm-vs-mucinex`("Mucinex와 Mucinex DM 차이?") — 골든 ok(단일)인데 live danger. LLM이 두 제품명 다 넘겨 guaifenesin 중복 발동.
+- `x100-ctx-fever-headache`("열/두통에 뭐 먹지?") — 제품 없이 일반 추천(→ B-12).
+
+### 원인 (Root cause)
+1. **"regular"가 strength 토큰으로 오분류**: `resolveProduct` step2(strength family)에서 `strengthToken("Regular Strength")="regular"`가 입력 토큰 "regular"와 explicit 매칭 → **Regular Strength SKU(325mg)로 확정, assumption 없음**. 그러나 소비자 자연어 "regular Tylenol"은 대개 *"보통/일반 타이레놀"*(= 흔한 Extra Strength) 의미. → **의미론 불일치.**
+2. **경계 SKU가 판정을 뒤집음**: APAP 합계가 4,000mg 경계 근처라 SKU 하나(Regular 325 vs ES 500)로 duplication이 caution↔danger로 flip. 재현: `verify(["Tylenol PM","Tylenol Regular Strength"])=danger` vs `verify(["Tylenol PM","Tylenol Extra Strength"])=caution`.
+3. **LLM의 비결정적 이름 정규화**: 같은 질문에도 LLM이 "Tylenol"/"regular Tylenol"/"Extra Strength Tylenol" 중 무엇을 도구에 넘기느냐로 productsChecked가 달라짐 → 결정론 코어의 입력이 흔들림.
+
+### 결과 (Effect / Impact)
+- **판정 비결정성(신뢰 리스크)**: 같은 의도의 질문이 이름 표현에 따라 danger↔caution으로 갈림. 심사위원이 "regular Tylenol" 류 자연어를 치면 재현 가능 → 뉴로심볼릭 "숫자로 반박"의 신뢰 훼손.
+- **단, 안전 방향은 유지됨**: 세 케이스 모두 산문은 중복/위험을 정확히 경고(위음성 아님). 문제는 **카드 verdict 등급의 일관성**이지 안전 누락이 아님. 그래서 P1이나 데모 치명은 아님.
+- **라이브 판정 assertion이 이 divergence를 전부 포착** — eval 하네스가 제 역할. (텍스트 채점만이면 놓쳤을 것.)
+
+### 해결안 (Fix)
+1. **`resolveProduct`에서 "regular/normal/plain/standard"를 strength 토큰 후보에서 제외** → 이 단어들은 강도가 아니라 "기본형" 신호로 보고 **bare 브랜드 default SKU 경로**(assumedDefault=true, ES)로 보냄 → AssumptionNote 노출("You said 'regular Tylenol' → we used Tylenol Extra Strength").
+2. **중복 경고 불변식**: 성분(특히 APAP) 중복이 존재하면 SKU 모호성으로 누적합이 경계 아래여도 **최소 caution + "doses add up" 경고는 항상 유지**(verdict가 조용히 ok로 안 빠지게). 이미 duplication=caution이나, 메시지 톤을 SKU 무관 견고화.
+3. **회귀테스트**: `"regular Tylenol"`→ES default+assumption / `"Tylenol PM"+"regular Tylenol"`→중복 caution+assumption / bare "Tylenol" 기존 동작 불변 / 다른 브랜드 회귀 없음.
+- **범위**: `verify.ts`의 `resolveProduct`/`strengthToken` 결정론 수정 + `verify.test.ts` 회귀. **LLM 미개입.** 선행 없음.
+- **검증 기준**: 전체 골든(223) 결정론 회귀 그린 + 신규 회귀 통과 + 위 3케이스 재현 해소.
 
 ## B-12. 의도 분류 + 추천 포지셔닝 `[P2]`
 > x100에서 발견된 스코프 뉘앙스(버그 아님, 정의 공백).
