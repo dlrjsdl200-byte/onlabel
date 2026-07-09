@@ -184,3 +184,16 @@
 - **왜 P2**: 배지 억제(B-13)로 오해 리스크는 이미 차단됨. 정식 판정은 스코프 확장이라 데모 후. 착수 시 좁게(스코프 내 ~9성분).
 - **정밀화 겸사**: B-13의 광의 cue 매칭(`liver`/`heart` 등) 오탐(예: "protect my liver")을 이때 문맥 구분으로 정밀화.
 - **선행**: 소스 신뢰성 검증 + 약사 서명(verify:false). B-4/B-6와 동일 추출 규율.
+
+## B-17. 이성질체/동일분자 교차중복 미검출 (cross-duplication) `[P1 안전 — 도메인 결정]`
+> 발견: 2026-07-09 제품 확장. `verify(["Xyzal","Zyrtec"])` = **ok** — levocetirizine(Xyzal)와 cetirizine(Zyrtec)은 **다른 ingredient key**라 중복 판정을 안 하지만, levocetirizine은 **cetirizine의 활성 거울상 이성질체**라 동시복용 = 사실상 같은 약 이중.
+- **무엇**: verify()의 duplication은 동일 key만 매칭 + 비진정 항히스타민엔 클래스 규칙 없음 → levo/cetirizine, (유사) dexbrompheniramine/brompheniramine 등 **이성질체·동일약리 쌍**을 놓침.
+- **왜 P1(안전)**: 위음성 방향(초록 ok가 실제 이중을 은폐). 단 소비자가 두 브랜드 다 살 확률은 낮아 데모 치명은 아님.
+- **결정 필요(약사)**: (a) 이성질체 쌍을 "동일 약리군 그룹키"로 묶어 그룹 중복 경고(levocetirizine↔cetirizine 등), (b) 비진정 항히스타민 클래스 규칙 추가(caution). 둘 다 결정론, 그룹 매핑 데이터 필요.
+- **범위**: verify.ts에 ingredient `dupGroup` 필드 or 이성질체 매핑 + duplication 로직에서 그룹 단위 비교. LLM 미개입.
+
+## B-18. openFDA SKU 정밀화 잔여 (Fix 3/4/5) `[P2 데이터]`
+> 제품 확장 시 fda-add가 아직 정확히 못 잡는 SKU/제형. 결정론 추출 개선분.
+- **Fix 3 SKU**: (a)콤보팩 거부(성분 개수>기대면 제외 — DayQuil+NyQuil HBP팩·Robitussin value pack), (b)액상 타겟은 액상 우선(childrens-tylenol이 8HR 캐플릿 매칭), (c)advil-allergy-sinus 실제=ibuprofen+chlorpheniramine+**pseudoephedrine**(spec 수정), (d)claritin-d 12hr/24hr 결정론 선택.
+- **Fix 4 결정(chlor-trimeton)**: Chlor-Trimeton 브랜드 openFDA 부재(자사 "Aller-chlor"만). (a)모노그래프 동등 제네릭 허용(chlorpheniramine 4mg 표준) or (b)defer. 함량은 grounding됨.
+- **🔴 Fix 5 새 제형(액상 per-mL)**: dimetapp·robitussin 등 액상은 "in each 5 mL"/"2 tsp(10 mL)" → `mgPerDose = strength × doseVol/labelVol`. verify() 모델에 dose-volume 개념 소폭 확장 필요. = "새 제형 추가"의 본체, 미완.

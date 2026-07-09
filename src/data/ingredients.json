@@ -203,6 +203,15 @@
       "source": "OTC label — 180 mg once daily (or 60 mg twice daily)",
       "verify": false
     },
+    "levocetirizine": {
+      "displayName": "Levocetirizine",
+      "aka": [],
+      "class": "antihistamine-nonsedating",
+      "maxDailyMg": 5,
+      "risk": "Mild sedation possible; the active enantiomer of cetirizine (a distinct ingredient).",
+      "source": "Xyzal Allergy 24HR label — 5 mg once daily (DailyMed SPL 8be45c2a-1eca-4a00-81b9-f7babdbdcd41)",
+      "verify": false
+    },
     "caffeine": {
       "displayName": "Caffeine",
       "aka": [],

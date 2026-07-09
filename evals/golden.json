@@ -9,7 +9,7 @@
       "danger"
     ],
     "updated": "2026-07-09",
-    "count": 232
+    "count": 236
   },
   "items": [
     {
@@ -4146,6 +4146,82 @@
         "verdict": "ok"
       },
       "note": "Excedrin Migraine single product within label",
+      "review": "pending"
+    },
+    {
+      "id": "x-claritin-claritind",
+      "category": "danger-duplication",
+      "question": "Can I take Claritin and Claritin-D together?",
+      "products": [
+        "Claritin",
+        "Claritin-D"
+      ],
+      "expected": {
+        "mustMention": [
+          "loratadine"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "loratadine"
+        ]
+      },
+      "note": "loratadine duplication (Claritin-D adds pseudoephedrine)",
+      "review": "pending"
+    },
+    {
+      "id": "x-unisom-benadryl",
+      "category": "caution-class",
+      "question": "Is it safe to take Unisom and Benadryl together?",
+      "products": [
+        "Unisom",
+        "Benadryl"
+      ],
+      "expected": {
+        "mustMention": [
+          "antihistamine"
+        ],
+        "verdict": "caution",
+        "classFlagged": [
+          "antihistamine-sedating"
+        ]
+      },
+      "note": "doxylamine + diphenhydramine — two sedating antihistamines",
+      "review": "pending"
+    },
+    {
+      "id": "x-claritind-sudafed",
+      "category": "danger-duplication",
+      "question": "Can I take Claritin-D with Sudafed?",
+      "products": [
+        "Claritin-D",
+        "Sudafed"
+      ],
+      "expected": {
+        "mustMention": [
+          "pseudoephedrine"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "pseudoephedrine"
+        ]
+      },
+      "note": "Claritin-D contains pseudoephedrine — decongestant duplication",
+      "review": "pending"
+    },
+    {
+      "id": "x-xyzal-alone",
+      "category": "single-ok",
+      "question": "How much Xyzal can I take in a day?",
+      "products": [
+        "Xyzal"
+      ],
+      "expected": {
+        "mustMention": [
+          "levocetirizine"
+        ],
+        "verdict": "ok"
+      },
+      "note": "Xyzal single product within label (levocetirizine 5 mg)",
       "review": "pending"
     }
   ]

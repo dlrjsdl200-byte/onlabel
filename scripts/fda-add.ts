@@ -104,7 +104,9 @@ async function build(spec: Spec) {
   // strength "(in each packet / each 10 mL)" is then the per-dose amount.
   const singleUnitForm = /packet|powder|stick|liquid|syrup|suspension|solution/i.test(spec.doseForm);
   const units = unitsPerDose(dir) ?? (singleUnitForm ? 1 : null);
-  const maxUnits = maxUnitsPerDay(dir);
+  // "take once daily / once a day" with no 24-h cap means one dose per day.
+  const onceDaily = /once\s+(?:a\s+day|daily)/i.test(dir);
+  const maxUnits = maxUnitsPerDay(dir) ?? (onceDaily && units != null ? units : null);
   const maxDoses = units && maxUnits ? maxUnits / units : null;
 
   console.log(`  openFDA SKU: ${fdaBrand}`);

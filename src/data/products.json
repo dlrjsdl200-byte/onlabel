@@ -419,6 +419,67 @@
       ],
       "source": "Coricidin HBP Cough and Cold — openFDA/DailyMed SPL b1cd7d9f-0ab4-21ce-e053-2a95a90a8c3d",
       "verify": false
+    },
+    {
+      "id": "claritin",
+      "brand": "Claritin",
+      "company": "Bayer HealthCare LLC.",
+      "category": "allergy",
+      "core": false,
+      "doseForm": "tablet",
+      "unitsPerDose": 2,
+      "maxDosesPerDay": 1,
+      "ingredients": [
+        { "ingredient": "loratadine", "mgPerDose": 10 }
+      ],
+      "source": "Claritin — openFDA/DailyMed SPL 20938e05-bc3e-51aa-e054-00144ff88e88",
+      "verify": false
+    },
+    {
+      "id": "xyzal",
+      "brand": "Xyzal Allergy",
+      "company": "Chattem, Inc.",
+      "category": "allergy",
+      "core": false,
+      "doseForm": "tablet",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 1,
+      "ingredients": [
+        { "ingredient": "levocetirizine", "mgPerDose": 5 }
+      ],
+      "source": "Xyzal Allergy 24HR — openFDA/DailyMed SPL 8be45c2a-1eca-4a00-81b9-f7babdbdcd41",
+      "verify": false
+    },
+    {
+      "id": "unisom-sleeptabs",
+      "brand": "Unisom SleepTabs",
+      "company": "Chattem, Inc.",
+      "category": "sleep",
+      "core": false,
+      "doseForm": "tablet",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 1,
+      "ingredients": [
+        { "ingredient": "doxylamine", "mgPerDose": 25 }
+      ],
+      "source": "Unisom SleepTabs — openFDA/DailyMed SPL 7ae32d74-76a0-47e2-9e5c-812426413c4e",
+      "verify": false
+    },
+    {
+      "id": "claritin-d",
+      "brand": "Claritin-D",
+      "company": "Bayer HealthCare LLC.",
+      "category": "allergy-decongestant",
+      "core": false,
+      "doseForm": "tablet",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 1,
+      "ingredients": [
+        { "ingredient": "loratadine", "mgPerDose": 10 },
+        { "ingredient": "pseudoephedrine", "mgPerDose": 240 }
+      ],
+      "source": "Claritin-D 24 Hour — openFDA/DailyMed SPL 3ea6a90b-8cb1-46b0-9ff7-be7090245e53",
+      "verify": false
     }
   ]
 }

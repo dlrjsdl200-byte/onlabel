@@ -35,10 +35,12 @@ export function words(s: string): string[] {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean);
 }
 
-/** Base ingredient names present in an openFDA active_ingredient text. */
+/** Base ingredient names present in an openFDA active_ingredient text. Uses word
+ * boundaries so "cetirizine" does NOT match inside "levocetirizine" — they are
+ * distinct active ingredients with distinct ceilings, not the same drug. */
 export function recognizedIngredients(activeText: string): Set<string> {
   const t = activeText.toLowerCase();
-  return new Set(ING_BASES.filter((b) => t.includes(b)));
+  return new Set(ING_BASES.filter((b) => new RegExp(`\\b${b}\\b`, "i").test(t)));
 }
 
 export function setEq(a: Set<string>, b: Set<string>): boolean {
@@ -89,27 +91,42 @@ export function selectSku(
   return best;
 }
 
-/** Per-unit mg for an ingredient from active_ingredient text ("...500 mg"). */
+/** Per-unit mg for an ingredient from active_ingredient text ("...500 mg"). Word
+ * boundary at the name start keeps distinct ingredients (cetirizine vs
+ * levocetirizine) from cross-matching. */
 export function strengthOf(text: string, ingredientKey: string): number | null {
   const base = ingredientKey.replace(/[^a-z]/gi, "");
-  const re = new RegExp(`${base}[a-z\\s]{0,25}?(\\d+(?:\\.\\d+)?)\\s*mg`, "i");
+  const re = new RegExp(`\\b${base}[a-z\\s]{0,25}?(\\d+(?:\\.\\d+)?)\\s*mg`, "i");
   const m = text.match(re);
   return m ? Number(m[1]) : null;
 }
 
 const UNIT =
   "(?:tablet|caplet|capsule|liquicap|liqui-?cap|softgel|gelcap|geltab|packet|teaspoon|tablespoon|lozenge|dose)s?";
-
-export function unitsPerDose(dir: string): number | null {
-  const m = dir.match(new RegExp(`take\\s+(\\d+)\\s+${UNIT}`, "i"));
-  return m ? Number(m[1]) : null;
+/** A count as a digit or a spelled-out small number (labels mix both). */
+const NUM = "(\\d+|one|two|three|four|six)";
+const HOUR = "(?:hour|hr|hrs)";
+const WORDNUM: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, six: 6 };
+function num(s: string): number {
+  return WORDNUM[s.toLowerCase()] ?? Number(s);
 }
 
+/** Units per dose. Handles "take/chew/use/dissolve N unit" and the verb-less
+ * "...12 years and over: 2 LiquiCaps" pattern, digit or spelled-out. */
+export function unitsPerDose(dir: string): number | null {
+  const m =
+    dir.match(new RegExp(`(?:take|chew|use|dissolve|swallow|drink)\\s+${NUM}\\s+${UNIT}`, "i")) ||
+    dir.match(new RegExp(`over[:\\s)]+${NUM}\\s+${UNIT}`, "i"));
+  return m ? num(m[1]) : null;
+}
+
+/** Max units per 24 h. Handles "do not exceed N unit per 24 hrs", "not more than
+ * N unit in 24 hours", "N unit in 24 hours", digit or spelled-out, hr/hrs. */
 export function maxUnitsPerDay(dir: string): number | null {
   const m =
-    dir.match(new RegExp(`not\\s+(?:take\\s+)?(?:more\\s+than|to\\s+exceed)\\s+(\\d+)\\s+${UNIT}[^.]*24\\s*hour`, "i")) ||
-    dir.match(new RegExp(`(\\d+)\\s+${UNIT}\\s+in\\s+(?:any\\s+)?24\\s*hour`, "i"));
-  return m ? Number(m[1]) : null;
+    dir.match(new RegExp(`not\\s+(?:take\\s+)?(?:more\\s+than|to\\s+exceed)\\s+${NUM}\\s+${UNIT}[^.]*24\\s*${HOUR}`, "i")) ||
+    dir.match(new RegExp(`${NUM}\\s+${UNIT}\\s+(?:in|per)\\s+(?:any\\s+)?24\\s*${HOUR}`, "i"));
+  return m ? num(m[1]) : null;
 }
 
 /** Fetch OTC label candidates for the primary brand token (the scorer narrows). */
