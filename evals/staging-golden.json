@@ -1,0 +1,15 @@
+{
+  "items": [
+    {
+      "id": "x101-example-REPLACE-ME",
+      "category": "danger-duplication",
+      "question": "Can I take <Brand A> with <Brand B>?",
+      "products": ["<Brand A>", "<Brand B>"],
+      "expected": {
+        "mustMention": ["acetaminophen"],
+        "mustNotClaim": ["safe to take together"]
+      },
+      "note": "Template — replace with a real case. Do NOT add a verdict; verify() computes it."
+    }
+  ]
+}

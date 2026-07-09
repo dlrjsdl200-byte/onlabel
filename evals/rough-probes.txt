@@ -1,0 +1,13 @@
+# Rough, messy, real-user questions — deliberately NOT engineered around the catalog.
+# Run: npm run collect -- --file=evals/rough-probes.txt   (PAID, NOT graded)
+
+i feel like crap, stuffy nose and a pounding headache, what do i take
+can i just take a bunch of tylenol to knock out this migraine
+my kid has a fever what do i give him
+is it bad to mix cold meds
+how many pills is too many
+took nyquil last night and still feel sick, can i take more stuff this morning
+whats safe to take for a cold if im on blood pressure meds
+hangover cure that wont wreck my liver?
+can i drink a couple beers if i took painkillers
+im pregnant and have a terrible cold, what can i take
