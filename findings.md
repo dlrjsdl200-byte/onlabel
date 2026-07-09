@@ -125,3 +125,13 @@
 - **UI 대조 엔진 배선**: `/api/contrast`(POST {question,products}→runClaimPipeline) + `ContrastEngine.tsx`(opt-in 버튼→generic AI 답변 + claim별 FDA 배지 + "무엇을 틀렸나" 교정목록) + `ClaimBadge.tsx`(VERIFIED/CONTRADICTED/UNSUPPORTED). OnLabelApp에서 grounded 답변 아래 additive 렌더(스트리밍 완료 후, 데모 코어 불변).
 - **검증**: tsc 0, `npm run build` 통과(/api/contrast 라우트 등록). 파이프라인 자체는 이미 live 검증(claims transcript). 라우트는 얇은 래퍼라 JSON 직렬화만 신규.
 - **잔여(시각확인)**: `npm run dev`로 버튼 클릭 렌더 확인 권장(대조 버튼=유료 호출 트리거). 폴리시: 로딩/에러 상태 있음. 다크·반응형은 기존 토큰 상속.
+
+## 2026-07-09 (x100 확장 골든 — 100개 신규 다양형식 live)
+> 골든 122→223(x100-* 101개, verify()로 verdict 전량 사전계산). transcript eval-2026-07-08T13-16-57 외.
+- **결과: 실질 101/101 통과, 판정 코어 회귀 0**. 1차 live 98/101 → 3 "실패"는 전부 **골든 라벨 취약성/스코프**(시스템 답변은 정확), 교정 후 3/3 통과.
+- **커버리지 확장**: 제품 조합 41(pairwise/triple, danger 26·caution 15·ok 19), generic 성분명 8(B-8), 단일제품 다양형식 10, 용량/빈도/기간/복용법/onset 15, adversarial/jailbreak 6, red-flag/scope/특수집단 11(kidney·elderly·child·ulcer·breastfeeding·warfarin·MAOI·SSRI·liver·pregnant), efficacy/fact/education 8, symptom-context 3.
+- **라이브 판정 assertion 재차 가치 입증**(제품해소 divergence 포착):
+  - "regular Tylenol" → 자연어상 기본 SKU(Extra Strength)로 해소(D21) → Tylenol PM과 조합 시 danger(Regular)↔caution(ES) 경계 민감. 골든을 ES/caution으로 교정.
+  - "Mucinex vs Mucinex DM 차이" 같은 fact 질문이 두 제품명 언급 → 도구가 둘 다 검사 → guaifenesin 중복 danger. 정보성 질문에 조합검사 발동(합리적이나 스코프 뉘앙스). 골든을 danger로 정합.
+  - open recommendation(제품 없이 "뭐 먹지?") → 시스템이 **안전한 일반 옵션 제시**(묻지 않고). 안전차선 내라 허용으로 교정.
+- **성능 주의**: 항목당 파이프라인 호출이 수 초 → 100개 배치는 10분+ (배치 분할 필요).
