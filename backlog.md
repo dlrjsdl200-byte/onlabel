@@ -2,7 +2,9 @@
 
 > 해커톤 데모 범위에서 **의도적으로 제외**한 기능. 나중에 실제 제품으로 키울 때 재검토.
 > 원칙: 지금은 "작동하는 좁은 데모"가 목표. 범위를 넓히면 완성 리스크 ↑.
-> **심각도**: P0 블로커 / P1 중요 / P2 개선 / IDEA. (현재 항목은 전부 데모 후 = IDEA/P2)
+> **심각도**: P0 블로커 / P1 중요 / P2 개선 / IDEA.
+> **✅ 완료(2026-07-08~09)**: B-6(복용법 9성분·NSAID잔여 B-7) · B-8(generic 성분명, D32) · B-11(제품해소) · B-12(검사기 D34) · B-13(red-flag 배지억제 D35·데이터 B-16) · B-15(verdict provenance D34).
+> **남은 것(전부 데모 후)**: B-1·B-2·B-3(IDEA) · B-4(제품조성 sync) · B-5 · B-7 · B-9 · B-10 · B-14 · B-16.
 
 ---
 
@@ -37,7 +39,8 @@
 - **현재 처리(D20)**: 강도 모호 브랜드는 브랜드명에 강도 못박아 표준 SKU 하나로 고정("Benadryl Allergy (25 mg)" 등). 데모엔 충분.
 - **개선안**: 사용자가 강도를 고르게 하는 UI(제품 선택 시 강도 드롭다운) 또는 자연어에서 "extra strength"·"maximum strength" 파싱 → 해당 SKU 매핑. openFDA sync(B-4) 시 SKU별 NDC 단위로 적재.
 
-## B-6. 복용법(dosing schedule) 데이터 레이어 `[P1]`
+## B-6. 복용법(dosing schedule) 데이터 레이어 `[✅ 대부분 DONE 2026-07-08 — D27(B) / NSAID 잔여는 B-7]`
+> **해결됨(9성분)**: `ingredients.json`에 `dosing{intervalText, maxDurationText}` 추가 — M012/M013 결정론 추출(pdftotext+grep), 약사 서명→verify:false. 간격/기간 질문이 접지 답변 or 정직 유보. **잔여 = ibuprofen·naproxen 소스 + ER 제형 오버라이드는 B-7.**
 - **무엇**: KB에 **복용 간격(interval)·1회 최대(single-dose max)·복용법(with food/at bedtime 등)** 필드를 추가. 현재 KB엔 성분·mgPerDose·maxDailyMg·maxDosesPerDay만 있고 **간격 데이터가 0**이라, "몇 시간마다 / 얼마나 자주" 질문에 LLM이 접지 없이 기억으로 답함(findings 2026-07-08 20개 probe, D27 위반).
 - **왜 P1**: 뉴로심볼릭 울타리(D27)를 완성하려면 필요. 이게 없으면 빈도 질문은 항상 "라벨 확인/약사" 유보밖에 못 함(정직하지만 데모 약함). 있으면 접지된 간격 답변 가능(데모·Impact 강화).
 - **어떻게**: **FDA 모노그래프 M012/M013(이미 refs/ 로컬 확보)에서 결정론 추출**(pdftotext+grep). 예: pseudoephedrine "60 mg every 4-6h"는 이미 source에 추출돼 있음 — 이를 구조화 필드로. 스코프 내 ~9성분/~18제품, 유계 작업. **LLM 추출 금지**(D22 원칙). = 범위 확장 아니라 용량 레이어 완성(D28).
@@ -60,7 +63,8 @@
 - **왜 P1**: 지금 ibuprofen/naproxen 빈도·기간 질문은 정직하게 유보하나 접지 답변이면 데모/Impact↑. NSAID는 최다 질문 대상.
 - **선행**: 현 dosing 9종 verify:true의 약사 서명(→verify:false) 먼저.
 
-## B-8. Generic 성분명 해결 (중복 위음성 차단) `[P1 안전]`
+## B-8. Generic 성분명 해결 (중복 위음성 차단) `[✅ DONE 2026-07-08 — D32]`
+> **해결됨**: resolver가 성분명/aka 매칭 시 원장에 **0mg 기여**로 참여(중복·클래스 탐지 작동, mg 미조작). `acetaminophen+Tylenol`→caution, `ibuprofen+Aleve`→danger. 회귀 5, 위음성 차단. 상세: DECISIONS D32.
 - **무엇**: resolver가 "acetaminophen"/"ibuprofen"/"naproxen" 같은 **일반 성분명**을 제품으로 인식하도록. 현재 브랜드/id 토큰만 매칭 → `verify(["acetaminophen","Tylenol Extra Strength"])`가 ok(실제 danger, APAP 이중). 소비자 실검색은 일반명 다수(시장조사 #12·#16).
 - **왜 P1(안전)**: 위음성 = 초록 OK가 실제 과용을 숨김 = 뉴로심볼릭 코어 신뢰 훼손. 데모에서 심사위원이 "acetaminophen + Tylenol" 쳐보면 드러남.
 - **어떻게**: 입력이 ingredient displayName/aka에 매칭되면 **성분레벨 합성 기여**(대표 mgPerDose로)를 원장에 추가해 중복/누적 계산에 참여시킴. 제품 미매칭이어도 성분은 반영. 회귀 테스트: 위 2케이스 danger + 라벨↔산문 일치.

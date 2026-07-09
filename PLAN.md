@@ -5,7 +5,7 @@
 > 원칙(CLAUDE.md): **항상 작동하는 데모 경로 유지** · 확실한 결정론적 코어부터 → 레이어로 점수 · Demo 우선.
 > 매일 끝: 커밋 + (D3부터) Vercel 배포로 "언제든 보여줄 수 있는" 상태 유지.
 >
-> **📍 현재 위치(2026-07-08 갱신)**: Day 1·2·3 완료 + Depth 대량 진행 — **접지 울타리(D+A+C+B)·B-8 위음성 수정·FDA 인용 receipts UI·L1 claim 파이프라인 Phase 1~3 완료**(대조 엔진 live 작동). 골든 122개. **다음 = L1 Phase 4(UI 대조 엔진 시각화)** → 그후 **Vercel 배포 + 제출물(README·요약·3분영상)**. 상세는 memory/onlabel-progress.md · DECISIONS.md · findings.md.
+> **📍 현재 위치(2026-07-09 갱신)**: Day 1~4 완료 + 안전 로직 라운드 완료 — 접지 울타리·B-8·FDA 인용·**L1 파이프라인 Phase 1~4 완료**(대조 엔진 UI). 골든 **223**. 추가로 **B-11 제품해소 견고화 + 검사기 전환(D34)/red-flag 유보(D35)로 B-12/B-13/B-15 해소 + eval 인프라(add-golden·collect 스킬 2종, probe 110콜)**. 코어·안전 로직 완료 상태. **다음 = 제출(Vercel 배포 + README·100~200단어 요약 + 3분 영상), feature freeze.** 상세는 memory/onlabel-progress.md · DECISIONS.md(D34/D35) · backlog.md · findings.md.
 
 ---
 
@@ -49,17 +49,26 @@
 - [x] **FDA 인용 receipts UI**(D33): Sources 칩 클릭→모노그래프 verbatim 발췌+공개 FDA URL 팝오버.
 - [x] **시나리오 골든 확대 25→122**: 2차 probe(다양형식) + 실검색 상위20 + generic-name.
 - [x] **L1 claim 파이프라인 Phase 1~3**(§9.4): [C]분해 · [D]하이브리드(임상=결정론/언어=격리LLM) · [E]reconciler. 대조 엔진 live(무근거초안→FDA교정). 테스트 verifyClaims11+reconcile3.
-- [ ] **L1 Phase 4** (진행 중): UI claim 배지 + 대조 엔진 시각화(Demo 30% 핵심).
+- [x] **L1 Phase 4**(aace0a7): `/api/contrast` + `ContrastEngine.tsx`("Compare to generic AI" opt-in→draft+claim배지+교정목록) + `ClaimBadge.tsx`. grounded 답변 아래 additive.
 - [ ] Skill `otc-red-flag-triage` / openFDA 라이브 fallback / MCP 서버 — 스트레치, 미실시(범위규율).
 - 서빙 기준: Depth + Claude Use.
 
-## Day 5 — 7/12(일) · 기능 동결 + 제출물 제작
-**목표: 제출 3종 완성. (feature freeze)**
-- [ ] **기능 동결** — 새 기능 금지, 버그·카피만
-- [ ] **3분 데모 영상** 대본+녹화: Tylenol+DayQuil 위험 → phenylephrine 효능 → (스트레치)오픈 스킬/MCP 각도
-- [ ] **100~200단어 요약**(영어) 작성
+## Day 4.5 — 7/9(수) · 견고성 라운드 (probe 기반) ✅ 완료
+**목표: 대량 라이브 관찰로 이음새 결함을 잡고 포지셔닝을 확정한다.**
+- [x] **B-11 제품해소 견고화**(525fce8): `verify.ts` `COLLOQUIAL_DEFAULT` — "regular/normal/plain/standard/ordinary"를 강도토큰 아닌 default 신호로 처리. "regular Tylenol"=bare "Tylenol"=ES+assumption 수렴. 회귀4, 골든214/214.
+- [x] **eval 인프라 2종**(4710e31): `add-golden.ts`(staging→verify()로 verdict 계산·추측차단) + `collect.ts`/`npm run collect`(채점없이 질문→실파이프라인→transcript) + 스킬 `golden-live-verify`·`collect-live-answers`. 유료는 신규ID만·승인게이트.
+- [x] **probe 110콜**(채점없음): 위음성(위험→ok) **0건** 확증(코어 견고). 발견 B-13(red-flag 초록배지)·B-15(추론제품 verdict).
+- [x] **검사기 전환 D34/D35**(6f8a893): `provenance.ts` `userNamedProducts`(verdict는 유저 명명 제품만) + `hasRedFlagContext`(소아/임부/기저질환→ok배지 억제, caution/danger는 유지). `agent.ts gatedVerification` + 프롬프트 울타리. **verify() 코어 불변.** → B-12/B-13/B-15 해소. 110콜 리플레이 검증 + 6콜 라이브 스모크 통과.
+- 검증: `npm test` 전스위트(verify23·provenance9·tool4·verifyClaims11·reconcile3·골든214) 그린, tsc0. 커밋 5개 origin/main 푸시(~46fa1b0).
+- 서빙 기준: Depth + Impact(안전 신뢰).
+
+## Day 5 — 제출물 제작 (◀ 현재 다음 단계) · 기능 동결
+**목표: 제출 3종 완성. (feature freeze — 코어·안전 로직 완료됨, 새 기능 금지)**
+- [ ] **기능 동결** — 새 기능 금지, 버그·카피만 (backlog는 전부 데모 후로)
+- [ ] **Vercel production 배포** — Next.js 16, `ANTHROPIC_API_KEY` env, `/api/check/stream` SSE 확인. 배포 전 `npm test` + `npm run build`.
+- [ ] **3분 데모 영상** 대본+녹화: Tylenol ES+DayQuil danger(APAP 5600>4000) → 대조 엔진(generic AI 오답 FDA 교정) → "regular Tylenol" assumption(B-11) → 간질환+Tylenol 초록배지 억제(D35) → phenylephrine 효능노트
+- [ ] **100~200단어 요약**(영어): 뉴로심볼릭 논지(일반LLM이 놓치는 성분중복·과용량을 결정론+FDA로 반박) + 검사기 포지셔닝
 - [ ] README 마무리, LICENSE 확인, **repo 공개(public)**
-- [ ] Vercel **production** 최종 배포
 - **Done =** 영상+repo+요약 준비 완료. 커밋.
 
 ## 7/13(월) — 제출 + 버퍼
