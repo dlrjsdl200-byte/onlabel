@@ -17,8 +17,8 @@
       "unitsPerDose": 2,
       "maxDosesPerDay": 5,
       "ingredients": [{ "ingredient": "acetaminophen", "mgPerDose": 650 }],
-      "source": "Tylenol Regular Strength label (2 x 325 mg per dose)",
-      "verify": true
+      "source": "Tylenol Regular Strength label (2 x 325 mg per dose) [DailyMed SPL 01f41fae-4abb-4b96-ab09-a7d3dfc286cd]",
+      "verify": false
     },
     {
       "id": "tylenol-extra-strength",
@@ -59,8 +59,8 @@
       "unitsPerDose": 1,
       "maxDosesPerDay": 3,
       "ingredients": [{ "ingredient": "naproxen", "mgPerDose": 220 }],
-      "source": "Aleve label (220 mg, max 3 tablets/day)",
-      "verify": true
+      "source": "Aleve label (220 mg, max 3 tablets/day) [DailyMed SPL 00ef5b30-71d0-4cb4-84a3-48c67d1cea2a]",
+      "verify": false
     },
     {
       "id": "bayer-aspirin",
@@ -72,8 +72,8 @@
       "unitsPerDose": 2,
       "maxDosesPerDay": 6,
       "ingredients": [{ "ingredient": "aspirin", "mgPerDose": 650 }],
-      "source": "Aspirin analgesic label (2 x 325 mg per dose)",
-      "verify": true
+      "source": "Aspirin analgesic label (2 x 325 mg per dose) [DailyMed SPL 23daa359-d40f-4f64-81be-6d154f41df9f]",
+      "verify": false
     },
     {
       "id": "excedrin-extra-strength",
@@ -106,8 +106,8 @@
         { "ingredient": "dextromethorphan", "mgPerDose": 20 },
         { "ingredient": "phenylephrine", "mgPerDose": 10 }
       ],
-      "source": "DayQuil label (2 LiquiCaps per dose: 2 x 325 mg APAP)",
-      "verify": true
+      "source": "DayQuil label (2 LiquiCaps per dose: 2 x 325 mg APAP) [DailyMed SPL efb982d4-93d0-815f-e053-2995a90a82dd]",
+      "verify": false
     },
     {
       "id": "nyquil",
@@ -154,8 +154,8 @@
       "unitsPerDose": 2,
       "maxDosesPerDay": 2,
       "ingredients": [{ "ingredient": "guaifenesin", "mgPerDose": 1200 }],
-      "source": "Mucinex label (600 mg guaifenesin per ER tablet; adults 1-2 tablets every 12h, max 4 tablets/day). Modeled at the 2-tablet max dose. NOTE: Maximum Strength Mucinex is 1200 mg per tablet — a different SKU.",
-      "verify": true
+      "source": "Mucinex label (600 mg guaifenesin per ER tablet; adults 1-2 tablets every 12h, max 4 tablets/day). Modeled at the 2-tablet max dose. NOTE: Maximum Strength Mucinex is 1200 mg per tablet — a different SKU. [DailyMed SPL 0129f47d-abc2-414c-b4e1-1064c5d6a623]",
+      "verify": false
     },
     {
       "id": "mucinex-dm",
@@ -170,8 +170,8 @@
         { "ingredient": "guaifenesin", "mgPerDose": 1200 },
         { "ingredient": "dextromethorphan", "mgPerDose": 60 }
       ],
-      "source": "Mucinex DM label (600 mg guaifenesin + 30 mg DXM per ER tablet; adults 1-2 tablets every 12h, max 4 tablets/day). Modeled at the 2-tablet max dose. NOTE: Maximum Strength Mucinex DM is 1200 mg/60 mg per tablet — a different SKU.",
-      "verify": true
+      "source": "Mucinex DM label (600 mg guaifenesin + 30 mg DXM per ER tablet; adults 1-2 tablets every 12h, max 4 tablets/day). Modeled at the 2-tablet max dose. NOTE: Maximum Strength Mucinex DM is 1200 mg/60 mg per tablet — a different SKU. [DailyMed SPL 3c9c8fb0-8a00-4b0f-e063-6394a90af632]",
+      "verify": false
     },
     {
       "id": "sudafed",
@@ -238,8 +238,8 @@
         { "ingredient": "acetaminophen", "mgPerDose": 1000 },
         { "ingredient": "diphenhydramine", "mgPerDose": 50 }
       ],
-      "source": "Tylenol PM label (2 caplets at bedtime; do not exceed 2 caplets/day)",
-      "verify": true
+      "source": "Tylenol PM label (2 caplets at bedtime; do not exceed 2 caplets/day) [DailyMed SPL 83df6b68-8bb5-410b-bb97-0a5eecf424f2]",
+      "verify": false
     },
     {
       "id": "advil-cold-sinus",
@@ -254,8 +254,8 @@
         { "ingredient": "ibuprofen", "mgPerDose": 200 },
         { "ingredient": "pseudoephedrine", "mgPerDose": 30 }
       ],
-      "source": "Advil Cold & Sinus label (1 caplet every 4-6h)",
-      "verify": true
+      "source": "Advil Cold & Sinus label (1 caplet every 4-6h) [DailyMed SPL 0da9ed22-bfb4-d61b-110b-0c7760332a98]",
+      "verify": false
     }
   ]
 }
