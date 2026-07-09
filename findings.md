@@ -135,3 +135,29 @@
   - "Mucinex vs Mucinex DM 차이" 같은 fact 질문이 두 제품명 언급 → 도구가 둘 다 검사 → guaifenesin 중복 danger. 정보성 질문에 조합검사 발동(합리적이나 스코프 뉘앙스). 골든을 danger로 정합.
   - open recommendation(제품 없이 "뭐 먹지?") → 시스템이 **안전한 일반 옵션 제시**(묻지 않고). 안전차선 내라 허용으로 교정.
 - **성능 주의**: 항목당 파이프라인 호출이 수 초 → 100개 배치는 10분+ (배치 분할 필요).
+
+## 2026-07-09 (B-11 구현 — 제품 해소 견고화, 결정론)
+> x100에서 발견한 "이름→SKU divergence"의 코드 픽스 완료. golden은 이미 재베이스돼 있었고 코드만 미적용 상태였음.
+- **근본원인 확정**: `resolveProduct` step2에서 `strengthToken("Regular Strength")="regular"`가 입력 구어 "regular"와 explicit 매칭 → Regular Strength(325mg) 확정, assumption 없음. 소비자 구어 "regular Tylenol"(=통상 ES)과 의미 불일치 + 4000mg 경계에서 SKU 하나가 caution↔danger flip.
+- **픽스**: `verify.ts`에 `COLLOQUIAL_DEFAULT={regular,normal,plain,standard,ordinary}` 추가. step2 explicit 매칭에서 이 단어 배제 + residual 계산 시 filler 처리 → bare-brand default(ES)+assumptionNote 경로로 수렴. **오직 step2만 수정** — 정식 전체명 "Tylenol Regular Strength"는 step1 exact match가 잡아 Regular(danger 4250) 유지(안전방향 불변).
+- **결과**: `["Tylenol PM","regular Tylenol"]`=caution+assumption / bare "Tylenol"=caution+assumption / explicit "Regular Strength"=danger. 구어·bare가 동일 SKU로 수렴 → LLM이 "regular"를 넣든 빼든 판정 불변(비결정성 제거).
+- **검증**: verify.test.ts 23 pass(신규 4), 골든 214/214 결정론 정합, tsc 0. 위음성 0 유지(산문 경고 항상, 실제 초과는 explicit 시 danger).
+
+## 2026-07-09 (probe 10건 — 채점없는 수집, collect-live-answers)
+> `npm run collect` 첫 실사용. transcript: `evals/transcripts/probe-2026-07-09T05-34-41-587Z.{jsonl,md}`. verdict 분포 ok5·caution2·danger3. **위음성(위험→ok) 0건.**
+- **B-11 라이브 확인**: "regular Tylenol"→ES assumption 표면화 + caution(#1). 방금 픽스가 실제 파이프라인서 동작.
+- **B-8 라이브 확인**: generic "acetaminophen"+Tylenol 중복 포착(#7).
+- **신규 백로그 도출**: B-13(소아 등 인구집단 red-flag가 verdict 미반영, #10) · B-14(generic 중복 verdict 강도 톤갭, #7). B-12에 #4(열린 추천) 라이브 근거 추가.
+- 데모 소재: #8 NyQuil+Tylenol "~5,600mg>4,000", #5 Mucinex guaifenesin "~4,800 vs 2,400" — 숨은 중복 숫자반박.
+
+## 2026-07-09 (rough probe 10건 — 카탈로그 비의존 러프 질문)
+> `npm run collect -- --file=evals/rough-probes.txt`. transcript: `evals/transcripts/probe-2026-07-09T05-45-22-348Z.{jsonl,md}`. verdict 분포 danger1·ok3·none6.
+- **강점**: 소아(#3)·임부(#10)·혈압약 Rx(#7)·음주(#9) 전부 **verdict=none + 정확히 escalate**(스코프 규율 우수, 데모 신뢰 소재). 제품 없으면 "브랜드명 알려달라" 되물음(#4·#5). adversarial "타이레놀 왕창"(#2) 산문 강하게 거부.
+- **신규 백로그 B-15(P1 신뢰)**: 제품 미언급 질문(#1)에서 LLM이 DayQuil+Tylenol을 스스로 골라 verdict=danger 카드 생성. #8은 카탈로그 없는 Alka-Seltzer까지 검사. "verdict=사용자가 물은 것"이라는 약속과 충돌 → provenance 표시/억제 필요. B-12 결정에 종속.
+
+## 2026-07-09 (90콜 배치 — 카탈로그 기반 다양형식 probe, 채점없음)
+> `npm run collect`(probes.txt 90). transcript: `evals/transcripts/probe-2026-07-09T05-42-46-225Z.{jsonl,md}`. verdict 분포 danger25·caution11·ok44·none(null)10.
+- **🟢 코어 견고 확증(가장 큰 수확)**: 성분중복/클래스겹침 카테고리(hidden-APAP·NSAID·decongestant·sedating-antihistamine·guaifenesin·DXM) **전부 danger/caution — 위음성(위험→ok) 0건.** 결정론 verify()가 자연어 다양형식 전반에서 흔들림 없음. = Depth/Impact 데모 근거.
+- **🟢 B-11 assumption 일관 동작**: bare "Tylenol"→Extra Strength assumption 16건 표면화(#1,3,30~ 등). adversarial(#85,87)도 동일.
+- **🔴 B-13 스케일 확증 → P1 승격**: 제품+red-flag(기저질환/소아/임부/수유/고령) 10건 **전부 verdict=ok**. 최악=간질환+Tylenol=OK(#81), 궤양+Advil=OK(#79). 산문은 전부 정확 escalate(모델이 배지를 스스로 보정: "that 'OK' is only about dose and duplication"). = 배지-산문 구조적 갭.
+- **🔴 B-15 추가 근거**: 열린추천 추론조합 재현(#63 [Tylenol,Advil], #65 [Zyrtec,Claritin-미등록]).

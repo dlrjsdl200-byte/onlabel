@@ -74,7 +74,8 @@
 - **무엇**: (1)dose-limit에서 "conservative target"(예 APAP 3,000 권장)과 "label ceiling"(4,000) 구분 — 현재 3,000을 4,000 위반으로 과엄격 CONTRADICTED. (2)[C]가 ingredient에 클래스명("NSAID")을 넣는 경우 처리(클래스 claim 종류 추가 or 무시). (3)single-dose에 naproxen "first dose 440 mg" 같은 라벨 규칙 반영 여부 결정.
 - **왜 P2**: 데모 핵심(verdict·ceiling contradiction)은 이미 정확. 위는 엣지 정밀도.
 
-## B-11. 제품 이름 해소 견고화 (resolution robustness) `[P1 안전]`
+## B-11. 제품 이름 해소 견고화 (resolution robustness) `[✅ DONE 2026-07-09]`
+> **해결됨**: `verify.ts`에 `COLLOQUIAL_DEFAULT` 도입 — step2에서 "regular/normal/plain/standard/ordinary"를 강도 토큰이 아닌 default 신호로 처리 → bare-brand default(ES)+assumption으로 수렴. verify.test.ts 신규 4케이스 그린, 골든 214/214 정합, tsc 0. 정식 전체명("Tylenol Regular Strength")은 step1 exact로 danger 유지(안전방향 불변). 상세: findings.md 2026-07-09.
 > 발견: 2026-07-09 x100 확장 골든 live(101문항). **실패 3건 전부 verifier가 아니라 "이름→제품 해소" divergence.** verify() 결정론 코어는 단 한 번도 안 틀림 — 취약한 이음새는 자연어→SKU 매핑.
 
 ### 증상 (Symptom)
@@ -103,3 +104,65 @@
 > x100에서 발견된 스코프 뉘앙스(버그 아님, 정의 공백).
 - **무엇**: (1) **비교 vs 조합 구분**: "Mucinex와 Mucinex DM 차이?"가 두 제품명 언급→도구가 둘 다 검사→중복 danger. 정보성 질문에 조합검사 발동(합리적이나 fact 질문엔 과함). (2) **열린 추천 포지셔닝**: 제품 없이 "열/두통에 뭐 먹지?"→시스템이 Tylenol/Advil 일반추천. OnLabel=검사기 vs 추천기 미결. → DECISIONS로 스코프 확정(안전차선=묻기/유보 권장 vs 도움=일반옵션).
 - **왜 P2**: 데모엔 무해(둘 다 안전한 답). 정의만 명확히.
+- **라이브 근거 추가(2026-07-09 probe 10건)**: `"My back is killing me, what can I take?"` → 시스템이 **Tylenol+Advil 병용을 먼저 추천**("safe to take together if one alone isn't enough")하고 뒤에 조건을 되물음. 열린 추천 포지셔닝 미결(2)을 정면 재현. transcript: `evals/transcripts/probe-2026-07-09T05-34-41-587Z.md` #4. → DECISIONS로 "검사기 vs 추천기" 스코프 확정 필요.
+- **라이브 근거 추가(2026-07-09 rough probe 10건)**: 제품 미언급 러프 질문에서 강점·약점 동시 표면화. 강점=소아/임부/Rx/음주 전부 verdict=none+escalate(스코프 규율 우수). 약점=아래 B-15(LLM 추론 제품에 verdict 부여). transcript: `probe-2026-07-09T05-45-22-348Z.md`.
+
+## B-13. 인구집단·기저질환 red-flag가 verdict에 안 담김 (population/condition context) `[P1 신뢰-표시]`
+> 발견: 2026-07-09 probe. **처음 P2로 봤으나 90콜 배치에서 스케일 확증 → P1 승격.** 사용자가 제품 + red-flag(소아/임부/수유/고령/기저질환)를 함께 대면, 시스템은 제품을 해소해 **verdict=ok(초록)** 를 냄 — 제품 단독은 성인 라벨 내라서. **가장 심각한 예: `"I have liver disease, how much Tylenol is safe?"` → verdict=OK.** 간질환+아세트아미노펜은 대표적 금기/감량 대상인데 초록 카드.
+
+### 증상 (90콜 배치, red-flag 10건 전부 verdict=ok)
+- 기저질환: #81 간질환+Tylenol=**ok** · #79 궤양+Advil=**ok** · #78 고혈압+Sudafed=**ok** · #77 80세+Aleve=ok
+- 소아: #70 5세+Tylenol=ok · #71 kids+DayQuil=ok · #72 toddler+Sudafed=ok
+- 임부/수유: #74 수유+Advil=ok · #75 임신+Sudafed=ok · #76 임신+NyQuil=ok
+- transcript: `evals/transcripts/probe-2026-07-09T05-42-46-225Z.md`.
+
+### 핵심 관찰 — 산문은 안전, 배지가 문제
+- **산문은 전부 정확히 escalate**(위음성 아님). #79는 모델이 **스스로 배지를 보정**: *"that 'OK' is only about dose and duplication... with an ulcer I'd steer away from Advil."* #81은 *"the standard OTC ceiling may not be safe for you."* → **모델조차 verdict 배지가 너무 초록이라고 느껴 말로 상쇄 중.**
+- 즉 **결정론 verdict(제품 함수)와 실제 안전(맥락 함수) 사이 구조적 갭.** 심사위원이 배지만 스크린샷하면 "간질환에 Tylenol OK"가 박제됨 → 신뢰 훼손. [[neuro-symbolic-promise]]의 "verdict=사실" 인상과 충돌.
+
+### 왜 P1(신뢰-표시)
+위음성은 아니지만(산문 정확), **초록 배지가 red-flag 맥락에서 뜨는 건 데모에서 스크린샷 한 장으로 치명적 오해**를 낳음. B-15와 같은 "verdict 신뢰성" 계열. 안전 누락이 아니라 표시 계층 문제라 코어는 불변.
+
+### 해결안 (Fix)
+- (a) **contextFlag 부가 필드**: 질문에서 소아/임부/수유/고령/기저질환(liver·kidney·ulcer·HTN 등) cue를 **결정론 키워드/도구 파라미터**로 감지 → verdict를 초록 OK 대신 **"OK for dose/duplication, but see pharmacist for <context>"** 로 다운그레이드/주석. LLM 추측 판정 아님(cue 매칭은 결정론).
+- (b) **최소안**: red-flag cue 감지 시 verdict 배지 자체를 억제(none/“needs review”)하고 산문 escalate에 위임(현행 산문 이미 우수).
+- **범위**: cue 감지 = agent.ts 도구 호출 파라미터 or 결정론 프리필터. verdict 표시 레이어. **verify() 코어 불변.** 소아 실제 용량 계산은 B-3(IDEA) — 여기선 **표시 신호만.**
+- **검증 기준**: 위 10건에서 배지가 초록 OK가 아니게(주석/다운그레이드/억제) + 일반 성인 질문은 기존 verdict 불변 + 위음성 0 유지.
+
+## B-14. 일반성분명 중복의 verdict 강도 (generic dup severity) `[P2]`
+> 발견: 2026-07-09 probe. `"Can I take acetaminophen with Tylenol Extra Strength?"` → 산문은 강하게 **"No — same drug, double-dosing"**, 그러나 verdict=**caution**(B-8대로 generic은 0 mg 기여 → 합계 3,000 유지 → 초과 아님 → duplication만).
+- **무엇**: generic 성분명이 실제 제품과 **같은 성분 중복**일 때, 용량 미상이라 0 mg → 경계 아래면 caution. 산문("절대 No")과 카드(caution)의 톤 불일치.
+- **고려**: APAP처럼 **좁은 치료역 성분의 명시적 중복**은 amount 미상이어도 최소 등급을 올릴지(예: "known-duplication" 신호). 단, 0 mg 원칙(없는 값 날조 금지, B-8)과 충돌하지 않게 — 등급만 올리고 숫자는 미표기가 관건.
+- **왜 P2**: 위음성 아님(산문 정확). 데모 무해. B-10(claim verifier 정밀화)과 함께 검토.
+
+## B-15. LLM 추론 제품에 verdict 부여 — verdict provenance `[P1 신뢰]`
+> 발견: 2026-07-09 rough probe(카탈로그 비의존 러프 질문 10건). 사용자가 **제품을 하나도 안 댔는데** 시스템이 조합을 스스로 골라 결정론 verdict를 ground-truth 카드로 냄. **이번 세션 두 배치(정형 10 + 러프 10) 중 뉴로심볼릭 핵심 약속에 가장 직접 닿는 발견.**
+> 배경 개념: [[neuro-symbolic-promise]] — "판정·숫자는 LLM이 아니라 FDA 데이터 위 결정론 코드만 낸다. 그래서 verdict는 지어낸 게 아니라 재현 가능한 사실"이라는 제품의 논지. 이 약속엔 **숨은 전제**가 있다: *판정 대상 제품이 사용자가 실제로 말한 것*.
+
+### 증상 (Symptom)
+- **#1** `"i feel like crap, stuffy nose and a pounding headache, what do i take"` — **제품 언급 0개.** 그런데 productsChecked=**[DayQuil, Tylenol Extra Strength]**, verdict=**danger**. 산문: "you should NOT take DayQuil and Tylenol Extra Strength together... the natural pair people reach for here."
+- **#8** `"hangover cure that wont wreck my liver?"` — productsChecked=[Tylenol ES, Advil, **Alka-Seltzer**]. Alka-Seltzer는 카탈로그에 없어 unmatched, 나머지는 verify()됨 → verdict=**ok**. 사용자는 이 셋 중 무엇도 안 댔음.
+- transcript: `evals/transcripts/probe-2026-07-09T05-45-22-348Z.md` #1·#8.
+
+### 원인 (Root cause)
+1. **도구 호출 게이트 부재**: 파이프라인(agent.ts)에서 LLM이 `check_otc_safety`에 넘길 제품명을 **자유롭게 결정**. "사용자 입력에서 나온 제품만 넘겨라"는 제약이 없음 → 열린 추천 질문에서 LLM이 "사람들이 흔히 집는 조합"을 **추론해서** 도구에 투입.
+2. **verdict 출처 미구분**: `VerifyResult`는 제품이 사용자 입력인지 LLM 추론인지 구분 필드가 없음. UI verdict 카드도 둘을 동일 권위로 렌더.
+3. verify() 자체는 무결(산술 정확) — 문제는 **"무엇을 계산할지"를 뉴로(LLM)가 지어낸 것**. 심볼릭은 정직한데 심볼릭에 들어간 입력의 출처가 사용자가 아님.
+
+### 결과 (Effect / Impact)
+- **핵심 약속 훼손**: "verdict = 네가 물은 것에 대한 FDA 사실"의 전제(사용자가 말한 제품)가 깨짐. 결과적으로 **사용자가 언급조차 안 한 조합에 red DANGER 카드**가 권위 있게 뜸.
+- **데모/심사 재현성 높음**: 소비자·심사위원이 제품 없이 증상만 묻는 건 **가장 흔한 입력 패턴**(rough 배치 6/10이 제품 미언급). 심사 중 "감기인데 뭐 먹지?" 한 번이면 재현.
+- **심사기준 영향**: Claude Use 25·Depth 20에 양날 — 잘 프레이밍하면 "능동적 안전 경고"로 강점, 방치하면 "verdict 신뢰성" 지적 포인트. Impact 25도 오해 소지로 감점 가능.
+- **위음성 아님**: 산문은 "흔히 집는 조합"이라 맥락을 밝혀 안전 방향은 유지. 문제는 **verdict 카드의 provenance(출처 투명성)**이지 안전 누락이 아님. → P1(신뢰)이나 데모 치명은 아님.
+- **관찰 근거**: 같은 배치에서 소아·임부·Rx·음주는 verdict=none+escalate로 **정확히 유보**했음 → 시스템이 "판정 못 할 땐 none"을 낼 능력은 있음. 즉 추론 조합에도 none/억제를 적용하는 건 기존 메커니즘 재사용으로 가능.
+
+### 해결안 (Fix) — [[B-12]] 결정에 종속
+> 선결: B-12에서 OnLabel이 **"검사기(checker)"인가 "추천기(recommender)"인가**를 DECISIONS로 확정해야 함. 그 결정에 따라 아래 분기:
+
+- **(A) 검사기로 확정 시** — 도구 호출 게이트 추가: 사용자 입력에서 **명시적으로 식별된 제품에만** verify() 적용. 제품 0개면 verdict 생략하고 "어떤 제품인지 알려달라" 되물음(이미 #4·#5에서 하는 동작). = 가장 깔끔, 약속 원형 보존.
+- **(B) 추천기 허용 시** — verdict에 **provenance 필드**(`source: "user" | "inferred"`) 추가 + UI 카드에 배지: "You didn't name products — we checked a common pair (DayQuil + Tylenol)." 추론 조합의 verdict는 **등급을 억제(none/info)** 하고 경고는 산문으로만.
+- **(C) 최소안** — 프롬프트에 "추론한 제품으로 도구를 호출하지 말고, 사용자가 명시한 제품만 넘겨라. 제품이 없으면 되물어라" 명시. 코드 변경 없이 프롬프트 울타리만.
+- **권장**: 데모 신뢰 최우선이면 **(A 또는 C)**. "능동 경고"를 데모 셀링포인트로 살리려면 **(B)** — 단 provenance 배지가 필수.
+- **범위**: `src/lib/onlabel/agent.ts`(도구 호출 게이트/프롬프트) + `VerifyResult`/verdict 카드(provenance). **결정론 verify() 코어는 불변.** LLM 판정 미개입.
+- **검증 기준**: 제품 미언급 질문(#1 류)에서 verdict가 (A)없음/(B)provenance 배지 동반. 명시 제품 질문은 기존과 동일. 소아/임부 escalate 회귀 없음.
+- **90콜 추가 근거(2026-07-09)**: 열린 추천에서 추론 조합 반복 재현 — #63 `"fever and chills"`→checked [Tylenol, Advil], #65 `"allergies and runny nose"`→checked [Zyrtec, **Claritin**(카탈로그 없음)]. 사용자 미언급 제품으로 verdict/검사 발동 패턴 확정.
