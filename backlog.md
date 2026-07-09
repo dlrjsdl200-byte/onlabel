@@ -100,14 +100,17 @@
 - **범위**: `verify.ts`의 `resolveProduct`/`strengthToken` 결정론 수정 + `verify.test.ts` 회귀. **LLM 미개입.** 선행 없음.
 - **검증 기준**: 전체 골든(223) 결정론 회귀 그린 + 신규 회귀 통과 + 위 3케이스 재현 해소.
 
-## B-12. 의도 분류 + 추천 포지셔닝 `[P2]`
+## B-12. 의도 분류 + 추천 포지셔닝 `[✅ DONE 2026-07-09 — D34]`
+> **해결됨**: 검사기(Checker)로 확정(DECISIONS D34). 결정론 provenance 게이트(`provenance.ts` `userNamedProducts`) — verdict는 사용자가 명명한 제품에만. 열린 질문은 verdict 없이 교육+되물음. `agent.ts` 배선 + 프롬프트 울타리. 라이브 스모크 확인(#1 fever→verdict none). 남은 "비교 vs 조합" 뉘앙스는 무해라 미처리.
 > x100에서 발견된 스코프 뉘앙스(버그 아님, 정의 공백).
 - **무엇**: (1) **비교 vs 조합 구분**: "Mucinex와 Mucinex DM 차이?"가 두 제품명 언급→도구가 둘 다 검사→중복 danger. 정보성 질문에 조합검사 발동(합리적이나 fact 질문엔 과함). (2) **열린 추천 포지셔닝**: 제품 없이 "열/두통에 뭐 먹지?"→시스템이 Tylenol/Advil 일반추천. OnLabel=검사기 vs 추천기 미결. → DECISIONS로 스코프 확정(안전차선=묻기/유보 권장 vs 도움=일반옵션).
 - **왜 P2**: 데모엔 무해(둘 다 안전한 답). 정의만 명확히.
 - **라이브 근거 추가(2026-07-09 probe 10건)**: `"My back is killing me, what can I take?"` → 시스템이 **Tylenol+Advil 병용을 먼저 추천**("safe to take together if one alone isn't enough")하고 뒤에 조건을 되물음. 열린 추천 포지셔닝 미결(2)을 정면 재현. transcript: `evals/transcripts/probe-2026-07-09T05-34-41-587Z.md` #4. → DECISIONS로 "검사기 vs 추천기" 스코프 확정 필요.
 - **라이브 근거 추가(2026-07-09 rough probe 10건)**: 제품 미언급 러프 질문에서 강점·약점 동시 표면화. 강점=소아/임부/Rx/음주 전부 verdict=none+escalate(스코프 규율 우수). 약점=아래 B-15(LLM 추론 제품에 verdict 부여). transcript: `probe-2026-07-09T05-45-22-348Z.md`.
 
-## B-13. 인구집단·기저질환 red-flag가 verdict에 안 담김 (population/condition context) `[P1 신뢰-표시]`
+## B-13. 인구집단·기저질환 red-flag가 verdict에 안 담김 (population/condition context) `[✅ 배지억제 DONE 2026-07-09 — D35 / 데이터레이어는 B-16]`
+> **1차 해결(배지 억제)**: red-flag cue 결정론 감지(`provenance.ts` `hasRedFlagContext`) → verdict가 **ok일 때만 억제**(초록 오해 차단), caution/danger는 유지(위험 은폐 방지). `agent.ts gatedVerification` + 프롬프트 red-flag 유보. 라이브 확인: 간질환+Tylenol=배지없음(이전 ok), 고혈압+Sudafed+DayQuil=caution 유지. **정식 red-flag 판정(용량 조정·금기·임부카테고리)은 B-16 데이터레이어로 후속.**
+> ⚠️ 알려진 한계: cue가 광의 매칭(`liver`/`heart`/`kidney`)이라 "간 건강 지키려고" 류도 억제(안전차선 과억제, verdict none). 정밀화는 B-16.
 > 발견: 2026-07-09 probe. **처음 P2로 봤으나 90콜 배치에서 스케일 확증 → P1 승격.** 사용자가 제품 + red-flag(소아/임부/수유/고령/기저질환)를 함께 대면, 시스템은 제품을 해소해 **verdict=ok(초록)** 를 냄 — 제품 단독은 성인 라벨 내라서. **가장 심각한 예: `"I have liver disease, how much Tylenol is safe?"` → verdict=OK.** 간질환+아세트아미노펜은 대표적 금기/감량 대상인데 초록 카드.
 
 ### 증상 (90콜 배치, red-flag 10건 전부 verdict=ok)
@@ -135,7 +138,8 @@
 - **고려**: APAP처럼 **좁은 치료역 성분의 명시적 중복**은 amount 미상이어도 최소 등급을 올릴지(예: "known-duplication" 신호). 단, 0 mg 원칙(없는 값 날조 금지, B-8)과 충돌하지 않게 — 등급만 올리고 숫자는 미표기가 관건.
 - **왜 P2**: 위음성 아님(산문 정확). 데모 무해. B-10(claim verifier 정밀화)과 함께 검토.
 
-## B-15. LLM 추론 제품에 verdict 부여 — verdict provenance `[P1 신뢰]`
+## B-15. LLM 추론 제품에 verdict 부여 — verdict provenance `[✅ DONE 2026-07-09 — D34]`
+> **해결됨**: 검사기 게이트(`userNamedProducts`)로 사용자 미명명 제품은 verdict에서 제외 → 추론 조합에 판정 안 남. 110콜 transcript 리플레이 검증(`evals/validate-provenance.ts`): 정당한 유저-명명 브랜드 오탈락 0, 추론 제품(#1·63·65·8)만 드롭. 라이브 스모크 확인(#1 열린질문→verdict none). [[B-12]]와 동일 D34 결정으로 함께 해소.
 > 발견: 2026-07-09 rough probe(카탈로그 비의존 러프 질문 10건). 사용자가 **제품을 하나도 안 댔는데** 시스템이 조합을 스스로 골라 결정론 verdict를 ground-truth 카드로 냄. **이번 세션 두 배치(정형 10 + 러프 10) 중 뉴로심볼릭 핵심 약속에 가장 직접 닿는 발견.**
 > 배경 개념: [[neuro-symbolic-promise]] — "판정·숫자는 LLM이 아니라 FDA 데이터 위 결정론 코드만 낸다. 그래서 verdict는 지어낸 게 아니라 재현 가능한 사실"이라는 제품의 논지. 이 약속엔 **숨은 전제**가 있다: *판정 대상 제품이 사용자가 실제로 말한 것*.
 
@@ -166,3 +170,10 @@
 - **범위**: `src/lib/onlabel/agent.ts`(도구 호출 게이트/프롬프트) + `VerifyResult`/verdict 카드(provenance). **결정론 verify() 코어는 불변.** LLM 판정 미개입.
 - **검증 기준**: 제품 미언급 질문(#1 류)에서 verdict가 (A)없음/(B)provenance 배지 동반. 명시 제품 질문은 기존과 동일. 소아/임부 escalate 회귀 없음.
 - **90콜 추가 근거(2026-07-09)**: 열린 추천에서 추론 조합 반복 재현 — #63 `"fever and chills"`→checked [Tylenol, Advil], #65 `"allergies and runny nose"`→checked [Zyrtec, **Claritin**(카탈로그 없음)]. 사용자 미언급 제품으로 verdict/검사 발동 패턴 확정.
+
+## B-16. red-flag 데이터 레이어 (정식 인구집단·기저질환 판정) `[P2 데이터]`
+> B-13의 후속(D35). 현재는 red-flag를 **감지→유보**만 함. 정식 판정을 하려면 권위 소스 기반 결정론 데이터가 필요(LLM 추측 금지, D22 원칙).
+- **무엇**: (1) **임부/수유** 성분 안전등급 — 후보 소스: FDA PLLR 라벨, LactMed(NLM, 무료), MotherToBaby. (2) **소아** 체중당 용량 — FDA 모노그래프 소아 표(M013/M012, refs/ 로컬 일부 확보) + Drug Facts. (3) **기저질환 금기/주의** — 간(APAP 감량)·신장/궤양(NSAID 회피)·고혈압(decongestant 회피): FDA 라벨 warnings 섹션에서 결정론 추출.
+- **왜 P2**: 배지 억제(B-13)로 오해 리스크는 이미 차단됨. 정식 판정은 스코프 확장이라 데모 후. 착수 시 좁게(스코프 내 ~9성분).
+- **정밀화 겸사**: B-13의 광의 cue 매칭(`liver`/`heart` 등) 오탐(예: "protect my liver")을 이때 문맥 구분으로 정밀화.
+- **선행**: 소스 신뢰성 검증 + 약사 서명(verify:false). B-4/B-6와 동일 추출 규율.
