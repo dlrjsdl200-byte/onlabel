@@ -99,6 +99,17 @@ export function verifyClinicalClaim(
           `${ref.displayName} daily ceiling is ${ref.maxDailyMg} mg (${ref.source})`,
           key ?? undefined,
         );
+      // A recognized conservative target below the ceiling (e.g. APAP 3,000 vs
+      // the 4,000 mg label max) is NOT wrong — don't contradict a safer figure.
+      if (
+        ref.conservativeDailyMg != null &&
+        claim.assertedNumber === ref.conservativeDailyMg
+      )
+        return verified(
+          claim,
+          `${claim.assertedNumber} mg/day is a recognized conservative daily target for ${ref.displayName}; the FDA label ceiling is ${ref.maxDailyMg} mg (${ref.conservativeSource ?? ref.source})`,
+          key ?? undefined,
+        );
       return contradicted(
         claim,
         `${ref.displayName} daily ceiling is ${ref.maxDailyMg} mg, not ${claim.assertedNumber} mg (${ref.source})`,
@@ -110,18 +121,33 @@ export function verifyClinicalClaim(
       if (!finding) return unsupported(claim, `no per-dose data for "${claim.ingredient}"`);
       if (claim.assertedNumber == null)
         return unsupported(claim, "claim states no per-dose amount to check");
-      const doses = finding.contributions.map((c) => c.mgPerDose).filter((n) => n > 0);
-      if (doses.length === 0)
+      // A per-DOSE amount (mgPerDose) and a per-UNIT amount (one caplet/tablet of
+      // a multi-unit dose, e.g. a 500 mg caplet of a 1,000 mg dose) are BOTH true
+      // statements a consumer or generic AI may cite. Accept either so we never
+      // contradict a true "500 mg per pill" as if it were the per-dose figure (B-10).
+      const perDose = [
+        ...new Set(finding.contributions.map((c) => c.mgPerDose).filter((n) => n > 0)),
+      ];
+      const perUnit = [
+        ...new Set(
+          finding.contributions
+            .filter((c) => c.unitsPerDose > 0 && c.mgPerDose > 0)
+            .map((c) => c.mgPerDose / c.unitsPerDose),
+        ),
+      ];
+      if (perDose.length === 0)
         return unsupported(claim, `no per-dose amount on record for ${finding.displayName}`);
-      if (doses.includes(claim.assertedNumber))
+      const perUnitDiffers = perUnit.some((u) => !perDose.includes(u));
+      const unitNote = perUnitDiffers ? ` (${perUnit.join("/")} mg per unit)` : "";
+      if (perDose.includes(claim.assertedNumber) || perUnit.includes(claim.assertedNumber))
         return verified(
           claim,
-          `${finding.displayName} label dose is ${doses.join("/")} mg`,
+          `${finding.displayName} label amount is ${perDose.join("/")} mg per dose${unitNote}`,
           key ?? undefined,
         );
       return contradicted(
         claim,
-        `${finding.displayName} label dose is ${doses.join("/")} mg, not ${claim.assertedNumber} mg`,
+        `${finding.displayName} label amount is ${perDose.join("/")} mg per dose${unitNote}, not ${claim.assertedNumber} mg`,
         key ?? undefined,
       );
     }

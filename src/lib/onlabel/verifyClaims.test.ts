@@ -48,14 +48,65 @@ test("combination-safety: correct 'danger' assertion -> VERIFIED", () => {
 });
 
 // A wrong clinical number is caught deterministically with the correct value.
-test("dose-limit: wrong acetaminophen ceiling -> CONTRADICTED with correct value", () => {
+test("dose-limit: dangerously high acetaminophen ceiling -> CONTRADICTED", () => {
   const r = verify(["Tylenol Extra Strength"]);
   const v = verifyClinicalClaim(
-    { text: "max 3000 mg", kind: "dose-limit", ingredient: "acetaminophen", assertedNumber: 3000, assertedUnit: "mg/day" },
+    { text: "max 6000 mg", kind: "dose-limit", ingredient: "acetaminophen", assertedNumber: 6000, assertedUnit: "mg/day" },
     r,
   );
   assert.strictEqual(v.status, "CONTRADICTED");
   assert.match(v.basis, /4000 mg/);
+});
+
+// B-10: 3,000 mg is the recognized conservative target (Extra Strength Tylenol
+// label), NOT wrong — must not be falsely contradicted against the 4,000 ceiling.
+test("dose-limit: acetaminophen 3,000 mg conservative target -> VERIFIED (not contradicted)", () => {
+  const r = verify(["Tylenol Extra Strength"]);
+  const v = verifyClinicalClaim(
+    { text: "keep under 3000 mg a day", kind: "dose-limit", ingredient: "acetaminophen", assertedNumber: 3000 },
+    r,
+  );
+  assert.strictEqual(v.status, "VERIFIED");
+  assert.match(v.basis, /conservative/i);
+});
+
+// B-10: an arbitrary low number is not a recognized target -> still CONTRADICTED.
+test("dose-limit: arbitrary low ceiling (2,500) is not a target -> CONTRADICTED", () => {
+  const r = verify(["Tylenol Extra Strength"]);
+  const v = verifyClinicalClaim(
+    { text: "max 2500 mg", kind: "dose-limit", ingredient: "acetaminophen", assertedNumber: 2500 },
+    r,
+  );
+  assert.strictEqual(v.status, "CONTRADICTED");
+});
+
+// B-10: a per-PILL amount ("500 mg per pill") is TRUE and must not be contradicted
+// against the per-DOSE figure (1,000 mg = two 500 mg caplets).
+test("single-dose: per-pill 500 mg for Tylenol ES -> VERIFIED (not per-dose confusion)", () => {
+  const r = verify(["Tylenol Extra Strength"]);
+  const v = verifyClinicalClaim(
+    { text: "Tylenol Extra Strength is 500 mg per pill", kind: "single-dose", ingredient: "acetaminophen", assertedNumber: 500 },
+    r,
+  );
+  assert.strictEqual(v.status, "VERIFIED");
+});
+
+test("single-dose: per-dose 1,000 mg for Tylenol ES -> VERIFIED", () => {
+  const r = verify(["Tylenol Extra Strength"]);
+  const v = verifyClinicalClaim(
+    { text: "1000 mg per dose", kind: "single-dose", ingredient: "acetaminophen", assertedNumber: 1000 },
+    r,
+  );
+  assert.strictEqual(v.status, "VERIFIED");
+});
+
+test("single-dose: a genuinely wrong per-dose amount (800 mg) -> CONTRADICTED", () => {
+  const r = verify(["Tylenol Extra Strength"]);
+  const v = verifyClinicalClaim(
+    { text: "800 mg per dose", kind: "single-dose", ingredient: "acetaminophen", assertedNumber: 800 },
+    r,
+  );
+  assert.strictEqual(v.status, "CONTRADICTED");
 });
 
 test("dose-limit: correct ceiling -> VERIFIED with citation", () => {

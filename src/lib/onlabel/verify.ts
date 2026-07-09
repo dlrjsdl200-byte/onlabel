@@ -28,6 +28,11 @@ export interface IngredientRef {
   aka: string[];
   class: string;
   maxDailyMg: number | null;
+  /** A recognized conservative daily target BELOW the FDA ceiling (e.g. APAP
+   * 3,000 vs the 4,000 mg label max). Lets the claim verifier accept a
+   * conservative figure instead of falsely contradicting it (B-10). */
+  conservativeDailyMg?: number;
+  conservativeSource?: string;
   risk: string;
   efficacyNote?: string;
   efficacyRefs?: string[];

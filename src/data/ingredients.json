@@ -14,6 +14,8 @@
       ],
       "class": "analgesic-antipyretic",
       "maxDailyMg": 4000,
+      "conservativeDailyMg": 3000,
+      "conservativeSource": "Extra Strength Tylenol label — McNeil lowered the stated daily max to 3,000 mg/24h (2011); the FDA monograph ceiling remains 4,000 mg/24h",
       "risk": "Liver damage — the leading cause of acute liver failure in the US. Often hidden in multi-symptom cold/flu and PM products.",
       "source": "FDA OTC label ceiling (4,000 mg/24h)",
       "verify": false,
