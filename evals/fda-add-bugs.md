@@ -16,13 +16,17 @@ The tool has no per-mL model: liquids state strength "in each 5 mL" and dose as
 - `bc-powder` — aspirin strength not extracted (powder "per stick")
 
 ## B. Directions phrasing not parsed (units/max = null)
-Real label phrasings the regex still misses:
-- LiquiCap "2 caps with water every 4 hrs" — `dayquil-severe`, `nyquil-severe`
-- effervescent / dissolve directions — `mucinex-dm-max`, `mucinex-sinus-max`,
-  `mucinex-fast-max` (also matched a Children's SKU)
-- `allegra` once-daily variant (different wording than the recovered singles)
-- `advil-allergy-sinus` (correct SKU "ADVIL ALLERGY SINUS", but max not parsed)
-- `zzzquil` — sleep-aid bedtime dosing
+✅ **FIXED (2 recovered)**: added the "12 years and older: N tablet" verb-less
+pattern and the hyphenated "24-hour" form to the parser.
+- `advil-allergy-sinus` — RECOVERED (the "24-hour period" hyphen blocked max)
+- `mucinex-dm-max` — RECOVERED (the "older: 1 tablet" verb-less units blocked it)
+
+Still open (different phrasings / formulations):
+- `dayquil-severe`, `nyquil-severe` — matched the LIQUID SKU (30 mL dose) → belongs
+  to §A (per-mL), not a phrasing gap
+- `mucinex-sinus-max`, `mucinex-fast-max` — matched a Children's SKU
+- `allegra` — matched a Children's ODT ("take 2 tablets") not the adult once-daily
+- `zzzquil` — liquid "one dose (30 mL) per day" → §A
 - `midol-complete` — also needs a `pyrilamine` ingredient KB entry (not present)
 
 ## C. No SKU matched (brand absent / ingredient-set mismatch)

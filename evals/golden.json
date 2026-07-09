@@ -9,7 +9,7 @@
       "danger"
     ],
     "updated": "2026-07-09",
-    "count": 239
+    "count": 241
   },
   "items": [
     {
@@ -4284,6 +4284,47 @@
         ]
       },
       "note": "ibuprofen dup (Motrin=Advil)",
+      "review": "pending"
+    },
+    {
+      "id": "x-advilallergy-advil",
+      "category": "danger-duplication",
+      "question": "Can I take Advil Allergy Sinus with Advil?",
+      "products": [
+        "Advil Allergy Sinus",
+        "Advil"
+      ],
+      "expected": {
+        "mustMention": [
+          "ibuprofen"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "ibuprofen"
+        ]
+      },
+      "note": "ibuprofen dup",
+      "review": "pending"
+    },
+    {
+      "id": "x-mucinexdmmax-dm",
+      "category": "danger-duplication",
+      "question": "Can I take Maximum Strength Mucinex DM and regular Mucinex DM together?",
+      "products": [
+        "Mucinex DM Maximum Strength",
+        "Mucinex DM"
+      ],
+      "expected": {
+        "mustMention": [
+          "guaifenesin"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "guaifenesin",
+          "dextromethorphan"
+        ]
+      },
+      "note": "guaifenesin dup",
       "review": "pending"
     }
   ]

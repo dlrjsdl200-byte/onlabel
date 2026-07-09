@@ -112,20 +112,21 @@ function num(s: string): number {
 }
 
 /** Units per dose. Handles "take/chew/use/dissolve N unit" and the verb-less
- * "...12 years and over: 2 LiquiCaps" pattern, digit or spelled-out. */
+ * "...12 years and over: 2 LiquiCaps" / "...12 years and older: 1 tablet". */
 export function unitsPerDose(dir: string): number | null {
   const m =
     dir.match(new RegExp(`(?:take|chew|use|dissolve|swallow|drink)\\s+${NUM}\\s+${UNIT}`, "i")) ||
-    dir.match(new RegExp(`over[:\\s)]+${NUM}\\s+${UNIT}`, "i"));
+    dir.match(new RegExp(`(?:older|over)[:\\s)]+${NUM}\\s+${UNIT}`, "i"));
   return m ? num(m[1]) : null;
 }
 
 /** Max units per 24 h. Handles "do not exceed N unit per 24 hrs", "not more than
- * N unit in 24 hours", "N unit in 24 hours", digit or spelled-out, hr/hrs. */
+ * N unit in any 24-hour period", "N unit in 24 hours"; hr/hrs and the "24-hour"
+ * hyphen form are all accepted. */
 export function maxUnitsPerDay(dir: string): number | null {
   const m =
-    dir.match(new RegExp(`not\\s+(?:take\\s+)?(?:more\\s+than|to\\s+exceed)\\s+${NUM}\\s+${UNIT}[^.]*24\\s*${HOUR}`, "i")) ||
-    dir.match(new RegExp(`${NUM}\\s+${UNIT}\\s+(?:in|per)\\s+(?:any\\s+)?24\\s*${HOUR}`, "i"));
+    dir.match(new RegExp(`not\\s+(?:take\\s+)?(?:more\\s+than|to\\s+exceed)\\s+${NUM}\\s+${UNIT}[^.]*24[\\s-]*${HOUR}`, "i")) ||
+    dir.match(new RegExp(`${NUM}\\s+${UNIT}\\s+(?:in|per)\\s+(?:any\\s+)?24[\\s-]*${HOUR}`, "i"));
   return m ? num(m[1]) : null;
 }
 

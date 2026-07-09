@@ -559,6 +559,39 @@
       ],
       "source": "Benadryl Allergy Plus Congestion — openFDA/DailyMed SPL 685b51d3-cc25-47b2-ac8a-368924f43137",
       "verify": false
+    },
+    {
+      "id": "advil-allergy-sinus",
+      "brand": "Advil Allergy Sinus",
+      "company": "Haleon US Holdings LLC",
+      "category": "cold-flu",
+      "core": false,
+      "doseForm": "tablet",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 6,
+      "ingredients": [
+        { "ingredient": "ibuprofen", "mgPerDose": 200 },
+        { "ingredient": "chlorpheniramine", "mgPerDose": 2 },
+        { "ingredient": "pseudoephedrine", "mgPerDose": 30 }
+      ],
+      "source": "ADVIL ALLERGY SINUS — openFDA/DailyMed SPL ecd6ea11-8b34-01b4-cbd9-901ba7a8f6e2",
+      "verify": false
+    },
+    {
+      "id": "mucinex-dm-max",
+      "brand": "Maximum Strength Mucinex DM",
+      "company": "A-S Medication Solutions",
+      "category": "cough-expectorant",
+      "core": false,
+      "doseForm": "tablet",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 2,
+      "ingredients": [
+        { "ingredient": "guaifenesin", "mgPerDose": 1200 },
+        { "ingredient": "dextromethorphan", "mgPerDose": 60 }
+      ],
+      "source": "Mucinex DM Maximum Strength — openFDA/DailyMed SPL 104b29ed-a377-4436-8e24-413c63579f2e",
+      "verify": false
     }
   ]
 }
