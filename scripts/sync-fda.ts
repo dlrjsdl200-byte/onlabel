@@ -16,6 +16,14 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import productsData from "../src/data/products.json";
+import {
+  words,
+  selectSku,
+  strengthOf,
+  unitsPerDose,
+  maxUnitsPerDay,
+  fetchCandidates,
+} from "./fda-lib";
 
 interface KBIngredient {
   ingredient: string;
@@ -54,108 +62,6 @@ const BRAND_QUERY: Record<string, string> = {
   "advil-cold-sinus": "advil+cold",
 };
 
-/** Active-ingredient base names we recognize (openFDA appends salt forms). */
-const ING_BASES = [
-  "acetaminophen", "ibuprofen", "naproxen", "aspirin", "caffeine",
-  "dextromethorphan", "phenylephrine", "guaifenesin", "doxylamine",
-  "pseudoephedrine", "diphenhydramine", "cetirizine",
-];
-
-/** SKU-variant tokens that mark a DIFFERENT product than a plain brand — used to
- * penalize a candidate whose brand carries a variant our target doesn't. */
-const VARIANT_TOKENS = new Set([
-  "kids", "children", "childrens", "infant", "infants", "junior", "jr", "pediatric",
-  "pm", "nighttime", "night", "sleep", "12", "24", "hour", "extended", "er",
-  "sinus", "chest", "congestion", "severe", "maximum", "max", "migraine",
-  "back", "body", "arthritis", "tension", "liquid", "gummies", "dissolve",
-  "chewable", "dye", "free", "berry", "cherry", "grape", "orange", "menthol",
-  "intense", "complete", "cooling", "warming", "honey", "vapocool", "flavor",
-]);
-
-function words(s: string): string[] {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().split(" ").filter(Boolean);
-}
-
-/** Base ingredient names present in an openFDA active_ingredient text. */
-function recognizedIngredients(activeText: string): Set<string> {
-  const t = activeText.toLowerCase();
-  return new Set(ING_BASES.filter((b) => t.includes(b)));
-}
-
-function setEq(a: Set<string>, b: Set<string>): boolean {
-  return a.size === b.size && [...a].every((x) => b.has(x));
-}
-
-/**
- * Deterministically choose the SKU among openFDA candidates that IS our product:
- * its active-ingredient SET must equal our KB's ingredient set (identity, not the
- * amounts we're verifying), and its brand name must carry the fewest extra
- * variant tokens (so "Kids", "12 Hour", "PM" SKUs lose to the plain product).
- * Selection never looks at strengths — those stay the thing we verify.
- */
-function selectSku(
-  candidates: Record<string, unknown>[],
-  ourBrand: string,
-  ourIngredients: Set<string>,
-  primaryToken: string,
-  ourDoseForm: string,
-): Record<string, unknown> | null {
-  const brandToks = new Set(words(ourBrand.replace(/\(.*?\)/g, "")));
-  // Our catalog products are all solid oral forms; reject a liquid/kids SKU whose
-  // per-unit strength differs only because the formulation differs.
-  const wantSolid = /tablet|caplet|capsule|liquicap|gelcap|geltab/i.test(ourDoseForm);
-  let best: Record<string, unknown> | null = null;
-  let bestScore = -Infinity;
-  for (const c of candidates) {
-    const active = ((c.active_ingredient as string[]) ?? []).join(" ");
-    const rset = recognizedIngredients(active);
-    if (!setEq(rset, ourIngredients)) continue; // wrong ingredient set = wrong product
-    const cbrand = ((c.openfda as { brand_name?: string[] })?.brand_name ?? []).join(" ");
-    // HARD requirement: the candidate must actually be this brand — rejects a
-    // store-brand / wrong-category product that merely shares the ingredient set
-    // (e.g. a phenylephrine hemorrhoid cream matching "Sudafed PE").
-    if (!words(cbrand).includes(primaryToken)) continue;
-    const extra = words(cbrand).filter(
-      (w) => !brandToks.has(w) && !ourIngredients.has(w) && w.length > 1,
-    );
-    const variantPenalty = extra.filter((w) => VARIANT_TOKENS.has(w)).length;
-    const otc =
-      ((c.openfda as { product_type?: string[] })?.product_type ?? []).some((t) =>
-        /OTC/i.test(t),
-      ) ? 1 : 0;
-    const form = ((c.dosage_form as string[]) ?? []).join(" ");
-    const liquidMismatch =
-      wantSolid && /solution|suspension|syrup|liquid|elixir/i.test(form) ? 1 : 0;
-    const score = 1000 - 500 * liquidMismatch - 25 * variantPenalty - extra.length + 5 * otc;
-    if (score > bestScore) {
-      bestScore = score;
-      best = c;
-    }
-  }
-  return best;
-}
-
-/** Regex base for each ingredient key (openFDA uses salt forms after the base). */
-function strengthOf(text: string, ingredientKey: string): number | null {
-  const base = ingredientKey.replace(/[^a-z]/gi, "");
-  // <base> [optional salt words] <number> mg   — the number nearest the name
-  const re = new RegExp(`${base}[a-z\\s]{0,25}?(\\d+(?:\\.\\d+)?)\\s*mg`, "i");
-  const m = text.match(re);
-  return m ? Number(m[1]) : null;
-}
-
-const UNIT = "(?:tablet|caplet|capsule|liquicap|liqui-?cap|softgel|gelcap|geltab|packet|teaspoon|tablespoon|lozenge|dose)s?";
-function unitsPerDose(dir: string): number | null {
-  const m = dir.match(new RegExp(`take\\s+(\\d+)\\s+${UNIT}`, "i"));
-  return m ? Number(m[1]) : null;
-}
-function maxUnitsPerDay(dir: string): number | null {
-  const m =
-    dir.match(new RegExp(`not\\s+(?:more\\s+than|to\\s+exceed)\\s+(\\d+)\\s+${UNIT}[^.]*24\\s*hour`, "i")) ||
-    dir.match(new RegExp(`(\\d+)\\s+${UNIT}\\s+in\\s+(?:any\\s+)?24\\s*hour`, "i"));
-  return m ? Number(m[1]) : null;
-}
-
 interface Row {
   id: string;
   brand: string;
@@ -163,19 +69,6 @@ interface Row {
   setId: string;
   lines: string[];
   flags: number;
-}
-
-/** Fetch OTC label candidates for the primary brand token (broad); the scorer
- * narrows to the right SKU by ingredient set + brand-variant distance. Querying
- * the single strong token avoids openFDA's weak multi-token AND behaviour. */
-async function fetchCandidates(primaryToken: string): Promise<Record<string, unknown>[]> {
-  const url =
-    `https://api.fda.gov/drug/label.json?search=` +
-    `openfda.brand_name:${primaryToken}+AND+openfda.product_type:"HUMAN+OTC+DRUG"&limit=100`;
-  const res = await fetch(url);
-  if (!res.ok) return [];
-  const json = (await res.json()) as { results?: Record<string, unknown>[] };
-  return json.results ?? [];
 }
 
 function mark(kb: number | string, fda: number | string | null): string {
