@@ -12,10 +12,11 @@ interface ContrastData {
 }
 
 /**
- * The contrast engine (L1, additive). On demand, it fetches a generic-LLM answer
- * to the same question and checks each of its claims against FDA data — showing
- * exactly what a generic AI gets wrong and how OnLabel's deterministic layer
- * corrects it. Opt-in so the core verdict-first path is untouched.
+ * The contrast engine (L1, additive) — OnLabel's thesis made visible. On demand
+ * it asks a generic LLM the same question, then checks every claim in that answer
+ * against FDA data, showing exactly what a generic AI gets wrong and how the
+ * deterministic layer corrects it. Opt-in so the core verdict-first path is
+ * untouched; when run, it is the demo's centerpiece.
  */
 export function ContrastEngine({
   question,
@@ -51,16 +52,23 @@ export function ContrastEngine({
     return (
       <button
         onClick={run}
-        className="w-full rounded-xl border border-dashed border-foreground/20 px-4 py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+        className="group w-full rounded-xl border border-dashed border-foreground/20 px-4 py-3.5 text-sm font-medium text-muted-foreground transition-colors hover:border-foreground/40 hover:bg-muted/40 hover:text-foreground"
       >
-        🔬 Compare to a generic AI answer — see what it gets wrong
+        <span className="mr-1.5" aria-hidden>
+          🔬
+        </span>
+        Compare to a generic AI answer
+        <span className="ml-1 text-muted-foreground/70 group-hover:text-foreground/70">
+          — see what it gets wrong, checked against FDA data
+        </span>
       </button>
     );
   }
 
   if (state === "loading") {
     return (
-      <div className="rounded-xl border bg-muted/30 p-4 text-sm text-muted-foreground">
+      <div className="flex items-center gap-3 rounded-xl border bg-muted/30 p-4 text-sm text-muted-foreground">
+        <span className="size-4 shrink-0 animate-spin rounded-full border-2 border-foreground/20 border-t-foreground/60" />
         Asking a generic AI the same question, then checking every claim against FDA
         data…
       </div>
@@ -77,46 +85,76 @@ export function ContrastEngine({
 
   if (!data) return null;
   const { draft, verdicts, reconciled } = data;
+  const { verified, contradicted, unsupported } = reconciled.stats;
 
   return (
-    <section className="space-y-4 rounded-xl border bg-muted/20 p-5">
-      <div>
+    <section className="overflow-hidden rounded-xl border">
+      <header className="border-b bg-muted/30 px-5 py-4">
         <h3 className="text-sm font-semibold text-foreground">
           Generic AI vs. OnLabel
         </h3>
         <p className="mt-0.5 text-xs text-muted-foreground">
-          A generic assistant answered from memory. OnLabel checks each claim
-          against FDA labeling — {reconciled.stats.verified} verified,{" "}
-          {reconciled.stats.contradicted} contradicted,{" "}
-          {reconciled.stats.unsupported} unverifiable.
+          A generic assistant answered from memory. OnLabel checked every claim it
+          made against FDA labeling data.
         </p>
-      </div>
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          <Stat n={contradicted} label="Contradicted" tone="danger" />
+          <Stat n={verified} label="Verified" tone="ok" />
+          <Stat n={unsupported} label="Unverifiable" tone="caution" />
+        </div>
+      </header>
 
       {reconciled.corrections.length > 0 && (
-        <div className="rounded-lg border border-verdict-danger/30 bg-verdict-danger-bg/40 p-3">
+        <div className="border-b border-verdict-danger/20 bg-verdict-danger-bg/30 px-5 py-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-verdict-danger-fg">
             What the generic AI got wrong
           </p>
-          <ul className="mt-2 space-y-2">
+          <ul className="mt-3 space-y-3">
             {reconciled.corrections.map((c, i) => (
-              <li key={i} className="text-sm">
-                <span className="text-foreground/60 line-through">
-                  “{c.claimText}”
-                </span>
-                <span className="mt-0.5 block font-medium text-foreground">
-                  → {c.correction}
-                </span>
+              <li
+                key={i}
+                className="rounded-lg border border-verdict-danger/25 bg-background/60 p-3"
+              >
+                <div className="flex items-start gap-2">
+                  <span
+                    className="mt-0.5 shrink-0 text-verdict-danger-fg"
+                    aria-hidden
+                  >
+                    ✕
+                  </span>
+                  <span className="text-sm text-foreground/55 line-through decoration-verdict-danger/40">
+                    “{c.claimText}”
+                  </span>
+                </div>
+                <div className="mt-1.5 flex items-start gap-2">
+                  <span className="mt-0.5 shrink-0 text-verdict-ok-fg" aria-hidden>
+                    ✓
+                  </span>
+                  <div className="min-w-0">
+                    <span className="text-sm font-medium text-foreground">
+                      {c.correction}
+                    </span>
+                    {c.citationIngredient && (
+                      <span className="ml-1.5 inline-block rounded bg-muted px-1.5 py-0.5 align-middle text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                        FDA · {c.citationIngredient}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </li>
             ))}
           </ul>
         </div>
       )}
 
-      <details className="group">
-        <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground">
+      <details className="group px-5 py-3">
+        <summary className="cursor-pointer list-none text-xs font-medium text-muted-foreground hover:text-foreground">
+          <span className="inline-block transition-transform group-open:rotate-90" aria-hidden>
+            ›
+          </span>{" "}
           Generic AI&rsquo;s full answer + every claim checked ({verdicts.length})
         </summary>
-        <blockquote className="mt-2 whitespace-pre-wrap border-l-2 border-foreground/15 pl-3 text-sm leading-relaxed text-foreground/70">
+        <blockquote className="mt-3 whitespace-pre-wrap border-l-2 border-foreground/15 pl-3 text-sm leading-relaxed text-foreground/70">
           {draft}
         </blockquote>
         <ul className="mt-3 space-y-2">
@@ -134,5 +172,37 @@ export function ContrastEngine({
         </ul>
       </details>
     </section>
+  );
+}
+
+const TONE: Record<"ok" | "caution" | "danger", string> = {
+  ok: "border-verdict-ok/30 bg-verdict-ok-bg/50 text-verdict-ok-fg",
+  caution: "border-verdict-caution/30 bg-verdict-caution-bg/50 text-verdict-caution-fg",
+  danger: "border-verdict-danger/30 bg-verdict-danger-bg/60 text-verdict-danger-fg",
+};
+
+/** One scoreboard tile. Muted (not colored) when the count is zero. */
+function Stat({
+  n,
+  label,
+  tone,
+}: {
+  n: number;
+  label: string;
+  tone: "ok" | "caution" | "danger";
+}) {
+  const active = n > 0;
+  return (
+    <div
+      className={
+        "rounded-lg border px-2 py-2 text-center " +
+        (active ? TONE[tone] : "border-border bg-muted/30 text-muted-foreground")
+      }
+    >
+      <div className="text-xl font-bold tabular-nums leading-none">{n}</div>
+      <div className="mt-1 text-[10px] font-medium uppercase tracking-wide">
+        {label}
+      </div>
+    </div>
   );
 }
