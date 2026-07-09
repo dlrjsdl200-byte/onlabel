@@ -592,6 +592,39 @@
       ],
       "source": "Mucinex DM Maximum Strength — openFDA/DailyMed SPL 104b29ed-a377-4436-8e24-413c63579f2e",
       "verify": false
+    },
+    {
+      "id": "allegra",
+      "brand": "Allegra Allergy",
+      "company": "Chattem, Inc.",
+      "category": "allergy",
+      "core": false,
+      "doseForm": "tablet",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 2,
+      "ingredients": [
+        { "ingredient": "fexofenadine", "mgPerDose": 60 }
+      ],
+      "source": "Allegra Allergy — openFDA/DailyMed SPL 81c1dcbb-28b3-4ad5-9f3d-9ccc16ddd173",
+      "verify": false
+    },
+    {
+      "id": "mucinex-sinus-max",
+      "brand": "Mucinex Sinus-Max Pressure Pain",
+      "company": "Reckitt Benckiser LLC",
+      "category": "cold-flu",
+      "core": false,
+      "doseForm": "caplet",
+      "unitsPerDose": 2,
+      "maxDosesPerDay": 6,
+      "ingredients": [
+        { "ingredient": "acetaminophen", "mgPerDose": 650 },
+        { "ingredient": "dextromethorphan", "mgPerDose": 20 },
+        { "ingredient": "guaifenesin", "mgPerDose": 400 },
+        { "ingredient": "phenylephrine", "mgPerDose": 10 }
+      ],
+      "source": "Mucinex Sinus-Max Pressure, Pain and Cough — openFDA/DailyMed SPL 8905706b-b9da-4520-8cf2-87d7c125edf3",
+      "verify": false
     }
   ]
 }

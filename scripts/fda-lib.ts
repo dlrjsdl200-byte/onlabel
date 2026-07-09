@@ -63,6 +63,10 @@ export function selectSku(
 ): Record<string, unknown> | null {
   const brandToks = new Set(words(ourBrand.replace(/\(.*?\)/g, "")));
   const wantSolid = /tablet|caplet|capsule|liquicap|gelcap|geltab/i.test(ourDoseForm);
+  // Is THIS product a children's product? (brand says so, or a kids liquid form)
+  const childTarget =
+    /\b(child|children|childrens|kids?|infant|infants|pediatric)\b/i.test(ourBrand) ||
+    /suspension|drops/i.test(ourDoseForm);
   let best: Record<string, unknown> | null = null;
   let bestScore = -Infinity;
   for (const c of candidates) {
@@ -71,6 +75,12 @@ export function selectSku(
     if (!setEq(rset, expectedIngredients)) continue;
     const cbrand = ((c.openfda as { brand_name?: string[] })?.brand_name ?? []).join(" ");
     if (!words(cbrand).includes(primaryToken)) continue;
+    // Hard children's gate: a children's target must match a children's SKU, and
+    // an adult target must NOT match a children's SKU (a mere penalty let ties go
+    // wrong — Children's Tylenol matched the adult 8HR, adult Allegra lost to the
+    // Children's ODT).
+    const cbrandChild = /\b(child|children|childrens|kids?|infant|infants|pediatric|jr|junior)\b/i.test(cbrand);
+    if (childTarget !== cbrandChild) continue;
     const extra = words(cbrand).filter(
       (w) => !brandToks.has(w) && !expectedIngredients.has(w) && w.length > 1,
     );
@@ -114,9 +124,11 @@ function num(s: string): number {
 /** Units per dose. Handles "take/chew/use/dissolve N unit" and the verb-less
  * "...12 years and over: 2 LiquiCaps" / "...12 years and older: 1 tablet". */
 export function unitsPerDose(dir: string): number | null {
+  // Optional "<strength> mg" between the count and the unit ("take one 180 mg tablet").
+  const S = "(?:\\d+(?:\\.\\d+)?\\s*mg\\s+)?";
   const m =
-    dir.match(new RegExp(`(?:take|chew|use|dissolve|swallow|drink)\\s+${NUM}\\s+${UNIT}`, "i")) ||
-    dir.match(new RegExp(`(?:older|over)[:\\s)]+${NUM}\\s+${UNIT}`, "i"));
+    dir.match(new RegExp(`(?:take|chew|use|dissolve|swallow|drink)\\s+${NUM}\\s+${S}${UNIT}`, "i")) ||
+    dir.match(new RegExp(`(?:older|over)[:\\s)]+${NUM}\\s+${S}${UNIT}`, "i"));
   return m ? num(m[1]) : null;
 }
 
