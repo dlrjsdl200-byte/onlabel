@@ -99,20 +99,20 @@ export function verifyClinicalClaim(
           `${ref.displayName} daily ceiling is ${ref.maxDailyMg} mg (${ref.source})`,
           key ?? undefined,
         );
-      // A recognized conservative target below the ceiling (e.g. APAP 3,000 vs
-      // the 4,000 mg label max) is NOT wrong — don't contradict a safer figure.
-      if (
-        ref.conservativeDailyMg != null &&
-        claim.assertedNumber === ref.conservativeDailyMg
-      )
-        return verified(
+      // Only a number ABOVE the FDA ceiling is dangerous misinformation. A figure
+      // AT or BELOW the ceiling is a more conservative daily limit — safe to
+      // follow, so we don't contradict it (and we don't invent a specific
+      // "conservative target" number the KB can't source). We ground the real
+      // FDA ceiling either way.
+      if (claim.assertedNumber > ref.maxDailyMg)
+        return contradicted(
           claim,
-          `${claim.assertedNumber} mg/day is a recognized conservative daily target for ${ref.displayName}; the FDA label ceiling is ${ref.maxDailyMg} mg (${ref.conservativeSource ?? ref.source})`,
+          `${claim.assertedNumber} mg/day exceeds the FDA ceiling of ${ref.maxDailyMg} mg for ${ref.displayName} — risk of overdose (${ref.source})`,
           key ?? undefined,
         );
-      return contradicted(
+      return verified(
         claim,
-        `${ref.displayName} daily ceiling is ${ref.maxDailyMg} mg, not ${claim.assertedNumber} mg (${ref.source})`,
+        `${claim.assertedNumber} mg/day stays within the FDA ceiling of ${ref.maxDailyMg} mg for ${ref.displayName} — a more conservative daily limit (${ref.source})`,
         key ?? undefined,
       );
     }

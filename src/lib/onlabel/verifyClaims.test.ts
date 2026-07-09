@@ -58,26 +58,17 @@ test("dose-limit: dangerously high acetaminophen ceiling -> CONTRADICTED", () =>
   assert.match(v.basis, /4000 mg/);
 });
 
-// B-10: 3,000 mg is the recognized conservative target (Extra Strength Tylenol
-// label), NOT wrong — must not be falsely contradicted against the 4,000 ceiling.
-test("dose-limit: acetaminophen 3,000 mg conservative target -> VERIFIED (not contradicted)", () => {
+// B-10: a figure AT/BELOW the FDA ceiling is a safe, more conservative daily
+// limit — do not contradict it (and do not invent a specific "target" number).
+// The FDA ceiling (4,000 mg) is grounded either way.
+test("dose-limit: acetaminophen 3,000 mg is within the 4,000 ceiling -> VERIFIED (not contradicted)", () => {
   const r = verify(["Tylenol Extra Strength"]);
   const v = verifyClinicalClaim(
     { text: "keep under 3000 mg a day", kind: "dose-limit", ingredient: "acetaminophen", assertedNumber: 3000 },
     r,
   );
   assert.strictEqual(v.status, "VERIFIED");
-  assert.match(v.basis, /conservative/i);
-});
-
-// B-10: an arbitrary low number is not a recognized target -> still CONTRADICTED.
-test("dose-limit: arbitrary low ceiling (2,500) is not a target -> CONTRADICTED", () => {
-  const r = verify(["Tylenol Extra Strength"]);
-  const v = verifyClinicalClaim(
-    { text: "max 2500 mg", kind: "dose-limit", ingredient: "acetaminophen", assertedNumber: 2500 },
-    r,
-  );
-  assert.strictEqual(v.status, "CONTRADICTED");
+  assert.match(v.basis, /within the FDA ceiling of 4000 mg/i);
 });
 
 // B-10: a per-PILL amount ("500 mg per pill") is TRUE and must not be contradicted
