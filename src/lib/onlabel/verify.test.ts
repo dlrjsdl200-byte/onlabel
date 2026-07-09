@@ -177,4 +177,36 @@ test("a non-drug string stays unmatched (no over-matching)", () => {
   assert.strictEqual(r.genericIngredients.length, 0);
 });
 
+// B-11: colloquial "regular Tylenol" means the default SKU (Extra Strength),
+// not the literal "Regular Strength" product. Deterministic resolution must not
+// hinge on whether the LLM keeps or drops the word "regular".
+test("'regular Tylenol' resolves to Extra Strength default with an assumption", () => {
+  const r = verify(["regular Tylenol"]);
+  assert.strictEqual(r.matched[0]?.id, "tylenol-extra-strength");
+  assert.strictEqual(r.assumptions.length, 1, "colloquial default is a surfaced assumption");
+  assert.strictEqual(r.assumptions[0].input, "regular Tylenol");
+  assert.strictEqual(r.assumptions[0].resolvedTo, "Tylenol Extra Strength");
+});
+
+test("'Tylenol PM' + 'regular Tylenol' -> acetaminophen duplication caution", () => {
+  const r = verify(["Tylenol PM", "regular Tylenol"]);
+  const apap = r.findings.find((f) => f.ingredient === "acetaminophen");
+  assert.ok(apap?.duplicated, "acetaminophen must be flagged duplicated");
+  assert.strictEqual(r.overall, "caution", "at-ceiling dup is caution, deterministic");
+  assert.strictEqual(r.assumptions.length, 1, "'regular Tylenol' surfaces an assumption");
+});
+
+// Guard: the full official name is still an EXACT, non-assumed Regular Strength.
+test("explicit 'Tylenol Regular Strength' is unchanged by the B-11 fix", () => {
+  const r = verify(["Tylenol Regular Strength"]);
+  assert.strictEqual(r.matched[0]?.id, "tylenol-regular");
+  assert.strictEqual(r.assumptions.length, 0);
+});
+
+// Golden parity: naming Extra Strength explicitly matches the re-baselined verdict.
+test("'Tylenol PM' + 'Tylenol Extra Strength' is caution (golden x100-txpm-tylenol)", () => {
+  const r = verify(["Tylenol PM", "Tylenol Extra Strength"]);
+  assert.strictEqual(r.overall, "caution");
+});
+
 console.log(`\n${passed} passed`);

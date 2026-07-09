@@ -159,6 +159,15 @@ function strengthToken(label?: string): string | null {
 /** Filler words that carry no product identity ("Advil Cold & Sinus" == "...and..."). */
 const STOP = new Set(["and", "with", "the", "for", "plus", "a", "an"]);
 
+/**
+ * Colloquial "the ordinary one" words. A consumer saying "regular Tylenol" almost
+ * always means the common default SKU (Extra Strength), NOT the label's literal
+ * "Regular Strength" (325 mg) product. We therefore treat these as a default
+ * signal, not a strength selector — the full official name "Tylenol Regular
+ * Strength" still resolves exactly via the step-1 brand match. (B-11)
+ */
+const COLLOQUIAL_DEFAULT = new Set(["regular", "normal", "plain", "standard", "ordinary"]);
+
 function contentTokens(s: string): string[] {
   return normalize(s)
     .split(" ")
@@ -240,10 +249,12 @@ export function resolveProduct(name: string): ProductMatch | null {
     if (!tokens.includes(key)) continue;
     const members = PRODUCTS.filter((p) => p.brandKey === key);
     if (members.length < 2) continue;
-    // Did the user name a strength (e.g. "extra", "regular")?
+    // Did the user name a strength (e.g. "extra")? A colloquial word like
+    // "regular" is NOT an explicit strength choice — it means "the default one"
+    // and is handled by the bare-brand path below with a surfaced assumption.
     const explicit = members.find((m) => {
       const t = strengthToken(m.strengthLabel);
-      return t !== null && tokens.includes(t);
+      return t !== null && tokens.includes(t) && !COLLOQUIAL_DEFAULT.has(t);
     });
     if (explicit) {
       return { product: explicit, assumedDefault: false, alternatives: [] };
@@ -251,12 +262,17 @@ export function resolveProduct(name: string): ProductMatch | null {
     // Only collapse to the family default for a BARE brand. If the query carries
     // other distinctive tokens (e.g. "Tylenol Cold and Flu Severe"), it names a
     // different SKU — fall through to the specificity-aware fuzzy match instead
-    // of silently resolving to the family default.
+    // of silently resolving to the family default. Colloquial default words are
+    // treated as filler here so "regular Tylenol" collapses to the default SKU.
     const strengthTokens = new Set(
       members.map((m) => strengthToken(m.strengthLabel)).filter(Boolean) as string[],
     );
     const residual = tokens.filter(
-      (t) => t !== key && !STOP.has(t) && !strengthTokens.has(t),
+      (t) =>
+        t !== key &&
+        !STOP.has(t) &&
+        !strengthTokens.has(t) &&
+        !COLLOQUIAL_DEFAULT.has(t),
     );
     if (residual.length > 0) break;
     // Bare brand -> default SKU, surfaced as an assumption.
