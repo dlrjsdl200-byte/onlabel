@@ -22,6 +22,11 @@ const INITIAL: OnLabelStreamState = {
   error: null,
 };
 
+/** If no bytes arrive for this long, treat the stream as stuck and surface an
+ * error instead of spinning forever. A healthy stream delivers the verdict in
+ * ~1–2s and prose continuously after; a 30s gap means something wedged. */
+const STREAM_IDLE_TIMEOUT_MS = 30_000;
+
 /** Drives the verdict-first SSE flow from POST /api/check/stream. */
 export function useOnLabelStream() {
   const [state, setState] = useState<OnLabelStreamState>(INITIAL);
@@ -40,7 +45,20 @@ export function useOnLabelStream() {
       error: null,
     });
 
+    // Watchdog state lives in the outer scope so the catch can tell a timeout
+    // abort from a user (reset / new question) abort.
+    let timedOut = false;
+    let watchdog: ReturnType<typeof setTimeout> | undefined;
+    const armWatchdog = () => {
+      clearTimeout(watchdog);
+      watchdog = setTimeout(() => {
+        timedOut = true;
+        controller.abort();
+      }, STREAM_IDLE_TIMEOUT_MS);
+    };
+
     try {
+      armWatchdog();
       const res = await fetch("/api/check/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -49,6 +67,7 @@ export function useOnLabelStream() {
       });
 
       if (!res.ok || !res.body) {
+        clearTimeout(watchdog);
         const msg = await res.text().catch(() => "Request failed.");
         setState((s) => ({ ...s, status: "error", error: msg || "Request failed." }));
         return;
@@ -61,6 +80,7 @@ export function useOnLabelStream() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
+        armWatchdog();
         buffer += decoder.decode(value, { stream: true });
 
         // SSE frames are separated by a blank line.
@@ -81,13 +101,20 @@ export function useOnLabelStream() {
           setState((s) => applyEvent(s, event));
         }
       }
+      clearTimeout(watchdog);
       setState((s) => (s.status === "streaming" ? { ...s, status: "done" } : s));
     } catch (err) {
-      if (controller.signal.aborted) return;
+      // A watchdog abort surfaces as an error; a user abort (new question /
+      // reset) is silent — distinguish via the timedOut flag.
+      if (controller.signal.aborted && !timedOut) return;
       setState((s) => ({
         ...s,
         status: "error",
-        error: err instanceof Error ? err.message : "Network error.",
+        error: timedOut
+          ? "The answer took too long to load. Please try again."
+          : err instanceof Error
+            ? err.message
+            : "Network error.",
       }));
     }
   }, []);
