@@ -3,7 +3,7 @@
  * Run: npx tsx src/lib/onlabel/verify.test.ts
  */
 import assert from "node:assert";
-import { verify } from "./verify";
+import { verify, resolveProduct } from "./verify";
 import productsData from "../../data/products.json";
 import ingredientsData from "../../data/ingredients.json";
 
@@ -82,6 +82,18 @@ test("no single catalog product is danger on its own", () => {
       "danger",
       `${p.brand} flags danger alone — an ingredient limit is likely too low`,
     );
+  }
+});
+
+// Resolution invariant: every catalog product must resolve to ITSELF from its own
+// brand name. Guards against a resolver change (B-19/B-21) or a newly-added product
+// whose name is shadowed/mis-scored so the wrong SKU (or none) comes back.
+test("every catalog product resolves to itself from its brand name", () => {
+  const products = (productsData as { products: { id: string; brand: string }[] }).products;
+  for (const p of products) {
+    const m = resolveProduct(p.brand);
+    assert.ok(m, `${p.brand} does not resolve to any product`);
+    assert.strictEqual(m!.product.id, p.id, `${p.brand} resolved to ${m!.product.id}, not ${p.id}`);
   }
 });
 

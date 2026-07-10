@@ -42,6 +42,15 @@ Still open (different phrasings / formulations):
 - `goodys-extra-strength` — no match under "goody" for {APAP, aspirin, caffeine}
 
 ## D. Wrong SKU selected (mislabel — NOT added) — B-18 Fix 3
+> Status 2026-07-10: these are `fda-add` TOOL selection issues for products we do
+> NOT stock (children's, combo/value packs). They do NOT affect current catalog
+> correctness — the shipped entries were verified clean this session:
+> advil-allergy-sinus (ibuprofen 200 + chlorpheniramine 2 + pseudoephedrine 30),
+> claritin-d (24 Hour: loratadine 10 + PSE 240, 1/day), zyrtec-d / allegra-d
+> (12 Hour combos) all match their cited openFDA labels; check:catalog 38/38.
+> Fix 3 (combo-pack rejection, liquid-form preference) is deferred until we add
+> more products (feature freeze for submission).
+
 Ingredient set matched but the auto-selected SKU is the wrong product:
 - `childrens-tylenol` → "Tylenol 8HR" (adult ER, not children's suspension)
 - `childrens-motrin` → "MOTRIN IB" (adult, not children's)
