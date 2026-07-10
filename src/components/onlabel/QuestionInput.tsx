@@ -24,6 +24,9 @@ export function QuestionInput({
     const text = q.trim();
     if (!text || disabled) return;
     onSubmit?.(text);
+    // Clear the box after asking — the question is already echoed in "You asked:",
+    // so a leftover value just forces the user to delete it before the next ask.
+    setValue("");
   }
 
   return (
@@ -57,10 +60,7 @@ export function QuestionInput({
             <button
               key={ex}
               type="button"
-              onClick={() => {
-                setValue(ex);
-                submit(ex);
-              }}
+              onClick={() => submit(ex)}
               disabled={disabled}
               className="rounded-full border bg-muted/40 px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
             >

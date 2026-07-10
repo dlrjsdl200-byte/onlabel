@@ -3,12 +3,18 @@
 import { QuestionInput } from "./QuestionInput";
 import { AnswerView } from "./AnswerView";
 import { ContrastEngine } from "./ContrastEngine";
+import { FollowUps } from "./FollowUps";
+import { ProgressSteps } from "./ProgressSteps";
 import { Disclaimer } from "./Disclaimer";
 import { useOnLabelStream } from "./useOnLabelStream";
 
 export function OnLabelApp() {
   const { state, ask, reset } = useOnLabelStream();
   const active = state.status !== "idle";
+  // The pre-answer "thinking" phase: streaming has started but neither the
+  // deterministic verdict nor any prose has arrived yet.
+  const thinking =
+    state.status === "streaming" && !state.verification && !state.prose;
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 py-10 sm:py-16">
@@ -41,6 +47,8 @@ export function OnLabelApp() {
               <p className="font-medium">Something went wrong.</p>
               <p className="mt-1 text-foreground/70">{state.error}</p>
             </div>
+          ) : thinking ? (
+            <ProgressSteps />
           ) : state.verification ? (
             <div className="space-y-6">
               <AnswerView
@@ -55,6 +63,10 @@ export function OnLabelApp() {
                     question={state.question}
                     products={state.verification.matched.map((p) => p.brand)}
                   />
+                )}
+              {state.status !== "streaming" &&
+                state.verification.findings.length > 0 && (
+                  <FollowUps result={state.verification} onAsk={ask} />
                 )}
             </div>
           ) : (
