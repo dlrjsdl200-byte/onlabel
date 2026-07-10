@@ -19,11 +19,26 @@ can't be abused.
 The app calls the Claude API on **every** `/api/check`, `/api/check/stream`, and
 `/api/contrast` request, so a public URL can run up spend. Lock it down:
 
-- **Project → Settings → Deployment Protection → Vercel Authentication** (or set a
-  **Password**). This gates the whole deployment behind a login/password — enough
-  for a demo and real-device testing.
-- The request-size caps added in the code (question ≤ 2000 chars, ≤ 20 products —
-  B-22) are a second layer, not a substitute for protection.
+- **Project → Settings → Deployment Protection → Vercel Authentication →
+  "Require Log In" (Standard Protection).** This is **free** on the Hobby plan and
+  gates the whole deployment behind a Vercel login (only you / your team can view).
+  Enough for a demo and real-device testing.
+  - Password Protection is a paid Pro feature ($150/mo) — **not needed**; skip it.
+- The request-size caps in the code (question ≤ 2000 chars, ≤ 20 products — B-22)
+  are a second layer, not a substitute for protection.
+
+**Consequences of "Require Log In" (read before testing / recording):**
+- It protects the **`/api` routes too**, so the plain `curl` smoke test in §3 will
+  be redirected to a login page. Either test in the browser (logged in) or use a
+  **Protection Bypass for Automation** token: Settings → Deployment Protection →
+  *Protection Bypass for Automation* → generate a secret, then pass it as the
+  `x-vercel-protection-bypass` header (free).
+- **Real-device test:** on the phone, first sign in at `vercel.com` with the same
+  account, then open the deployment URL — it will load.
+- **Demo video / judges:** a login-protected URL is not viewable by people outside
+  your team. Recording while you are logged in is fine. If judges need live access,
+  either share a Protection Bypass link or briefly toggle protection off during the
+  window — most hackathons evaluate on the video + repo, so this is usually a non-issue.
 
 ## 3. ⚠️ Verify FIRST: does the Agent SDK run in the serverless function?
 
@@ -37,12 +52,16 @@ Mitigation already in place: `next.config.ts` forces the whole
 (`outputFileTracingIncludes`), and Vercel's Linux `npm install` pulls the Linux
 build, so the correct binary travels with the function.
 
-**Smoke test the deployed URL immediately:**
+**Smoke test the deployed URL immediately** (add the bypass header because
+"Require Log In" also protects `/api` — see §2):
 ```
 curl -s -X POST https://<your-app>.vercel.app/api/check \
   -H "content-type: application/json" \
+  -H "x-vercel-protection-bypass: <automation-bypass-secret>" \
   -d '{"question":"Can I take Tylenol Extra Strength with DayQuil?"}'
 ```
+(Drop the bypass header if protection is off. Or just run the query in the
+browser while logged in — same code path.)
 - Expect JSON with `verification.overall = "danger"` and a grounded `answer`.
 - If it returns a 500 or an empty answer, open **Vercel → Deployment → Functions
   logs**. A spawn/ENOENT/permission error there means the bundled binary didn't
