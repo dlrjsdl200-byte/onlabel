@@ -146,6 +146,25 @@ test("ingredient-identity: Advil is ibuprofen -> VERIFIED", () => {
   assert.strictEqual(v.status, "VERIFIED");
 });
 
+// B-23: a FALSE product-containment claim must be CONTRADICTED, not waved through.
+test("ingredient-identity: 'DayQuil contains ibuprofen' (false) -> CONTRADICTED", () => {
+  const r = verify(["DayQuil"]);
+  const v = verifyClinicalClaim(
+    { text: "DayQuil contains ibuprofen", kind: "ingredient-identity", ingredient: "ibuprofen", product: "DayQuil" },
+    r,
+  );
+  assert.strictEqual(v.status, "CONTRADICTED");
+});
+test("ingredient-identity: claim about the WRONG named product -> CONTRADICTED", () => {
+  // ibuprofen is in Advil, NOT Tylenol; the claim is about Tylenol -> false.
+  const r = verify(["Tylenol Extra Strength", "Advil"]);
+  const v = verifyClinicalClaim(
+    { text: "Tylenol contains ibuprofen", kind: "ingredient-identity", ingredient: "ibuprofen", product: "Tylenol" },
+    r,
+  );
+  assert.strictEqual(v.status, "CONTRADICTED");
+});
+
 test("duplication: acetaminophen doubled across products -> VERIFIED (duplicated)", () => {
   const r = verify(["Tylenol Extra Strength", "Vicks NyQuil Cold & Flu"]);
   const v = verifyClinicalClaim(

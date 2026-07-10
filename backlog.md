@@ -209,3 +209,15 @@ verify(["Advil","Advil"])가 원장 이중합산→false danger. 수정: matched
 
 ## B-22. API 입력 길이 상한 (P2) `[✅ DONE 2026-07-10]`
 /api/check·/stream·/contrast에 question≤2000자(+products≤20) 가드 추가(비용·지연 방어).
+
+## B-23. ingredient-identity false VERIFIED (P1 신뢰 — 대조엔진) `[✅ DONE 2026-07-10]`
+verifyClaims의 ingredient-identity가 claim.product를 안 쓰고 "아무 매칭 제품에 있으면", 없어도 "recognized"로 무조건 VERIFIED → "DayQuil contains ibuprofen"(거짓)도 VERIFIED(오정보 인증). 수정: claim.product를 카탈로그 제품으로 해소해 그 제품에 성분 있으면 VERIFIED, 없으면 CONTRADICTED. product 미지정 시만 "recognized" 완화. 회귀테스트 2.
+
+## B-24. 비-success agent result 침묵 (P1 견고성) `[✅ DONE 2026-07-10]`
+result subtype≠success(max_turns·execution error)에서 runOnLabel이 answer=""(빈 답변), streamOnLabel은 done/error 없이 조용히 닫힘(error 이벤트 타입은 정의됐으나 미방출). 수정: runOnLabel throw(라우트 500), streamOnLabel error 이벤트 방출.
+
+## B-25. done productsChecked 불일치 (P2) `[✅ DONE 2026-07-10]`
+verdict는 1차 tool 호출 제품으로 스냅되나 done은 전체 productSet 사용. 수정: verdict 스냅 시점 productsChecked 기록해 done에서 재사용(snappedProductsChecked).
+
+## B-26. daysOf 하이픈 미인식 (P2) `[✅ DONE 2026-07-10]`
+"10-day course"의 days 미추출. 수정: `\d+(?=\s*-?\s*day)`로 하이픈/공백 허용.

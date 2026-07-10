@@ -8,7 +8,7 @@
  * plus the grounded basis, so the pipeline can show FDA receipts per claim.
  */
 
-import { verify, ingredientRef, resolveIngredientKey, type VerifyResult } from "./verify";
+import { verify, ingredientRef, resolveIngredientKey, resolveProduct, type VerifyResult } from "./verify";
 import {
   type Claim,
   type ClaimVerdict,
@@ -28,9 +28,10 @@ function hoursOf(text: string): number[] {
   return [...new Set(out)];
 }
 
-/** Integers that precede "day(s)" — "up to 10 days" -> [10]. */
+/** Integers that precede "day(s)" — "up to 10 days" / "10-day course" -> [10].
+ * The optional hyphen/space lets the compound form ("10-day") match too. (B-26) */
 function daysOf(text: string): number[] {
-  const nums = text.match(/\d+(?=\s*day)/gi);
+  const nums = text.match(/\d+(?=\s*-?\s*day)/gi);
   return nums ? [...new Set(nums.map(Number))] : [];
 }
 
@@ -209,16 +210,27 @@ export function verifyClinicalClaim(
 
     case "ingredient-identity": {
       if (!ref) return unsupported(claim, `"${claim.ingredient}" is not a known active ingredient`);
-      const inProduct = result.matched.some((p) =>
-        p.ingredients.some((i) => i.ingredient === key),
-      );
-      return verified(
-        claim,
-        inProduct
-          ? `${ref.displayName} is an active ingredient in the named product(s)`
-          : `${ref.displayName} is a recognized active ingredient`,
-        key ?? undefined,
-      );
+      // The claim asserts a SPECIFIC product contains this ingredient. Check THAT
+      // product, not "any checked product": otherwise "Tylenol contains ibuprofen"
+      // passes just because ibuprofen is in a different named product (Advil), and
+      // "DayQuil contains ibuprofen" is waved through as merely "a recognized
+      // ingredient". Both are false and must be CONTRADICTED. (B-23)
+      const target = claim.product ? resolveProduct(claim.product)?.product : null;
+      if (target) {
+        const has = target.ingredients.some((i) => i.ingredient === key);
+        return has
+          ? verified(claim, `${ref.displayName} is an active ingredient in ${target.brand}`, key ?? undefined)
+          : contradicted(
+              claim,
+              `${target.brand} does not contain ${ref.displayName} — its active ingredients are ${target.ingredients
+                .map((i) => i.ingredient)
+                .join(", ")}`,
+              key ?? undefined,
+            );
+      }
+      // No specific product named (or it didn't resolve): the claim is only that
+      // this is a real active ingredient — a weaker, true statement.
+      return verified(claim, `${ref.displayName} is a recognized active ingredient`, key ?? undefined);
     }
 
     default:

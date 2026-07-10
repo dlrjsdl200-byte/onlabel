@@ -140,6 +140,7 @@ export async function* streamOnLabel(
   const productSet = new Set<string>();
   let verdictSent = false;
   let streamedProse = false;
+  let snappedProductsChecked: string[] | null = null;
   const buffered: string[] = [];
 
   function makeVerification(): OnLabelEvent | null {
@@ -147,6 +148,10 @@ export async function* streamOnLabel(
       questionText,
       [...productSet],
     );
+    // Record the products behind the verdict so the terminal `done` reports the
+    // SAME set the verdict was computed from, even if a later tool call widens
+    // productSet (B-25). Set on defer too, so an open-question `done` is stable.
+    snappedProductsChecked = productsChecked;
     if (!verification) return null; // no user-named products, or red-flag ok → defer
     return { type: "verification", verification, productsChecked };
   }
@@ -198,7 +203,14 @@ export async function* streamOnLabel(
           yield { type: "token", text };
         }
       }
-    } else if (message.type === "result" && message.subtype === "success") {
+    } else if (message.type === "result") {
+      // A non-success result (max_turns, execution error) must surface as an error
+      // event, not a silently-closed stream — the `error` event type existed but
+      // was never emitted. (B-24)
+      if (message.subtype !== "success") {
+        yield { type: "error", message: `OnLabel agent did not complete (${message.subtype}).` };
+        return;
+      }
       // Ensure a verdict went out even if partial parsing missed the tool call.
       if (!verdictSent) {
         const v = makeVerification();
@@ -216,7 +228,9 @@ export async function* streamOnLabel(
       }
       yield {
         type: "done",
-        productsChecked: gatedVerification(questionText, [...productSet]).productsChecked,
+        productsChecked:
+          snappedProductsChecked ??
+          gatedVerification(questionText, [...productSet]).productsChecked,
       };
     }
   }
@@ -250,8 +264,12 @@ export async function runOnLabel(questionText: string): Promise<OnLabelResponse>
           }
         }
       }
-    } else if (message.type === "result" && message.subtype === "success") {
-      answer = message.result;
+    } else if (message.type === "result") {
+      // A non-success result (max_turns, execution error) previously left `answer`
+      // empty and returned a silent blank response. Surface it so the route can
+      // report a real error instead of an empty card. (B-24)
+      if (message.subtype === "success") answer = message.result;
+      else throw new Error(`OnLabel agent did not complete (${message.subtype}).`);
     }
   }
 
