@@ -1,30 +1,63 @@
 /**
  * OnLabel agent runner.
  *
- * Runs the Claude Agent SDK with the deterministic check_otc_safety tool.
- * Claude drafts the answer and calls the tool; we additionally re-run the
+ * Runs a small Claude tool-use loop over the deterministic check_otc_safety tool,
+ * calling the Anthropic Messages API directly (@anthropic-ai/sdk) — no CLI
+ * subprocess. Claude drafts the answer and calls the tool; we re-run the
  * deterministic verifier on the products it checked so the returned
  * `verification` is guaranteed ground truth, not parsed from LLM prose.
  *
- * Day 2: methodology lives in the system prompt. The otc-safety-check skill
- * is the canonical artifact and will be wired via an isolated subagent in Day 3.
+ * The safety VERDICT is always verify()'s deterministic result — the model only
+ * writes grounded prose and decides which named products to check.
  */
 
-import { query } from "@anthropic-ai/claude-agent-sdk";
-import { onlabelServer, CHECK_OTC_SAFETY_TOOL } from "./tool";
+import Anthropic from "@anthropic-ai/sdk";
+import { runSafetyCheck } from "./tool";
 import { verify, type VerifyResult } from "./verify";
 import { userNamedProducts, hasRedFlagContext } from "./provenance";
 
 /**
  * The answer LLM only writes grounded prose and decides which products to pass to
  * the tool — the safety VERDICT is deterministic (verify()), never the model. So a
- * fast model is safe here and roughly halves latency (measured 18.3s → 10.7s, same
- * danger verdict, prose still grounded). Override with ONLABEL_MODEL if needed.
+ * fast model is safe here and roughly halves latency. Override with ONLABEL_MODEL.
  */
-const ANSWER_MODEL = process.env.ONLABEL_MODEL ?? "claude-haiku-4-5-20251001";
-/** Cap the agent loop: read question → call the tool → write the answer is ~2 turns;
- * a small ceiling stops a runaway loop from stretching latency. */
+const ANSWER_MODEL = process.env.ONLABEL_MODEL ?? "claude-haiku-4-5";
+/** read question → call the tool → write the answer is ~2 turns; a small ceiling
+ * stops a runaway tool loop from stretching latency. */
 const ANSWER_MAX_TURNS = 6;
+/** The prose answer is a few sentences; the tool-call turn is a tiny JSON blob. */
+const MAX_TOKENS = 1024;
+
+/** Fully-qualified name of the deterministic tool the model may call. */
+const TOOL_NAME = "check_otc_safety";
+
+/** The check_otc_safety tool, defined for the Messages API (raw JSON schema). */
+const CHECK_TOOL: Anthropic.Tool = {
+  name: TOOL_NAME,
+  description:
+    "Check whether a set of over-the-counter (OTC) pain-relief or cold/flu products is safe to take together. Returns a deterministic verdict grounded in FDA ingredient data: active-ingredient duplication (especially acetaminophen), cumulative dose vs. the daily maximum, and drug-class overlap (multiple NSAIDs, decongestants, or sedating antihistamines). Call this whenever the user asks about combining or dosing OTC medicines. Pass the product brand names exactly as the user wrote them.",
+  input_schema: {
+    type: "object",
+    properties: {
+      products: {
+        type: "array",
+        items: { type: "string" },
+        description:
+          "OTC product brand names the user is asking about, e.g. ['Tylenol Extra Strength', 'DayQuil']",
+      },
+    },
+    required: ["products"],
+  },
+};
+
+let client: Anthropic | null = null;
+function getClient(): Anthropic {
+  // Reads ANTHROPIC_API_KEY from the environment. The API routes already verify
+  // the key is set before calling in; construct lazily so importing this module
+  // never throws.
+  if (!client) client = new Anthropic();
+  return client;
+}
 
 /**
  * Turn a raw product set into the verdict shown to the user, applying the
@@ -139,6 +172,17 @@ function extractProducts(input: unknown): string[] {
   return out;
 }
 
+/** Run the tool call locally and return the tool_result block to send back. */
+function handleToolUse(
+  block: Anthropic.ToolUseBlock,
+  productSet: Set<string>,
+): Anthropic.ToolResultBlockParam {
+  const products = extractProducts(block.input);
+  for (const p of products) productSet.add(p);
+  const { text } = runSafetyCheck(products);
+  return { type: "tool_result", tool_use_id: block.id, content: text };
+}
+
 /**
  * Streaming variant of runOnLabel. Yields the deterministic `verification`
  * the moment Claude calls check_otc_safety (verdict-first snap), then streams
@@ -150,15 +194,12 @@ export async function* streamOnLabel(
 ): AsyncGenerator<OnLabelEvent> {
   const productSet = new Set<string>();
   let verdictSent = false;
-  let streamedProse = false;
   let snappedProductsChecked: string[] | null = null;
   const buffered: string[] = [];
+  const messages: Anthropic.MessageParam[] = [{ role: "user", content: questionText }];
 
   function makeVerification(): OnLabelEvent | null {
-    const { productsChecked, verification } = gatedVerification(
-      questionText,
-      [...productSet],
-    );
+    const { productsChecked, verification } = gatedVerification(questionText, [...productSet]);
     // Record the products behind the verdict so the terminal `done` reports the
     // SAME set the verdict was computed from, even if a later tool call widens
     // productSet (B-25). Set on defer too, so an open-question `done` is stable.
@@ -167,86 +208,68 @@ export async function* streamOnLabel(
     return { type: "verification", verification, productsChecked };
   }
 
-  for await (const message of query({
-    prompt: questionText,
-    options: {
-      systemPrompt: SYSTEM_PROMPT,
+  for (let turn = 0; turn < ANSWER_MAX_TURNS; turn++) {
+    const stream = getClient().messages.stream({
       model: ANSWER_MODEL,
-      maxTurns: ANSWER_MAX_TURNS,
-      mcpServers: { onlabel: onlabelServer },
-      allowedTools: [CHECK_OTC_SAFETY_TOOL],
-      tools: [],
-      includePartialMessages: true,
-    },
-  })) {
-    if (message.type === "assistant") {
-      for (const block of message.message.content) {
-        if (block.type === "tool_use" && block.name === CHECK_OTC_SAFETY_TOOL) {
-          for (const p of extractProducts(block.input)) productSet.add(p);
+      max_tokens: MAX_TOKENS,
+      system: SYSTEM_PROMPT,
+      tools: [CHECK_TOOL],
+      messages,
+    });
+
+    for await (const event of stream) {
+      if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+        const text = event.delta.text;
+        if (verdictSent) yield { type: "token", text };
+        else buffered.push(text); // hold prose until the verdict lands
+      }
+    }
+
+    const msg = await stream.finalMessage();
+
+    if (msg.stop_reason === "tool_use") {
+      messages.push({ role: "assistant", content: msg.content });
+      const toolResults: Anthropic.ToolResultBlockParam[] = [];
+      for (const block of msg.content) {
+        if (block.type === "tool_use" && block.name === TOOL_NAME) {
+          toolResults.push(handleToolUse(block, productSet));
         }
       }
-      // Snap the verdict as soon as we know the products.
+      messages.push({ role: "user", content: toolResults });
+      // Snap the verdict as soon as we know the products (after the first call).
       if (!verdictSent) {
         const v = makeVerification();
         if (v) {
           verdictSent = true;
           yield v;
-          for (const t of buffered) {
-            streamedProse = true;
-            yield { type: "token", text: t };
-          }
+          for (const t of buffered) yield { type: "token", text: t };
           buffered.length = 0;
         }
       }
-    } else if (message.type === "stream_event") {
-      const ev = message.event as {
-        type?: string;
-        delta?: { type?: string; text?: string };
-      };
-      if (
-        ev.type === "content_block_delta" &&
-        ev.delta?.type === "text_delta" &&
-        typeof ev.delta.text === "string"
-      ) {
-        const text = ev.delta.text;
-        if (!verdictSent) {
-          buffered.push(text); // hold prose until the verdict lands
-        } else {
-          streamedProse = true;
-          yield { type: "token", text };
-        }
-      }
-    } else if (message.type === "result") {
-      // A non-success result (max_turns, execution error) must surface as an error
-      // event, not a silently-closed stream — the `error` event type existed but
-      // was never emitted. (B-24)
-      if (message.subtype !== "success") {
-        yield { type: "error", message: `OnLabel agent did not complete (${message.subtype}).` };
-        return;
-      }
-      // Ensure a verdict went out even if partial parsing missed the tool call.
-      if (!verdictSent) {
-        const v = makeVerification();
-        if (v) {
-          verdictSent = true;
-          yield v;
-        }
-      }
-      // Fallback: if no deltas streamed, emit the full result text at once.
-      if (!streamedProse && message.result) {
-        for (const t of buffered) yield { type: "token", text: t };
-        if (buffered.length === 0) {
-          yield { type: "token", text: message.result };
-        }
-      }
-      yield {
-        type: "done",
-        productsChecked:
-          snappedProductsChecked ??
-          gatedVerification(questionText, [...productSet]).productsChecked,
-      };
+      continue;
     }
+
+    // end_turn (or max_tokens): the answer is complete. If the verdict was
+    // deferred (no user-named products, or a red-flag ok), flush the buffered
+    // prose now with no verdict card.
+    if (!verdictSent) {
+      const v = makeVerification();
+      if (v) yield v;
+      for (const t of buffered) yield { type: "token", text: t };
+      buffered.length = 0;
+    }
+    yield {
+      type: "done",
+      productsChecked:
+        snappedProductsChecked ??
+        gatedVerification(questionText, [...productSet]).productsChecked,
+    };
+    return;
   }
+
+  // The loop only exits without returning if it kept calling the tool past the
+  // cap — surface that instead of closing the stream silently (B-24).
+  yield { type: "error", message: "OnLabel agent did not complete (max turns reached)." };
 }
 
 /**
@@ -255,38 +278,39 @@ export async function* streamOnLabel(
  */
 export async function runOnLabel(questionText: string): Promise<OnLabelResponse> {
   const productSet = new Set<string>();
-  let answer = "";
+  const messages: Anthropic.MessageParam[] = [{ role: "user", content: questionText }];
+  let answer: string | null = null;
 
-  for await (const message of query({
-    prompt: questionText,
-    options: {
-      systemPrompt: SYSTEM_PROMPT,
+  for (let turn = 0; turn < ANSWER_MAX_TURNS && answer === null; turn++) {
+    const resp = await getClient().messages.create({
       model: ANSWER_MODEL,
-      maxTurns: ANSWER_MAX_TURNS,
-      mcpServers: { onlabel: onlabelServer },
-      allowedTools: [CHECK_OTC_SAFETY_TOOL],
-      tools: [], // strip built-in tools; only OnLabel's tool is available
-    },
-  })) {
-    if (message.type === "assistant") {
-      for (const block of message.message.content) {
-        if (block.type === "tool_use" && block.name === CHECK_OTC_SAFETY_TOOL) {
-          const input = block.input as { products?: unknown };
-          if (Array.isArray(input.products)) {
-            for (const p of input.products) {
-              if (typeof p === "string") productSet.add(p);
-            }
-          }
+      max_tokens: MAX_TOKENS,
+      system: SYSTEM_PROMPT,
+      tools: [CHECK_TOOL],
+      messages,
+    });
+
+    if (resp.stop_reason === "tool_use") {
+      messages.push({ role: "assistant", content: resp.content });
+      const toolResults: Anthropic.ToolResultBlockParam[] = [];
+      for (const block of resp.content) {
+        if (block.type === "tool_use" && block.name === TOOL_NAME) {
+          toolResults.push(handleToolUse(block, productSet));
         }
       }
-    } else if (message.type === "result") {
-      // A non-success result (max_turns, execution error) previously left `answer`
-      // empty and returned a silent blank response. Surface it so the route can
-      // report a real error instead of an empty card. (B-24)
-      if (message.subtype === "success") answer = message.result;
-      else throw new Error(`OnLabel agent did not complete (${message.subtype}).`);
+      messages.push({ role: "user", content: toolResults });
+      continue;
     }
+
+    answer = resp.content
+      .filter((b): b is Anthropic.TextBlock => b.type === "text")
+      .map((b) => b.text)
+      .join("");
   }
+
+  // A run that never reached a final answer (kept calling the tool past the cap)
+  // must surface as an error, not a silent blank response. (B-24)
+  if (answer === null) throw new Error("OnLabel agent did not complete (max turns reached).");
 
   // Checker (D34) + red-flag (D35) gates: verdict only on user-named products,
   // and no green "ok" badge on a red-flag context.
