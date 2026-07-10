@@ -221,3 +221,9 @@ verdict는 1차 tool 호출 제품으로 스냅되나 done은 전체 productSet 
 
 ## B-26. daysOf 하이픈 미인식 (P2) `[✅ DONE 2026-07-10]`
 "10-day course"의 days 미추출. 수정: `\d+(?=\s*-?\s*day)`로 하이픈/공백 허용.
+
+## B-27. 스트림 무한로딩 방어 (P1 UX) `[✅ DONE 2026-07-10]`
+비카탈로그/지체 입력("mycin")에서 스트림이 done 없이 멈추면 useOnLabelStream이 무한대기. 근본원인은 직접-API 리팩터(subprocess 제거)로 해소, 방어로 클라 30s 워치독 추가(무한로딩→에러). 상세: findings 2026-07-10.
+
+## B-28. 대조엔진 직접 API 전환 (P2 속도, 후속) `[IDEA]`
+/api/contrast(claimPipeline·verifyLanguage)는 아직 query()(SDK subprocess) 사용 — opt-in이라 데모 필수경로 아님. 메인경로와 동일하게 Messages API 직접 루프로 전환하면 대조엔진도 빨라지고 SDK 의존 완전 제거 가능. 후속.

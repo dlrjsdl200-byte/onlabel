@@ -202,3 +202,10 @@
 - **🟢 전수조사(전 16성분)**: 카탈로그 내 동일약 이성질체 쌍은 **cetirizine↔levocetirizine 하나뿐**. 미래 위험(desloratadine·dexchlorpheniramine·dexbrompheniramine)은 해당 이성질체 미보유. → dupGroup 그룹핑이 다른 성분 오그룹 위험 0 확인.
 - **수정(D38)**: (1) IngredientRef에 `dupGroup` 필드 + cetirizine/levocetirizine에 `"cetirizine"` 부여 → verify()가 dupGroup ≥2 distinct key면 **same-drug caution**. (2) Q2 결정대로 `CLASS_RULES`에 `antihistamine-nonsedating: caution` 추가(서로 다른 2세대 병용). 결과: Xyzal+Zyrtec=caution(same-drug), Zyrtec+Claritin=caution(class), 단일=ok 불변.
 - **검증**: typecheck 0, verify.test 30→**33**(신규 3), 골든 240/240 무회귀, build 성공. **위음성 0 방향으로 강화.** 잔여: levo 5mg≈cet 10mg 등가 danger 승격은 등가계수 접지 후(후속).
+
+## 2026-07-10 (Vercel 배포 + 속도 리팩터 + mycin 무한로딩 — MCP로 진단·수정)
+> 배포(GitHub→Vercel 연결, Vercel Auth 무료보호) 후 MCP(Vercel)로 배포·런타임 로그 직접 진단. onlabel.vercel.app 라이브.
+- **🔴 배포 블로커 규명·해결(MCP 로그)**: Agent SDK `query()`가 native CLI 바이너리를 **spawn** → 첫 배포 런타임 로그에서 `Native CLI binary for linux-x64 not found`(B-24 에러표면화가 진단 가능케 함). native 바이너리는 **별도 optional 패키지**(`@anthropic-ai/claude-agent-sdk-linux-x64`)라 tracing이 놓침 → `next.config.ts outputFileTracingIncludes`에 linux native 패키지 추가로 해결(빌드성공→런타임 200).
+- **⚡ 속도 다방면 조사→직접 API 리팩터(최대 성과)**: 원인=(1)모델 미지정(기본 Sonnet급 18.3s), (2)매 요청 subprocess spawn, (3)에이전트 2왕복. 조치: (a)Haiku(`claude-haiku-4-5`) 18.3→9s, (b)**query() 제거→Anthropic Messages API 직접 tool-use 루프**(`@anthropic-ai/sdk`). 실측 **runOnLabel 5.5s, stream verdict카드 ~1.3s, 전체 ~3s.** verify()코어·프롬프트울타리·D34/D35·verdict-first버퍼링·B-24/25 전부 보존. `runSafetyCheck` 재사용. **서버리스 subprocess 취약성도 동시 제거.** 대조엔진(/api/contrast, opt-in)만 SDK 잔존.
+- **🔴 "mycin" 무한로딩 규명(B-27)**: HTTP 전부 200(504 없음) → 스트림이 `done` 없이 멈춰 클라 무한대기. 원인=구 SDK-subprocess가 비카탈로그 입력("mycin")에서 지체 + useOnLabelStream **타임아웃 부재**. 직접-API선 정상(`Can I take mycin`→3.4s/verdict none/done). 조치: 근본=직접-API, 방어=**클라 30s 워치독**(멈추면 무한로딩 대신 에러, 유저취소와 구분).
+- **MCP 활용**: Vercel MCP로 프로젝트/배포/빌드로그/런타임로그 직접 조회·진단(POST는 못 보내 최종 verdict 확인은 사용자 클릭+로그판독). 실기기 테스트는 로그인 보호라 curl은 Protection Bypass 필요(브라우저 로그인 상태면 됨).
