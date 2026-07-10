@@ -609,6 +609,21 @@
       "verify": false
     },
     {
+      "id": "chlor-trimeton",
+      "brand": "Chlor-Trimeton Allergy",
+      "company": "Rugby Laboratories",
+      "category": "allergy",
+      "core": false,
+      "doseForm": "tablet",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 6,
+      "ingredients": [
+        { "ingredient": "chlorpheniramine", "mgPerDose": 4 }
+      ],
+      "source": "Chlor-Trimeton brand absent from openFDA; composition grounded to generic-equivalent single-ingredient SPL: Aller-chlor (chlorpheniramine maleate 4 mg) — openFDA/DailyMed SPL 04ca3806-72be-47d4-9fea-5b0dee087683",
+      "verify": false
+    },
+    {
       "id": "mucinex-sinus-max",
       "brand": "Mucinex Sinus-Max Pressure Pain",
       "company": "Reckitt Benckiser LLC",

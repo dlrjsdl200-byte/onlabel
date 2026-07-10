@@ -52,10 +52,13 @@ an existing catalog id.
 - `unisom-pm-pain` — acetaminophen **325 mg** once daily looks low (possible
   mis-parse of the dose vs per-caplet).
 
-## F. Store-brand match (Fix 4 decision, B-18)
-- `chlor-trimeton` → "Aller-chlor" (Chlor-Trimeton brand absent from openFDA OTC;
-  chlorpheniramine 4 mg / 24 mg-day is the monograph-standard value). Decision:
-  accept the generic-equivalent SPL or defer.
+## F. Store-brand match (Fix 4 decision, B-18) — ✅ RESOLVED (D36, 2026-07-10)
+- `chlor-trimeton` → "Aller-chlor". Verified `brand_name.exact:"CHLOR-TRIMETON"` = 0
+  hits (brand truly absent), but 12 single-substance chlorpheniramine-maleate 4 mg
+  OTC SPLs exist. **Decision: accept the generic-equivalent SPL** (D36) — the number
+  6 tablets × 4 mg = 24 mg/day is extracted from the Aller-chlor label and independently
+  matches the existing M012-grounded chlorpheniramine limit. Added with a `source` that
+  discloses "brand absent → grounded to generic-equivalent SPL". Product count 44 → 45.
 
 ---
 Clean-added this batch (5): motrin-ib, excedrin-tension-headache,
