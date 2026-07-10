@@ -40,20 +40,22 @@ The app calls the Claude API on **every** `/api/check`, `/api/check/stream`, and
   either share a Protection Bypass link or briefly toggle protection off during the
   window — most hackathons evaluate on the video + repo, so this is usually a non-issue.
 
-## 3. ⚠️ Verify FIRST: does the Agent SDK run in the serverless function?
+## 3. Smoke test the deployed URL
 
-**This is the #1 thing to check on the first deploy.** The Claude Agent SDK's
-`query()` extracts and **spawns a bundled binary** at request time (it is a client
-to the Claude Code runtime, not a pure HTTP client). Locally this is fine; in a
-serverless function it may not be.
+The **main answer path** (`/api/check`, `/api/check/stream`) calls the Anthropic
+Messages API directly (`@anthropic-ai/sdk`) — a plain HTTPS call, **no subprocess**.
+It is serverless-native and fast (~1.3s to the verdict card, ~3–5s to the full
+answer). There is no bundled binary to worry about here.
 
-Mitigation already in place: `next.config.ts` forces the whole
-`@anthropic-ai/claude-agent-sdk` package to ship with the API routes
-(`outputFileTracingIncludes`), and Vercel's Linux `npm install` pulls the Linux
-build, so the correct binary travels with the function.
+> The **opt-in contrast engine** (`/api/contrast`, the "Compare to generic AI"
+> button) still uses the Claude Agent SDK's `query()`, which extracts and spawns a
+> bundled binary at request time. `next.config.ts` ships the linux-x64 native
+> package with the function (`outputFileTracingIncludes`) so it runs on Vercel, but
+> it is heavier/slower than the main path. If you never click the contrast button,
+> this code never runs.
 
-**Smoke test the deployed URL immediately** (add the bypass header because
-"Require Log In" also protects `/api` — see §2):
+**Smoke test** (add the bypass header because "Require Log In" also protects
+`/api` — see §2):
 ```
 curl -s -X POST https://<your-app>.vercel.app/api/check \
   -H "content-type: application/json" \
@@ -64,9 +66,7 @@ curl -s -X POST https://<your-app>.vercel.app/api/check \
 browser while logged in — same code path.)
 - Expect JSON with `verification.overall = "danger"` and a grounded `answer`.
 - If it returns a 500 or an empty answer, open **Vercel → Deployment → Functions
-  logs**. A spawn/ENOENT/permission error there means the bundled binary didn't
-  run — see fallback below. (The B-24 fix makes a failed run surface as a real
-  error instead of a silent blank card, so the log will be explicit.)
+  logs** — the B-24 fix surfaces a real error there instead of a silent blank card.
 
 **Fallback if the subprocess can't run on Vercel:**
 - Confirm the function's runtime is **Node.js** (routes already set
