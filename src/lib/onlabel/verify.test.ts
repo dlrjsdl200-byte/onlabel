@@ -5,6 +5,7 @@
 import assert from "node:assert";
 import { verify } from "./verify";
 import productsData from "../../data/products.json";
+import ingredientsData from "../../data/ingredients.json";
 
 let passed = 0;
 function test(name: string, fn: () => void) {
@@ -80,6 +81,23 @@ test("no single catalog product is danger on its own", () => {
       r.overall,
       "danger",
       `${p.brand} flags danger alone — an ingredient limit is likely too low`,
+    );
+  }
+});
+
+// Provenance invariant: every ingredient daily ceiling must cite a primary
+// source. A maxDailyMg with no `source` is an un-auditable number — exactly the
+// gap that let a "manufacturer dosing schedule" be mistaken for an ingredient
+// ceiling. Forces `npm run audit:ceilings` groundwork to stay honest (D22/D37).
+test("every ingredient maxDailyMg cites a source", () => {
+  const ings = (ingredientsData as {
+    ingredients: Record<string, { maxDailyMg: number | null; source?: string }>;
+  }).ingredients;
+  for (const [key, ref] of Object.entries(ings)) {
+    if (ref.maxDailyMg == null) continue; // null = no monograph ceiling (e.g. caffeine) — legitimate
+    assert.ok(
+      typeof ref.source === "string" && ref.source.trim().length > 0,
+      `ingredient "${key}" has maxDailyMg=${ref.maxDailyMg} but no source citation`,
     );
   }
 });
