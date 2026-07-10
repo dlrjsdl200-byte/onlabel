@@ -185,7 +185,7 @@
 - **정밀화 겸사**: B-13의 광의 cue 매칭(`liver`/`heart` 등) 오탐(예: "protect my liver")을 이때 문맥 구분으로 정밀화.
 - **선행**: 소스 신뢰성 검증 + 약사 서명(verify:false). B-4/B-6와 동일 추출 규율.
 
-## B-17. 이성질체/동일분자 교차중복 미검출 (cross-duplication) `[P1 안전 — 도메인 결정]`
+## B-17. 이성질체/동일분자 교차중복 미검출 (cross-duplication) `[✅ DONE 2026-07-10 — D38]`
 > 발견: 2026-07-09 제품 확장. `verify(["Xyzal","Zyrtec"])` = **ok** — levocetirizine(Xyzal)와 cetirizine(Zyrtec)은 **다른 ingredient key**라 중복 판정을 안 하지만, levocetirizine은 **cetirizine의 활성 거울상 이성질체**라 동시복용 = 사실상 같은 약 이중.
 - **무엇**: verify()의 duplication은 동일 key만 매칭 + 비진정 항히스타민엔 클래스 규칙 없음 → levo/cetirizine, (유사) dexbrompheniramine/brompheniramine 등 **이성질체·동일약리 쌍**을 놓침.
 - **왜 P1(안전)**: 위음성 방향(초록 ok가 실제 이중을 은폐). 단 소비자가 두 브랜드 다 살 확률은 낮아 데모 치명은 아님.

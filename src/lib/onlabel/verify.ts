@@ -34,6 +34,11 @@ export interface IngredientRef {
   source: string;
   verify: boolean;
   dosing?: IngredientDosing;
+  /** Distinct ingredients that are the SAME active moiety (an enantiomer or active
+   * metabolite of each other) share a dupGroup, so taking both counts as a
+   * duplication even though their keys differ — e.g. levocetirizine is the
+   * R-enantiomer of cetirizine (B-17). */
+  dupGroup?: string;
 }
 
 export interface ProductIngredient {
@@ -491,12 +496,47 @@ export function verify(productNames: string[]): VerifyResult {
     });
   }
 
-  // Class-level findings: multiple DISTINCT ingredients of the same risk class
+  // Same-drug (isomer / active-metabolite) duplication: distinct ingredient keys
+  // that share a dupGroup are the SAME active moiety, so taking both is a
+  // duplication even though the keys differ (B-17: levocetirizine is the
+  // R-enantiomer of cetirizine). Treated as a caution — doses add up.
   const classFindings: ClassFinding[] = [];
+  const dupGroups = new Map<string, string[]>(); // dupGroup -> ingredient keys present
+  for (const key of ledger.keys()) {
+    const g = INGREDIENTS[key]?.dupGroup;
+    if (g) dupGroups.set(g, [...(dupGroups.get(g) ?? []), key]);
+  }
+  for (const [, keys] of dupGroups) {
+    if (keys.length < 2) continue;
+    const names = keys.map((k) => INGREDIENTS[k]?.displayName ?? k);
+    const brands = keys.flatMap((k) => (ledger.get(k) ?? []).map((c) => c.brand));
+    classFindings.push({
+      className: "same-drug",
+      ingredients: names,
+      brands: [...new Set(brands)],
+      severity: "caution",
+      message: `Same drug: ${names.join(" + ")} are the same antihistamine (one is the active isomer of the other). Taking both doubles the dose — do not combine.`,
+    });
+  }
+
+  // Class-level findings: multiple DISTINCT ingredients of the same risk class
   const CLASS_RULES: Record<string, Severity> = {
     nsaid: "danger",
     decongestant: "caution",
     "antihistamine-sedating": "caution",
+    "antihistamine-nonsedating": "caution",
+  };
+  const CLASS_LABEL: Record<string, string> = {
+    nsaid: "Multiple NSAIDs",
+    decongestant: "Multiple decongestants",
+    "antihistamine-sedating": "Multiple sedating antihistamines",
+    "antihistamine-nonsedating": "Multiple antihistamines",
+  };
+  const CLASS_WHY: Record<string, string> = {
+    nsaid: "Combining NSAIDs raises the risk of GI bleeding and kidney injury.",
+    decongestant: "Combining decongestants adds cardiovascular strain (blood pressure, heart rate).",
+    "antihistamine-sedating": "Combining sedating antihistamines adds up drowsiness and anticholinergic effects.",
+    "antihistamine-nonsedating": "Two antihistamines give no added benefit and more side effects — take just one.",
   };
   for (const [className, sev] of Object.entries(CLASS_RULES)) {
     const ings = [...ledger.keys()].filter(
@@ -507,24 +547,12 @@ export function verify(productNames: string[]): VerifyResult {
         (ledger.get(i) ?? []).map((c) => c.brand),
       );
       const names = ings.map((i) => INGREDIENTS[i]?.displayName ?? i);
-      const label =
-        className === "nsaid"
-          ? "Multiple NSAIDs"
-          : className === "decongestant"
-            ? "Multiple decongestants"
-            : "Multiple sedating antihistamines";
-      const why =
-        className === "nsaid"
-          ? "Combining NSAIDs raises the risk of GI bleeding and kidney injury."
-          : className === "decongestant"
-            ? "Combining decongestants adds cardiovascular strain (blood pressure, heart rate)."
-            : "Combining sedating antihistamines adds up drowsiness and anticholinergic effects.";
       classFindings.push({
         className,
         ingredients: names,
         brands: [...new Set(brands)],
         severity: sev,
-        message: `${label}: ${names.join(" + ")}. ${why}`,
+        message: `${CLASS_LABEL[className]}: ${names.join(" + ")}. ${CLASS_WHY[className]}`,
       });
     }
   }

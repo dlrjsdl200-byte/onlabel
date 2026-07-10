@@ -194,3 +194,11 @@
 - **견고 확인**: reconcile(verdict=verify() 승리, D25), UI(ContrastEngine 등 `.length>0` 가드+key), fda-lib(log-and-null) 전부 견고. agent 게이트×B-19/20/21 상호작용 회귀 없음.
 - **검증**: typecheck 0, verifyClaims.test 15→**17**, 골든 240/240 무회귀, build 성공. 안전방향(false VERIFIED 제거·에러 표면화)만 강화.
 - **🟢 라이브 종단 검증 완료(유료 9콜, 사용자 승인)**: (1)골든 5건 `eval:live` **5/5 통과** — LLM이 "Dimetapp Cold & Cough"의 `&`를 온전히 넘겨 정확 해소(과거 B-11 이음새 재확인 무결). (2)자연어 프로브 4건 `collect`: **Chlor-Trimeton+Benadryl=caution**(F결정 제품 라이브 첫 검증, chlorph↔diphenhydramine sedating 중복), **Dimetapp Cold _and_ Cough+Sudafed PE=danger**(`&`→"and" 변형이 LLM 경유로도 해소, "phenylephrine 10 mg per dose" 추출값 접지), **Delsym 2×=ok**("60 mg×2=120 mg" 액상 볼륨상한 추출값이 산문까지 전파), **Dimetapp+NyQuil(아이)=danger**(DXM 중복+소아 red-flag escalate 동시). 결정론 리졸버는 이름변형("and"/bare/"Chlor Trimeton" 띄어쓰기) 전부 견고(무료 사전확인). 유일 miss=concat "Chlortrimeton"(unmatched=안전방향). transcript: eval-2026-07-10T01-59-31 / probe-2026-07-10T02-01-34.
+
+## 2026-07-10 (B-17 이성질체 교차중복 위음성 수정 — 약사 결정 D38)
+> "이어서 진행" — 남은 backlog 중 최우선(false-negative 위음성). 약사 결정 2건 확정.
+- **🔴 위음성 재현**: `verify(["Xyzal","Zyrtec"])`=**ok**. levocetirizine(Xyzal)는 cetirizine(Zyrtec)의 활성 R-거울상이성질체=사실상 같은 약인데 다른 ingredient key라 중복 미검출 → 이중복용을 초록 OK로 은폐.
+- **🟢 원문 접지**: FDA 라벨 verbatim "Levocetirizine dihydrochloride is the R enantiomer of cetirizine hydrochloride, a racemic compound"(기억 아님).
+- **🟢 전수조사(전 16성분)**: 카탈로그 내 동일약 이성질체 쌍은 **cetirizine↔levocetirizine 하나뿐**. 미래 위험(desloratadine·dexchlorpheniramine·dexbrompheniramine)은 해당 이성질체 미보유. → dupGroup 그룹핑이 다른 성분 오그룹 위험 0 확인.
+- **수정(D38)**: (1) IngredientRef에 `dupGroup` 필드 + cetirizine/levocetirizine에 `"cetirizine"` 부여 → verify()가 dupGroup ≥2 distinct key면 **same-drug caution**. (2) Q2 결정대로 `CLASS_RULES`에 `antihistamine-nonsedating: caution` 추가(서로 다른 2세대 병용). 결과: Xyzal+Zyrtec=caution(same-drug), Zyrtec+Claritin=caution(class), 단일=ok 불변.
+- **검증**: typecheck 0, verify.test 30→**33**(신규 3), 골든 240/240 무회귀, build 성공. **위음성 0 방향으로 강화.** 잔여: levo 5mg≈cet 10mg 등가 danger 승격은 등가계수 접지 후(후속).

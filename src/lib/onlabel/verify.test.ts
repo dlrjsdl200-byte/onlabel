@@ -147,6 +147,27 @@ test("brand + noise modifier collapses to family default, not a sibling SKU", ()
   assert.strictEqual(verify(["Children's Tylenol"]).matched[0]?.id, "tylenol-extra-strength");
 });
 
+// B-17: levocetirizine is the R-enantiomer of cetirizine — the SAME drug. Taking
+// Xyzal + Zyrtec was a false-NEGATIVE "ok" (hidden double-dose); it must be caution.
+test("Xyzal + Zyrtec (levocetirizine + cetirizine) is caution, not ok", () => {
+  const r = verify(["Xyzal", "Zyrtec"]);
+  assert.strictEqual(r.overall, "caution");
+  assert.ok(
+    r.classFindings.some((c) => c.className === "same-drug"),
+    "should flag a same-drug (isomer) finding",
+  );
+});
+test("a single non-sedating antihistamine alone is ok", () => {
+  assert.strictEqual(verify(["Xyzal"]).overall, "ok");
+  assert.strictEqual(verify(["Zyrtec"]).overall, "ok");
+});
+// B-17 (Q2): two DIFFERENT non-sedating antihistamines -> class caution.
+test("Zyrtec + Claritin (two non-sedating antihistamines) is caution", () => {
+  const r = verify(["Zyrtec", "Claritin"]);
+  assert.strictEqual(r.overall, "caution");
+  assert.ok(r.classFindings.some((c) => c.className === "antihistamine-nonsedating"));
+});
+
 // B-20: the same SKU named twice is ONE product — no double-count, no false danger.
 test("duplicate product name is not double-counted", () => {
   assert.strictEqual(verify(["Advil", "Advil"]).overall, "ok");
