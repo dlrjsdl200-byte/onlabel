@@ -48,6 +48,15 @@ npm test               # verifier smoke tests
 npm run typecheck
 ```
 
+## Deploy & extend
+
+- **Deploy to Vercel (real-device testing):** [`DEPLOY.md`](DEPLOY.md) — GitHub→Vercel
+  import, `ANTHROPIC_API_KEY` env var, URL protection, and the first-deploy check
+  that the Agent SDK runs in the serverless function.
+- **Add a product or ingredient to the KB:** [`docs/ADD-PRODUCT.md`](docs/ADD-PRODUCT.md)
+  — the deterministic extract → verify → gate workflow (no hand-typed clinical
+  numbers). See also [`docs/EXTRACTION-RULES.md`](docs/EXTRACTION-RULES.md).
+
 ## Data sources
 
 openFDA drug label & NDC · DailyMed · RxNorm/RxNav · RxClass — all free, public,
