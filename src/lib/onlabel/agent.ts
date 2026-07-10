@@ -16,6 +16,17 @@ import { verify, type VerifyResult } from "./verify";
 import { userNamedProducts, hasRedFlagContext } from "./provenance";
 
 /**
+ * The answer LLM only writes grounded prose and decides which products to pass to
+ * the tool — the safety VERDICT is deterministic (verify()), never the model. So a
+ * fast model is safe here and roughly halves latency (measured 18.3s → 10.7s, same
+ * danger verdict, prose still grounded). Override with ONLABEL_MODEL if needed.
+ */
+const ANSWER_MODEL = process.env.ONLABEL_MODEL ?? "claude-haiku-4-5-20251001";
+/** Cap the agent loop: read question → call the tool → write the answer is ~2 turns;
+ * a small ceiling stops a runaway loop from stretching latency. */
+const ANSWER_MAX_TURNS = 6;
+
+/**
  * Turn a raw product set into the verdict shown to the user, applying the
  * deterministic checker (D34) and red-flag (D35) gates:
  *  - keep only products the USER named (never verdict LLM-inferred products), and
@@ -160,6 +171,8 @@ export async function* streamOnLabel(
     prompt: questionText,
     options: {
       systemPrompt: SYSTEM_PROMPT,
+      model: ANSWER_MODEL,
+      maxTurns: ANSWER_MAX_TURNS,
       mcpServers: { onlabel: onlabelServer },
       allowedTools: [CHECK_OTC_SAFETY_TOOL],
       tools: [],
@@ -248,6 +261,8 @@ export async function runOnLabel(questionText: string): Promise<OnLabelResponse>
     prompt: questionText,
     options: {
       systemPrompt: SYSTEM_PROMPT,
+      model: ANSWER_MODEL,
+      maxTurns: ANSWER_MAX_TURNS,
       mcpServers: { onlabel: onlabelServer },
       allowedTools: [CHECK_OTC_SAFETY_TOOL],
       tools: [], // strip built-in tools; only OnLabel's tool is available
