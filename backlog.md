@@ -225,5 +225,16 @@ verdict는 1차 tool 호출 제품으로 스냅되나 done은 전체 productSet 
 ## B-27. 스트림 무한로딩 방어 (P1 UX) `[✅ DONE 2026-07-10]`
 비카탈로그/지체 입력("mycin")에서 스트림이 done 없이 멈추면 useOnLabelStream이 무한대기. 근본원인은 직접-API 리팩터(subprocess 제거)로 해소, 방어로 클라 30s 워치독 추가(무한로딩→에러). 상세: findings 2026-07-10.
 
+## B-29. verdict 없는 답변이 브라우저에서 렌더 안 됨 (P0 데모치명) `[✅ DONE 2026-07-10]`
+> 라이브에서 "Does DayQuil's decongestant actually work?" 무한로딩 신고로 발견. 서버는 200/prose+done 정상인데 UI가 스켈레톤에 영영 갇힘.
+- **근본원인**: `OnLabelApp.tsx` 렌더 삼항이 `state.verification ? <AnswerView> : <PendingVerdict>`. verification이 null이면 **status·prose 무관하게 항상 PendingVerdict(스켈레톤)**. verdict가 안 나오는 답변(efficacy·교육·열린질문·**D35 red-flag ok억제**)은 verification이 끝까지 null → prose와 done이 다 와도 스켈레톤 고정 = "무한로딩".
+- **범위(넓음)**: efficacy(phenylephrine D9) + open recommendation(D34) + education + **red-flag escalation(D35, 간질환+Tylenol 등 — 데모 강점인데 브라우저에서 안 보였음)**. 판정 있는 답변만 렌더됐음.
+- **왜 여태 안 잡혔나**: 서버측 eval/collect는 SSE를 직접 읽어 prose가 정상으로 보임. React 렌더는 미검증 → 갭. (교훈: 브라우저 렌더 스모크 필요.)
+- **수정**: null 분기를 `NoVerdictAnswer`로 교체 — prose 있으면 prose-only 답변 렌더(verdict 카드 없이), prose 없고 streaming 중일 때만 스켈레톤, done인데 prose 없으면 fallback. verify() 코어·AnswerView(판정 경로) 불변. playwright로 efficacy 답변 렌더 시각검증. typecheck·build 그린.
+- **잔여(후속)**: verdict 없는 답변은 서버가 prose를 버퍼링해 생성 완료 후 한꺼번에 표시(로컬 ~2.6s, 프로덕션 콜드스타트 시 더 김) → 진행 표시 없는 스켈레톤 구간. progressive 스트리밍은 B-30.
+
+## B-30. verdict 없는 답변 progressive 스트리밍 (P2 UX, 후속) `[IDEA]`
+> B-29의 잔여. streamOnLabel이 verdict-first 보장 위해 turn-0 prose를 버퍼링 → verdict 안 나오는 질문은 생성 내내 무바이트(죽은 스켈레톤). turn-0 텍스트를 라이브 스트리밍하면 진행감↑(단 preamble-then-tool 케이스서 prose가 verdict보다 먼저 뜰 수 있음 — UI 슬롯 분리라 허용가능). 데모 데인저 경로 크리스프함 우선이라 지금은 보류.
+
 ## B-28. 대조엔진 직접 API 전환 (P2 속도, 후속) `[IDEA]`
 /api/contrast(claimPipeline·verifyLanguage)는 아직 query()(SDK subprocess) 사용 — opt-in이라 데모 필수경로 아님. 메인경로와 동일하게 Messages API 직접 루프로 전환하면 대조엔진도 빨라지고 SDK 의존 완전 제거 가능. 후속.

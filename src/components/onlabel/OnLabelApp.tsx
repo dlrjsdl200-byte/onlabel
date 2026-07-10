@@ -58,7 +58,11 @@ export function OnLabelApp() {
                 )}
             </div>
           ) : (
-            <PendingVerdict question={state.question} />
+            <NoVerdictAnswer
+              question={state.question}
+              prose={state.prose}
+              streaming={state.status === "streaming"}
+            />
           )}
         </div>
       )}
@@ -66,24 +70,59 @@ export function OnLabelApp() {
   );
 }
 
-/** Shown after submit, before the deterministic verdict snaps in. */
-function PendingVerdict({ question }: { question: string }) {
+/**
+ * Rendered when there is no deterministic verdict card — i.e. the question
+ * didn't resolve to user-named products (efficacy notes, education, open-ended
+ * questions). Shows the streaming prose answer; falls back to the pending
+ * skeleton only while we're still waiting for the first prose token.
+ *
+ * This branch is why a no-verdict answer must never depend on `verification`
+ * being set: the prose is the entire answer, and without this it would never
+ * render (the old PendingVerdict stayed on screen forever once the stream
+ * finished with verification === null).
+ */
+function NoVerdictAnswer({
+  question,
+  prose,
+  streaming,
+}: {
+  question: string;
+  prose: string;
+  streaming: boolean;
+}) {
   return (
     <div className="flex w-full flex-col gap-5">
       <p className="text-sm text-muted-foreground">
         <span className="font-medium text-foreground">You asked:</span>{" "}
         {question}
       </p>
-      <div className="flex items-center gap-3 rounded-xl border bg-muted/30 p-5">
-        <div className="size-10 shrink-0 animate-pulse rounded-lg bg-muted" />
-        <div className="flex-1 space-y-2">
-          <div className="h-3 w-24 animate-pulse rounded bg-muted" />
-          <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+
+      {prose ? (
+        <div className="text-[15px] leading-relaxed text-foreground/90">
+          <p className="whitespace-pre-wrap">{prose}</p>
+          {streaming && (
+            <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse bg-primary align-middle" />
+          )}
         </div>
-      </div>
-      <p className="text-sm text-muted-foreground">
-        Checking active ingredients against FDA labeling data…
-      </p>
+      ) : streaming ? (
+        <>
+          <div className="flex items-center gap-3 rounded-xl border bg-muted/30 p-5">
+            <div className="size-10 shrink-0 animate-pulse rounded-lg bg-muted" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 w-24 animate-pulse rounded bg-muted" />
+              <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Checking active ingredients against FDA labeling data…
+          </p>
+        </>
+      ) : (
+        <p className="text-[15px] leading-relaxed text-foreground/90">
+          No answer was returned. Please try rephrasing your question.
+        </p>
+      )}
+
       <Disclaimer />
     </div>
   );

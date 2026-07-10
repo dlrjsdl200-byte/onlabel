@@ -203,6 +203,15 @@
 - **수정(D38)**: (1) IngredientRef에 `dupGroup` 필드 + cetirizine/levocetirizine에 `"cetirizine"` 부여 → verify()가 dupGroup ≥2 distinct key면 **same-drug caution**. (2) Q2 결정대로 `CLASS_RULES`에 `antihistamine-nonsedating: caution` 추가(서로 다른 2세대 병용). 결과: Xyzal+Zyrtec=caution(same-drug), Zyrtec+Claritin=caution(class), 단일=ok 불변.
 - **검증**: typecheck 0, verify.test 30→**33**(신규 3), 골든 240/240 무회귀, build 성공. **위음성 0 방향으로 강화.** 잔여: levo 5mg≈cet 10mg 등가 danger 승격은 등가계수 접지 후(후속).
 
+## 2026-07-10 (🔴 라이브 무한로딩 재발 = verdict 없는 답변 렌더 버그, B-29 P0)
+> 사용자가 배포 최종검증 중 `onlabel.vercel.app`에서 "Does DayQuil's decongestant actually work?" → **30초+ 스켈레톤, 답변·에러 없음**. MCP 런타임로그: 05:30 POST /api/check/stream **200, 에러 0**. 즉 서버 정상, 클라 렌더 문제.
+- **🔴 근본원인 = 클라이언트 렌더 분기 부재(서버 hang 아님)**: `OnLabelApp.tsx`가 `verification ? <AnswerView> : <PendingVerdict>`. **verification이 null이면 prose/status 무관하게 무조건 스켈레톤.** verdict 안 나오는 답변(모델이 check_otc_safety 미호출: efficacy·교육·열린질문, 또는 **D35 red-flag가 ok 억제**)은 verification이 끝까지 null → 서버가 prose+done 다 보내도 **prose 띄울 자리가 없어** 스켈레톤 영구. 로컬 curl 재현: prose 10토큰+`done`(productsChecked=[]) 2.6s에 정상 도착 → 서버 무결 확증.
+- **🔴 영향 범위가 넓음(데모 다수 시나리오)**: phenylephrine 효능(D9 차별점), open recommendation(D34), education, **red-flag escalation(D35 — "간질환+Tylenol" 등, 메모리상 데모 강점으로 기록됐으나 브라우저에선 전혀 안 보였음)**. 그동안 **판정 있는 답변만** 화면에 떴음.
+- **왜 여태 안 잡혔나(핵심 교훈)**: 서버측 eval/`collect`/probe는 SSE를 직접 읽어 prose가 정상으로 보였음 → React 렌더 미검증이라 갭. **파이프라인 통과 ≠ 브라우저 렌더.** 브라우저 스모크(playwright)가 유일 포착 경로.
+- **수정(B-29)**: null 분기 → `NoVerdictAnswer`(prose 있으면 prose-only 렌더, 없고 streaming이면 스켈레톤, done+무prose면 fallback). verify()·AnswerView(판정경로) 불변. **playwright 시각검증**: efficacy 답변 정상 렌더(prose_rendered=true, stuck_skeleton=false), 스크린샷 확인. typecheck·build 그린.
+- **잔여 B-30**: verdict 없는 답변은 서버가 prose 버퍼링→생성 완료 후 일괄 표시(프로덕션 콜드스타트 시 스켈레톤 구간 김). progressive 스트리밍은 후속.
+- **워치독 관련**: 스트림이 done으로 정상 종료돼 30s 워치독은 안 뜸(정상). 무한로딩은 워치독 대상(멈춘 스트림)이 아니라 렌더 버그였음.
+
 ## 2026-07-10 (Vercel 배포 + 속도 리팩터 + mycin 무한로딩 — MCP로 진단·수정)
 > 배포(GitHub→Vercel 연결, Vercel Auth 무료보호) 후 MCP(Vercel)로 배포·런타임 로그 직접 진단. onlabel.vercel.app 라이브.
 - **🔴 배포 블로커 규명·해결(MCP 로그)**: Agent SDK `query()`가 native CLI 바이너리를 **spawn** → 첫 배포 런타임 로그에서 `Native CLI binary for linux-x64 not found`(B-24 에러표면화가 진단 가능케 함). native 바이너리는 **별도 optional 패키지**(`@anthropic-ai/claude-agent-sdk-linux-x64`)라 tracing이 놓침 → `next.config.ts outputFileTracingIncludes`에 linux native 패키지 추가로 해결(빌드성공→런타임 200).
