@@ -139,7 +139,9 @@
 - **범위**: cue 감지 = agent.ts 도구 호출 파라미터 or 결정론 프리필터. verdict 표시 레이어. **verify() 코어 불변.** 소아 실제 용량 계산은 B-3(IDEA) — 여기선 **표시 신호만.**
 - **검증 기준**: 위 10건에서 배지가 초록 OK가 아니게(주석/다운그레이드/억제) + 일반 성인 질문은 기존 verdict 불변 + 위음성 0 유지.
 
-## B-14. 일반성분명 중복의 verdict 강도 (generic dup severity) `[P2]`
+## B-14. 일반성분명 중복의 verdict 강도 (generic dup severity) `[✅ DONE 2026-07-10]`
+> **해결**: (1) verify.ts 중복 메시지 강화(same active ingredient→double-dosing, severity caution·0mg 불변). (2) agent.ts 프롬프트: generic 성분명=named product + 병용/같은약 질문은 반드시 도구 경유(기억판정 금지) + 카드-산문 톤 정합. → 성분명만 입력해도 결정론 카드가 뜸(무카드 갭 해소). generic 5문항 live 5/5 정확(danger/caution/ok). findings 2026-07-10.
+- (구) 무엇: generic 성분명이 실제 제품과 같은 성분 중복일 때 산문("No")과 카드(caution) 톤 불일치 + 모델이 도구 우회로 무카드.
 > 발견: 2026-07-09 probe. `"Can I take acetaminophen with Tylenol Extra Strength?"` → 산문은 강하게 **"No — same drug, double-dosing"**, 그러나 verdict=**caution**(B-8대로 generic은 0 mg 기여 → 합계 3,000 유지 → 초과 아님 → duplication만).
 - **무엇**: generic 성분명이 실제 제품과 **같은 성분 중복**일 때, 용량 미상이라 0 mg → 경계 아래면 caution. 산문("절대 No")과 카드(caution)의 톤 불일치.
 - **고려**: APAP처럼 **좁은 치료역 성분의 명시적 중복**은 amount 미상이어도 최소 등급을 올릴지(예: "known-duplication" 신호). 단, 0 mg 원칙(없는 값 날조 금지, B-8)과 충돌하지 않게 — 등급만 올리고 숫자는 미표기가 관건.
@@ -233,8 +235,8 @@ verdict는 1차 tool 호출 제품으로 스냅되나 done은 전체 productSet 
 - **수정**: null 분기를 `NoVerdictAnswer`로 교체 — prose 있으면 prose-only 답변 렌더(verdict 카드 없이), prose 없고 streaming 중일 때만 스켈레톤, done인데 prose 없으면 fallback. verify() 코어·AnswerView(판정 경로) 불변. playwright로 efficacy 답변 렌더 시각검증. typecheck·build 그린.
 - **잔여(후속)**: verdict 없는 답변은 서버가 prose를 버퍼링해 생성 완료 후 한꺼번에 표시(로컬 ~2.6s, 프로덕션 콜드스타트 시 더 김) → 진행 표시 없는 스켈레톤 구간. progressive 스트리밍은 B-30.
 
-## B-30. verdict 없는 답변 progressive 스트리밍 (P2 UX, 후속) `[IDEA]`
-> B-29의 잔여. streamOnLabel이 verdict-first 보장 위해 turn-0 prose를 버퍼링 → verdict 안 나오는 질문은 생성 내내 무바이트(죽은 스켈레톤). turn-0 텍스트를 라이브 스트리밍하면 진행감↑(단 preamble-then-tool 케이스서 prose가 verdict보다 먼저 뜰 수 있음 — UI 슬롯 분리라 허용가능). 데모 데인저 경로 크리스프함 우선이라 지금은 보류.
+## B-30. verdict 없는 답변 progressive 스트리밍 `[✅ DONE 2026-07-10]`
+> **해결**: streamOnLabel turn-0 prose 버퍼링 제거→라이브 yield(verdict 카드는 별도 슬롯 스냅이라 공존). preamble-then-tool 부작용은 anti-preamble 프롬프트 강화("도구 호출 전 무텍스트")로 turn-0 비워 verdict-first 복원. live 확인: efficacy 토큰 firstTok 0.69s/spread 2.0s(이전 일괄 ~2.6s), danger 이벤트순서 verification 첫 이벤트. findings 2026-07-10.
 
 ## B-28. 대조엔진 직접 API 전환 (P2 속도, 후속) `[IDEA]`
 /api/contrast(claimPipeline·verifyLanguage)는 아직 query()(SDK subprocess) 사용 — opt-in이라 데모 필수경로 아님. 메인경로와 동일하게 Messages API 직접 루프로 전환하면 대조엔진도 빨라지고 SDK 의존 완전 제거 가능. 후속.

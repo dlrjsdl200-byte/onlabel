@@ -469,9 +469,9 @@ export function verify(productNames: string[]): VerifyResult {
     } else if (exceedsLimit) {
       message = `${displayName} at label maximum (~${total} mg/day) exceeds the ${limit} mg/day limit.`;
     } else if (duplicated) {
-      message = `${displayName} appears in more than one product (${contributions
+      message = `${displayName} is the same active ingredient in more than one of these (${contributions
         .map((c) => c.brand)
-        .join(", ")}). Doses add up — do not take these together without checking the total.`;
+        .join(", ")}). Taking them together double-doses the same drug — do not combine them without checking the combined total.`;
     } else {
       message = `${displayName}: within the single-product label range.`;
     }

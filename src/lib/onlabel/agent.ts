@@ -91,15 +91,22 @@ names; you do not pick medicines for them.
 
 Method (always, in order):
 1. Identify the OTC products the user EXPLICITLY named (use the exact brand names
-   given). Only pass products the user named to the tool — never products you
+   given). A generic active-ingredient name the user typed (e.g. "acetaminophen",
+   "ibuprofen", "naproxen") counts as a named product — pass it to the tool exactly
+   as written. Only pass products the user named to the tool — never products you
    inferred. If the user names no specific product (only symptoms, e.g. "what can
    I take for a cold?"), do NOT call the tool: briefly give general, non-branded
    guidance and ask what they are taking or considering.
-2. Call the check_otc_safety tool with those product names. Its verdict is your
-   source of truth.
-3. Ground your answer in the tool result and never contradict it. If DANGER, lead
-   with the danger and say not to take them together as written. If CAUTION,
-   explain what to watch. If OK, say so plainly.
+2. Whenever the user asks about taking two or more named things together, or names
+   the same drug twice (a generic name plus a brand that contains it), you MUST call
+   check_otc_safety and let its verdict drive — never judge duplication or dosing
+   from your own knowledge, even when the answer seems obvious. Call the tool with
+   those product names; its verdict is your source of truth.
+3. Ground your answer in the tool result and never contradict it. Match your wording
+   to the verdict's severity: if DANGER, lead with the danger and say not to take
+   them together as written; if CAUTION, say plainly that they double up the same
+   drug / add up and to check the combined total, without overstating it as an
+   absolute prohibition; if OK, say so plainly.
 4. Explain the why in ingredient terms (name the shared active ingredient and its
    daily limit), not just brand names.
 5. If the tool flags an ingredient efficacy note (e.g. oral phenylephrine), tell
@@ -140,9 +147,12 @@ Scope & safety:
   finds.
 - Always add: this is not medical advice; confirm with a pharmacist or physician.
 
-Style: plain, calm, non-clinical language. Lead directly with the answer — do not
-open with a preamble like "I'll check this for you" or "Let me look". Give the
-concrete action first, then the reason. Write in plain prose sentences only — do NOT use markdown formatting
+Style: plain, calm, non-clinical language. When you call the tool, write NOTHING
+before the tool call — your first output for a product question is the tool call
+itself, with no words in front of it. Never narrate that you are checking (no
+"I'll check that for you", "I need to check", "Let me look"). After the tool
+returns, lead directly with the answer — the concrete action first, then the
+reason. Write in plain prose sentences only — do NOT use markdown formatting
 (no **bold**, headings, bullet lists, or hyperlinks). The interface already shows
 the ingredient ledger, sources, and efficacy notes as separate elements, so do
 not reproduce tables or link lists in your text. Keep it to a short, readable
@@ -195,7 +205,6 @@ export async function* streamOnLabel(
   const productSet = new Set<string>();
   let verdictSent = false;
   let snappedProductsChecked: string[] | null = null;
-  const buffered: string[] = [];
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: questionText }];
 
   function makeVerification(): OnLabelEvent | null {
@@ -219,9 +228,13 @@ export async function* streamOnLabel(
 
     for await (const event of stream) {
       if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
-        const text = event.delta.text;
-        if (verdictSent) yield { type: "token", text };
-        else buffered.push(text); // hold prose until the verdict lands
+        // B-30: stream prose live. The verdict card renders in its own UI slot and
+        // snaps in the moment it arrives, so prose no longer has to be held back —
+        // this removes the "dead skeleton" wait on answers that yield no verdict
+        // card (efficacy, open questions, red-flag ok). The demo danger path still
+        // reads verdict-first: the model calls the tool with no preamble, so the
+        // verification event is emitted before any prose token.
+        yield { type: "token", text: event.delta.text };
       }
     }
 
@@ -242,21 +255,17 @@ export async function* streamOnLabel(
         if (v) {
           verdictSent = true;
           yield v;
-          for (const t of buffered) yield { type: "token", text: t };
-          buffered.length = 0;
         }
       }
       continue;
     }
 
     // end_turn (or max_tokens): the answer is complete. If the verdict was
-    // deferred (no user-named products, or a red-flag ok), flush the buffered
-    // prose now with no verdict card.
+    // deferred (no user-named products, or a red-flag ok), emit it now with no
+    // verdict card. Prose has already streamed live (B-30).
     if (!verdictSent) {
       const v = makeVerification();
       if (v) yield v;
-      for (const t of buffered) yield { type: "token", text: t };
-      buffered.length = 0;
     }
     yield {
       type: "done",

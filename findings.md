@@ -203,6 +203,24 @@
 - **수정(D38)**: (1) IngredientRef에 `dupGroup` 필드 + cetirizine/levocetirizine에 `"cetirizine"` 부여 → verify()가 dupGroup ≥2 distinct key면 **same-drug caution**. (2) Q2 결정대로 `CLASS_RULES`에 `antihistamine-nonsedating: caution` 추가(서로 다른 2세대 병용). 결과: Xyzal+Zyrtec=caution(same-drug), Zyrtec+Claritin=caution(class), 단일=ok 불변.
 - **검증**: typecheck 0, verify.test 30→**33**(신규 3), 골든 240/240 무회귀, build 성공. **위음성 0 방향으로 강화.** 잔여: levo 5mg≈cet 10mg 등가 danger 승격은 등가계수 접지 후(후속).
 
+## 2026-07-10 (B-14 + B-30 구현 + generic 성분명 5문항 live 검증)
+> 사용자 요청 "둘 다 순차 구현 + 성분명만 5개 live". verify()·0mg·결정론 코어 불변, 라우팅/메시지/스트리밍 레이어만.
+- **B-14 구현(2파트)**: (1) `verify.ts` 중복 finding 메시지 강화("same active ingredient··· double-doses the same drug, do not combine")— severity caution 불변, 숫자 불변. (2) `agent.ts` SYSTEM_PROMPT: generic 성분명을 named product로 취급 + "2개 이상 병용/같은약 두번은 반드시 check_otc_safety 경유, 기억으로 판정 금지" + 카드-산문 톤 정합. → **q3류 무카드 갭 해소**.
+- **B-30 구현**: `streamOnLabel` turn-0 prose 버퍼링 제거 → 라이브 yield. verdict 카드는 별도 슬롯 스냅이라 공존. **부작용 발견·수정**: Haiku가 도구호출 전 "I'll check that for you" preamble을 흘려 라이브상 카드보다 먼저 뜸 → anti-preamble 규칙 강화("도구 호출 전 아무것도 쓰지 마라")로 turn-0 비움.
+- **🟢 generic 성분명 5문항 live(유료, transcript generic5-transcript.json)**: 전부 **도구 라우팅 성공→결정론 카드**. ibuprofen+naproxen=**danger**(2 NSAID)·acetaminophen+ibuprofen=**ok**·diphenhydramine+doxylamine=**caution**(2 진정AH)·cetirizine+levocetirizine=**caution**(동일약 이성질체 B-17)·DXM+guaifenesin=**ok**. 5/5 정확. **성분명만 입력해도 이제 verdict 카드가 뜬다**(이전엔 모델이 직접 답해 무카드).
+- **🟢 verdict-first 복원 확인**: anti-preamble 후 재실행 g1/g4 이벤트순서 `verification`이 **첫 이벤트**(이전 `token,token,verification`). 데모 danger 경로 verdict-first 유지.
+- **🟢 progressive 스트리밍 확인(B-30 이득)**: efficacy 질문 토큰 firstTok 0.69s/lastTok 2.69s(spread 2.0s) = 실시간 채움(이전 ~2.6s 일괄). 죽은 스켈레톤 해소.
+- 검증: typecheck·verify34·provenance9·tool4·verifyClaims17·golden240/240·build 전부 그린.
+
+## 2026-07-10 (B-29 수정 후 라이브 프로덕션 종단 검증 — playwright 3경로, 유료 3콜)
+> B-29 배포(0f6236e READY, onlabel.vercel.app) 후 사용자가 "그대로 무한로딩" 재신고 → 실은 **브라우저 옛 JS 번들 캐시**(하드리프레시 필요). Vercel `get_access_to_vercel_url` 우회토큰 + playwright로 프로덕션 직접 검증. transcript: scratchpad/qa-prod-transcript.json.
+- **🟢 프로덕션 스트리밍 정상 확증(직접 curl)**: 보호우회 후 POST /api/check/stream — warm first-byte 3.17s, 토큰10+done 완료. cold 6.76s. 즉 SSE가 클라이언트에 정상 도달(총버퍼링 hang 아님). → B-29(렌더분기)가 유일 원인이었고 프로덕션서도 유효.
+- **🟢 3경로 전부 프로덕션 렌더 확인(스크린샷)**:
+  - **q1 danger**("Tylenol ES + DayQuil"): verdict 4.2s, DANGER 카드 + 대조스트립 + 접지산문(APAP ~5600>4000) + 성분원장(APAP 5600/4000 Danger·DXM 80/120·PE 40/60 OK) + PE 효능노트(FDA 16-0) + Sources칩 + 대조엔진버튼. 데모 센터피스 완전동작.
+  - **q2 red-flag**("간질환인데 Tylenol 얼마나?"): **초록배지 없음(D35 억제)** + escalation 산문 완전 렌더("stop here, direct to doctor··· acetaminophen is processed by the liver··· standard max may not be safe"). **B-29 전엔 이 화면이 안 떴음** — 이제 렌더. 데모 강점 회복.
+  - **q3 open**("코막힘+두통 뭐 먹지?"): verdict none + 검사기 포지셔닝 산문("can't pick for you, but can check any products you name··· what specific products?"). D34 정확.
+- **결론**: B-29는 프로덕션서 완전 해소. 3경로(판정/red-flag억제/열린질문) 모두 정상. 잔여=콜드스타트 시 verdict 도착 ~4s(no-verdict는 생성완료까지 스켈레톤, B-30 progressive로 개선여지). **사용자 재현 무한로딩은 캐시 → 하드리프레시로 해결.**
+
 ## 2026-07-10 (🔴 라이브 무한로딩 재발 = verdict 없는 답변 렌더 버그, B-29 P0)
 > 사용자가 배포 최종검증 중 `onlabel.vercel.app`에서 "Does DayQuil's decongestant actually work?" → **30초+ 스켈레톤, 답변·에러 없음**. MCP 런타임로그: 05:30 POST /api/check/stream **200, 에러 0**. 즉 서버 정상, 클라 렌더 문제.
 - **🔴 근본원인 = 클라이언트 렌더 분기 부재(서버 hang 아님)**: `OnLabelApp.tsx`가 `verification ? <AnswerView> : <PendingVerdict>`. **verification이 null이면 prose/status 무관하게 무조건 스켈레톤.** verdict 안 나오는 답변(모델이 check_otc_safety 미호출: efficacy·교육·열린질문, 또는 **D35 red-flag가 ok 억제**)은 verification이 끝까지 null → 서버가 prose+done 다 보내도 **prose 띄울 자리가 없어** 스켈레톤 영구. 로컬 curl 재현: prose 10토큰+`done`(productsChecked=[]) 2.6s에 정상 도착 → 서버 무결 확증.
