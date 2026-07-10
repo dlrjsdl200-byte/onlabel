@@ -145,6 +145,17 @@ export function maxUnitsPerDay(dir: string): number | null {
   return m ? num(m[1]) : null;
 }
 
+/** Max volume per 24 h for a liquid stated as a VOLUME, not a unit count:
+ * "not to exceed 20 mL in 24 hours" / "not more than 20 mL in 24 hrs" -> 20.
+ * Returns the FIRST match, which on an OTC label is the adult tier (adults are
+ * listed before the children's tiers), mirroring doseVolume's adult preference. */
+export function maxVolumePerDay(dir: string): number | null {
+  const m = dir.match(
+    /not\s+(?:to\s+exceed|more\s+than)\s+(\d+(?:\.\d+)?)\s*mL[^.]*24[\s-]*(?:hour|hr|hrs)/i,
+  );
+  return m ? Number(m[1]) : null;
+}
+
 /** The volume a liquid's strength is stated per: "Active ingredient (in each 5
  * mL) ... 30 mg" -> 5. */
 export function labelVolume(active: string): number | null {

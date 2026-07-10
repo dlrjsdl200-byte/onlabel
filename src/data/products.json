@@ -694,6 +694,21 @@
       "verify": false
     },
     {
+      "id": "delsym",
+      "brand": "Delsym 12 Hour Cough",
+      "company": "Reckitt Benckiser LLC",
+      "category": "cough",
+      "core": false,
+      "doseForm": "liquid",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 2,
+      "ingredients": [
+        { "ingredient": "dextromethorphan", "mgPerDose": 60 }
+      ],
+      "source": "Delsym — openFDA/DailyMed SPL 234e6a2c-a280-4a39-8777-9316e9d681fb",
+      "verify": false
+    },
+    {
       "id": "zzzquil",
       "brand": "ZzzQuil Nighttime Sleep-Aid",
       "company": "Lil' Drug Store Products, Inc.",

@@ -22,6 +22,7 @@ import {
   recognizedIngredients,
   labelVolume,
   doseVolume,
+  maxVolumePerDay,
 } from "./fda-lib";
 
 /** IDENTITY only — no strengths/limits. Those are extracted from the label. */
@@ -134,7 +135,15 @@ async function build(spec: Spec) {
   // "take once daily / once a day" or "only one dose per day" -> one dose per day.
   const onceDaily = /once\s+(?:a\s+day|daily)|one\s+dose[^.]*per\s+day/i.test(dir);
   const maxUnits = maxUnitsPerDay(dir) ?? (onceDaily && units != null ? units : null);
-  const maxDoses = units && maxUnits ? maxUnits / units : null;
+  // A liquid may cap the day as a VOLUME ("not to exceed 20 mL in 24 hours")
+  // instead of a unit count. Doses/day = adult daily volume / adult dose volume.
+  const maxVol = isLiquid ? maxVolumePerDay(dir) : null;
+  const maxDoses =
+    units && maxUnits
+      ? maxUnits / units
+      : isLiquid && maxVol != null && doseVol != null && doseVol > 0
+        ? maxVol / doseVol
+        : null;
 
   console.log(`  openFDA SKU: ${fdaBrand}`);
   console.log(`  DailyMed:    https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=${setId}`);
@@ -186,10 +195,19 @@ async function build(spec: Spec) {
   // typed. Emit it so a new ingredients.json entry can cite this SPL.
   if (spec.ingredients.length === 1) {
     const only = ings[0];
-    const dailyMax = only.perUnit != null && maxUnits != null ? only.perUnit * maxUnits : null;
+    // Daily ceiling = per-dose amount × doses/day. For a solid this equals
+    // perUnit(mg/unit) × maxUnits; for a liquid the cap is a volume, so use the
+    // already-scaled mgPerDose × maxDoses. Both are grounded, not typed.
+    const dailyMax =
+      only.mgPerDose != null && maxDoses != null
+        ? Math.round(only.mgPerDose * maxDoses * 100) / 100
+        : null;
+    const basis = isLiquid
+      ? `${only.mgPerDose ?? "?"} mg/dose × ${maxDoses ?? "?"} doses/24h`
+      : `${only.perUnit ?? "?"} mg/unit × ${maxUnits ?? "?"} units/24h`;
     console.log(
       `  ---- ingredient daily ceiling (single-ingredient SKU) ----\n` +
-        `  ${only.ingredient}: maxDailyMg = ${dailyMax ?? "?"}  (= ${only.perUnit ?? "?"} mg/unit × ${maxUnits ?? "?"} units/24h)  source: DailyMed SPL ${setId}`,
+        `  ${only.ingredient}: maxDailyMg = ${dailyMax ?? "?"}  (= ${basis})  source: DailyMed SPL ${setId}`,
     );
   }
 }
