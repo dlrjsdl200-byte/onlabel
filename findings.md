@@ -161,3 +161,10 @@
 - **🟢 B-11 assumption 일관 동작**: bare "Tylenol"→Extra Strength assumption 16건 표면화(#1,3,30~ 등). adversarial(#85,87)도 동일.
 - **🔴 B-13 스케일 확증 → P1 승격**: 제품+red-flag(기저질환/소아/임부/수유/고령) 10건 **전부 verdict=ok**. 최악=간질환+Tylenol=OK(#81), 궤양+Advil=OK(#79). 산문은 전부 정확 escalate(모델이 배지를 스스로 보정: "that 'OK' is only about dose and duplication"). = 배지-산문 구조적 갭.
 - **🔴 B-15 추가 근거**: 열린추천 추론조합 재현(#63 [Tylenol,Advil], #65 [Zyrtec,Claritin-미등록]).
+
+## 2026-07-10 (F 결정 + B-18 잔여버그: chlor-trimeton·delsym·dimetapp)
+> 제품 44→47, 골든 235→240(결정론), check:catalog 38/38. 커밋 6e2c8b3·eee06d8·91b2d86(미푸시).
+- **🟢 "브랜드 부재"는 재조회로 정밀화해야 함(F 결정, D36)**: 사용자 지적("다시 찾아봐")대로 openFDA 재조회 — `brand_name.exact:"CHLOR-TRIMETON"`=**0건**(브랜드 라벨 진짜 부재)이나, 단일성분 chlorpheniramine maleate 4 mg OTC SPL은 **12개** 존재. 초기 퍼지검색 "1건"은 "chlor" 토큰 매칭 아티팩트였음. → **브랜드 라벨 부재 + 단일성분 모노그래프 표준 조성이면 제네릭-동등 SPL로 접지 허용**(defer 아님). Aller-chlor SPL서 6정×4 mg=24 mg/day 추출 = 기존 M012 접지 chlorpheniramine 한도와 독립 재확인 일치. source에 "브랜드 부재→제네릭-동등 접지" 명시(정직성).
+- **🟢 액상 일일상한은 '개수'가 아니라 '볼륨'으로 표기됨(delsym)**: Delsym "not to exceed **20 mL** in 24 hours"라 `maxUnitsPerDay`(정/dose 카운트)가 null. → `maxVolumePerDay` 신설 + 액상 fallback(doses/day = 성인 일일볼륨/성인 dose볼륨 = 20/10 = 2). OTC 라벨은 성인 티어가 먼저 나열되므로 **첫 매칭 = 성인값**(doseVolume의 성인우선과 동일 가정). DXM 60×2=120 mg/day(표준). 단일성분 ceiling emit도 액상은 `mgPerDose×maxDoses`로 교정.
+- **🟢 새 성분도 단일성분 SPL로 결정론 접지 가능(brompheniramine)**: brompheniramine KB 부재로 dimetapp 막혀 있었음. **단일성분** "Dimetapp Cold and Allergy" SPL(2 mg/10 mL, 성인 20 mL q4h, max 6 doses)에서 4 mg/dose×6=**24 mg/day** 접지 → ingredients.json 신설(class=antihistamine-sedating). 그 후 combo "Dimetapp Cold & Cough"가 clean 추출(bromph 4/DXM 20/PE 10, 6 doses). 신성분이 **sedating-antihistamine 클래스 겹침에 즉시 참여**(+Benadryl caution) — 클래스 로직이 데이터 주도임을 재확인.
+- **방법 재확인**: 세 제품 모두 숫자 타이핑 0(D22). 값은 openFDA 라벨서 추출, 못 뽑으면 파서 보강 or null. 골든 verdict는 verify()가 계산(add-golden). 라이브 유료검증(5콜)은 미실행(승인 대기).
