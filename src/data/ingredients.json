@@ -161,6 +161,21 @@
         "verify": false
       }
     },
+    "brompheniramine": {
+      "displayName": "Brompheniramine",
+      "aka": [],
+      "class": "antihistamine-sedating",
+      "maxDailyMg": 24,
+      "risk": "Sedation; additive with other sedating antihistamines.",
+      "source": "Single-ingredient SPL 'Dimetapp Cold and Allergy' (brompheniramine maleate 2 mg/10 mL; adults 20 mL = 4 mg every 4 h, no more than 6 doses/24 h -> 24 mg/24 h) — openFDA/DailyMed SPL 15c3570c-bd00-8e43-e063-6294a90a8683",
+      "verify": false,
+      "dosing": {
+        "intervalText": "4 mg every 4 hours",
+        "maxDurationText": null,
+        "source": "openFDA/DailyMed SPL 15c3570c-bd00-8e43-e063-6294a90a8683 (single-ingredient) Directions",
+        "verify": false
+      }
+    },
     "doxylamine": {
       "displayName": "Doxylamine",
       "aka": [],

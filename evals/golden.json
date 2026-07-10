@@ -8,8 +8,8 @@
       "caution",
       "danger"
     ],
-    "updated": "2026-07-09",
-    "count": 244
+    "updated": "2026-07-10",
+    "count": 249
   },
   "items": [
     {
@@ -4387,6 +4387,108 @@
         ]
       },
       "note": "diphenhydramine + doxylamine sedating",
+      "review": "pending"
+    },
+    {
+      "id": "x101-delsym-alone",
+      "category": "ok-single-product",
+      "question": "Is Delsym 12 Hour Cough safe to take on its own?",
+      "products": [
+        "Delsym"
+      ],
+      "expected": {
+        "mustMention": [
+          "dextromethorphan"
+        ],
+        "verdict": "ok"
+      },
+      "note": "Single-ingredient liquid, volume-capped max/day (20 mL / 24 h -> 2 doses); DXM 120 mg/day = at ceiling, so alone is ok. Locks the liquid volume-cap parser.",
+      "review": "pending"
+    },
+    {
+      "id": "x102-delsym-nyquil-dxm-dup",
+      "category": "danger-duplication",
+      "question": "Can I take Delsym together with NyQuil?",
+      "products": [
+        "Delsym",
+        "NyQuil"
+      ],
+      "expected": {
+        "mustMention": [
+          "dextromethorphan"
+        ],
+        "mustNotClaim": [
+          "safe to take together",
+          "generally fine"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "dextromethorphan"
+        ]
+      },
+      "note": "Both contain dextromethorphan -> DXM duplication over the 120 mg/24 h ceiling.",
+      "review": "pending"
+    },
+    {
+      "id": "x103-dimetapp-alone",
+      "category": "ok-single-product",
+      "question": "Is Dimetapp Cold & Cough safe by itself?",
+      "products": [
+        "Dimetapp Cold & Cough"
+      ],
+      "expected": {
+        "mustMention": [
+          "brompheniramine"
+        ],
+        "verdict": "ok",
+        "efficacyNote": true
+      },
+      "note": "New brompheniramine ingredient; liquid per-mL. All three actives at their ceilings, so alone is ok.",
+      "review": "pending"
+    },
+    {
+      "id": "x104-dimetapp-benadryl-sedating",
+      "category": "caution-class-overlap",
+      "question": "Can I take Dimetapp Cold & Cough with Benadryl?",
+      "products": [
+        "Dimetapp Cold & Cough",
+        "Benadryl"
+      ],
+      "expected": {
+        "mustMention": [
+          "antihistamine"
+        ],
+        "verdict": "caution",
+        "classFlagged": [
+          "antihistamine-sedating"
+        ],
+        "efficacyNote": true
+      },
+      "note": "brompheniramine + diphenhydramine = two sedating antihistamines (class overlap). Confirms the new ingredient participates in class detection.",
+      "review": "pending"
+    },
+    {
+      "id": "x105-dimetapp-sudafed-decongestant",
+      "category": "danger-duplication",
+      "question": "Is it ok to take Dimetapp Cold & Cough and Sudafed PE together?",
+      "products": [
+        "Dimetapp Cold & Cough",
+        "Sudafed PE"
+      ],
+      "expected": {
+        "mustMention": [
+          "phenylephrine"
+        ],
+        "mustNotClaim": [
+          "safe to take together"
+        ],
+        "verdict": "danger",
+        "ingredientsFlagged": [
+          "phenylephrine"
+        ],
+        "efficacyNote": true
+      },
+      "note": "phenylephrine duplication / decongestant overlap.",
       "review": "pending"
     }
   ]

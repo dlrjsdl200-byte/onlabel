@@ -678,6 +678,23 @@
       "verify": false
     },
     {
+      "id": "dimetapp-cold-cough",
+      "brand": "Dimetapp Cold & Cough",
+      "company": "Foundation Consumer Brands",
+      "category": "cold-flu",
+      "core": false,
+      "doseForm": "liquid",
+      "unitsPerDose": 1,
+      "maxDosesPerDay": 6,
+      "ingredients": [
+        { "ingredient": "brompheniramine", "mgPerDose": 4 },
+        { "ingredient": "dextromethorphan", "mgPerDose": 20 },
+        { "ingredient": "phenylephrine", "mgPerDose": 10 }
+      ],
+      "source": "Dimetapp Cold and Cough — openFDA/DailyMed SPL cc09a8c5-d173-4261-b838-96e6a16e2ff9",
+      "verify": false
+    },
+    {
       "id": "robitussin-dm",
       "brand": "Robitussin DM",
       "company": "Haleon US Holdings LLC",

@@ -11,9 +11,16 @@ Legend of the 30-spec batch (2026-07-09): **5 clean-added**, 25 with issues belo
 "N tsp"×5, "N tbsp"×15) and computes mgPerDose = strength × doseVol / labelVol;
 `strengthOf` gap widened for salt phrasings ("polistirex equivalent to 30 mg").
 - RECOVERED + added: `dayquil-severe`, `nyquil-severe`, `robitussin-dm`, `zzzquil`
-- still open: `delsym` (max/day not parsed — Delsym phrasing), `dimetapp-cold-cough`
-  (needs a `brompheniramine` ingredient KB entry), `childrens-*` (weight-based,
-  held), `bc-powder`/`goodys` (powder "per stick" + no-match)
+- ✅ **RESOLVED 2026-07-10**: `delsym` — daily cap was a VOLUME ("not to exceed 20 mL
+  in 24 hours"), not a unit count, so `maxUnitsPerDay` returned null. Added
+  `maxVolumePerDay` + a liquid fallback (doses/day = adult daily vol / adult dose
+  vol = 20/10 = 2). DXM 60 mg/dose × 2 = 120 mg/day. Added (46).
+- ✅ **RESOLVED 2026-07-10**: `dimetapp-cold-cough` — added a `brompheniramine`
+  ingredient KB entry (class=antihistamine-sedating, maxDailyMg 24 grounded to the
+  single-ingredient "Dimetapp Cold and Allergy" SPL: 4 mg/dose × 6 = 24 mg/24 h).
+  Product extracted clean (bromph 4 / DXM 20 / PE 10 mg-dose, 6 doses/day). Added (47).
+- still open: `childrens-*` (weight-based, held), `bc-powder`/`goodys` (powder
+  "per stick" + no-match)
 
 ## B. Directions phrasing not parsed (units/max = null)
 ✅ **FIXED (2 recovered)**: added the "12 years and older: N tablet" verb-less
