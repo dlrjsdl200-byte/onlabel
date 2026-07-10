@@ -24,6 +24,9 @@ export async function POST(req: NextRequest) {
   }
   if (!question || products.length === 0)
     return Response.json({ error: "question and products are required." }, { status: 400 });
+  // Bound the inputs so an oversized body can't run up cost/latency. (B-22)
+  if (question.length > 2000 || products.length > 20)
+    return Response.json({ error: "Input too large (question <= 2000 chars, <= 20 products)." }, { status: 400 });
 
   try {
     const { draft, verdicts, reconciled } = await runClaimPipeline(question, products);

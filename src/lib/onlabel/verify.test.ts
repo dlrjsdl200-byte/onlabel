@@ -131,6 +131,41 @@ test("'Tylenol PM' resolves to itself, not a strength variant", () => {
   assert.strictEqual(r.assumptions.length, 0);
 });
 
+// B-19: a strength abbreviation ("ES"/"XS") must resolve to the strength SKU it
+// names, NOT drift to a sibling formulation (Tylenol PM). This previously caused
+// a danger->caution SAFETY DOWNGRADE on the flagship duplication case.
+test("'Tylenol ES' resolves to Extra Strength (not Tylenol PM)", () => {
+  assert.strictEqual(verify(["Tylenol ES"]).matched[0]?.id, "tylenol-extra-strength");
+  assert.strictEqual(verify(["Tylenol XS"]).matched[0]?.id, "tylenol-extra-strength");
+});
+test("'Tylenol ES' + NyQuil still flags acetaminophen danger", () => {
+  assert.strictEqual(verify(["Tylenol ES", "NyQuil"]).overall, "danger");
+});
+// A noise modifier absent from the catalog collapses to the family default, not
+// a sibling: "Children's Tylenol" (peds not stocked) -> adult default, never PM.
+test("brand + noise modifier collapses to family default, not a sibling SKU", () => {
+  assert.strictEqual(verify(["Children's Tylenol"]).matched[0]?.id, "tylenol-extra-strength");
+});
+
+// B-20: the same SKU named twice is ONE product — no double-count, no false danger.
+test("duplicate product name is not double-counted", () => {
+  assert.strictEqual(verify(["Advil", "Advil"]).overall, "ok");
+  assert.strictEqual(verify(["Mucinex", "Mucinex 600"]).overall, "ok");
+  // but two genuinely different products still sum
+  assert.strictEqual(verify(["Advil", "Aleve"]).overall, "danger");
+});
+
+// B-21: "Advil 200mg" must resolve to plain Advil, not Advil PM (the "/ Motrin IB"
+// alias must not sink the canonical SKU). Generic symptom phrases resolve to
+// nothing rather than latching onto an arbitrary SKU.
+test("'Advil 200mg' resolves to plain Advil (not Advil PM)", () => {
+  assert.strictEqual(verify(["Advil 200mg"]).matched[0]?.id, "advil");
+});
+test("a generic symptom phrase resolves to no product", () => {
+  assert.strictEqual(verify(["cold and flu"]).matched.length, 0);
+  assert.strictEqual(verify(["severe cold medicine"]).matched.length, 0);
+});
+
 // Regression: the LLM writes "and" where the label prints "&" / "+". A short
 // SKU id must not shadow a more specific multi-word product, and a distinct SKU
 // must not collapse to the brand's strength-family default. Both previously

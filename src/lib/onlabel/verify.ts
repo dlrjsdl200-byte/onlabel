@@ -168,11 +168,47 @@ const STOP = new Set(["and", "with", "the", "for", "plus", "a", "an"]);
  */
 const COLLOQUIAL_DEFAULT = new Set(["regular", "normal", "plain", "standard", "ordinary"]);
 
+/**
+ * Common consumer abbreviations for a strength label. "Tylenol ES" means Extra
+ * Strength; without this, "es" is an unrecognized token that derails resolution
+ * to a sibling formulation (Tylenol PM). Mapped to the first token a
+ * strengthLabel normalizes to, so the step-2 strength match picks it up. (B-19)
+ */
+const STRENGTH_ALIAS: Record<string, string> = {
+  es: "extra",
+  xs: "extra",
+  "x-strength": "extra",
+  max: "maximum",
+  rs: "regular",
+};
+
+/**
+ * Generic symptom/marketing words that are NOT product identity. A query that
+ * overlaps a product only on these ("cold and flu") does not name that product,
+ * so fuzzy resolution must not latch onto a specific SKU from them alone. (B-21)
+ */
+const GENERIC_WORDS = new Set([
+  "cold", "flu", "severe", "sinus", "allergy", "congestion", "cough",
+  "pain", "nighttime", "daytime", "night", "day", "childrens", "kids",
+  "children", "maximum", "relief", "medicine", "symptom", "symptoms",
+]);
+
 function contentTokens(s: string): string[] {
   return normalize(s)
     .split(" ")
     .filter((t) => t && !STOP.has(t));
 }
+
+/**
+ * Every distinctive token that appears in some catalog product's name. Used to
+ * tell a real formulation modifier ("cold", "pm" — a different SKU the user
+ * wants) apart from noise/abbreviation ("es", "200mg", "childrens" — absent from
+ * the catalog), so a strength-family brand with a noise modifier collapses to its
+ * default SKU instead of mis-resolving to a sibling formulation. (B-19)
+ */
+const PRODUCT_VOCAB = new Set<string>(
+  PRODUCTS.flatMap((p) => contentTokens(p.brand + " " + p.id)),
+);
 
 /**
  * Specificity-aware fuzzy matcher. Scores every product by how many of its own
@@ -186,21 +222,44 @@ function fuzzyLookup(q: string): Product | null {
   if (qset.size === 0) return null;
   let best: Product | null = null;
   let bestScore = -1;
+  let bestDistinctive = 0;
   for (const p of PRODUCTS) {
-    const pTokens = contentTokens(p.brand + " " + p.id);
-    const pset = new Set(pTokens);
-    let overlap = 0;
-    for (const t of pset) if (qset.has(t)) overlap++;
-    if (overlap === 0) continue;
-    // Prefer matching more of the product's distinctive tokens (overlap), then
-    // higher coverage fraction (how fully the product name is named).
-    const score = overlap * 1000 + (overlap / pset.size) * 100;
-    if (score > bestScore) {
-      bestScore = score;
+    // A brand may carry aliases separated by "/" ("Advil / Motrin IB"). Score each
+    // alias variant (plus the id) and take the best, so alias tokens don't inflate
+    // the token count and sink the canonical product below a shorter sibling. (B-21)
+    const variants = [...p.brand.split("/"), p.id];
+    let pScore = -1;
+    let pDistinctive = 0;
+    for (const v of variants) {
+      const pset = new Set(contentTokens(v));
+      if (pset.size === 0) continue;
+      let overlap = 0;
+      let distinctive = 0; // overlap on non-generic (identity-bearing) tokens
+      for (const t of pset)
+        if (qset.has(t)) {
+          overlap++;
+          if (!GENERIC_WORDS.has(t)) distinctive++;
+        }
+      if (overlap === 0) continue;
+      // Reward coverage of the PRODUCT's tokens; penalize the product's own
+      // distinctive tokens the query did NOT name (a formulation word like "pm"
+      // the user didn't ask for), so "Advil" beats "Advil PM" for a bare "Advil".
+      const unmatched = pset.size - overlap;
+      const score = overlap * 1000 - unmatched * 60 + (overlap / qset.size) * 10;
+      if (score > pScore) {
+        pScore = score;
+        pDistinctive = distinctive;
+      }
+    }
+    if (pScore > bestScore) {
+      bestScore = pScore;
+      bestDistinctive = pDistinctive;
       best = p;
     }
   }
-  return best;
+  // Require at least one identity-bearing (non-generic) token in the match, so a
+  // generic symptom phrase ("cold and flu") does not resolve to a specific SKU. (B-21)
+  return bestDistinctive > 0 ? best : null;
 }
 
 /**
@@ -232,7 +291,9 @@ function matchGenericIngredient(name: string): string | null {
 export function resolveProduct(name: string): ProductMatch | null {
   const q = normalize(name);
   if (!q) return null;
-  const tokens = q.split(" ");
+  // Expand strength abbreviations ("es" -> "extra") so the strength-family match
+  // can recognize them; the exact-name paths below still use the raw string. (B-19)
+  const tokens = q.split(" ").map((t) => STRENGTH_ALIAS[t] ?? t);
 
   // 1. Exact id/brand match — an explicit choice, no assumption.
   for (const p of PRODUCTS) {
@@ -274,7 +335,13 @@ export function resolveProduct(name: string): ProductMatch | null {
         !strengthTokens.has(t) &&
         !COLLOQUIAL_DEFAULT.has(t),
     );
-    if (residual.length > 0) break;
+    // A residual token that names a real, different SKU (e.g. "cold", "pm") means
+    // the user wants that other formulation — fall through to fuzzy. But an
+    // UNKNOWN modifier absent from the whole catalog ("es"→already aliased,
+    // "200mg", "childrens") is noise; collapse to the family default rather than
+    // letting fuzzy mis-pick a sibling formulation (Tylenol PM). (B-19)
+    const residualNamesRealSku = residual.some((t) => PRODUCT_VOCAB.has(t));
+    if (residualNamesRealSku) break;
     // Bare brand -> default SKU, surfaced as an assumption.
     const def = members.find((m) => m.isBrandDefault) ?? members[0];
     return {
@@ -310,12 +377,19 @@ export function ingredientRef(key: string): IngredientRef | undefined {
  */
 export function verify(productNames: string[]): VerifyResult {
   const matched: Product[] = [];
+  const matchedIds = new Set<string>();
   const unmatched: string[] = [];
   const genericIngredients: GenericIngredientMatch[] = [];
   const assumptions: Assumption[] = [];
   for (const name of productNames) {
     const m = resolveProduct(name);
     if (m) {
+      // Dedup by product id: the same SKU named twice (e.g. "Advil" and
+      // "Advil 200mg", both -> advil) is ONE product, not two — counting it twice
+      // would double the ledger and flag a false danger. This is a checker, not a
+      // quantity tracker; "how much I already took" is out of scope (see tool.ts). (B-20)
+      if (matchedIds.has(m.product.id)) continue;
+      matchedIds.add(m.product.id);
       matched.push(m.product);
       if (m.assumedDefault) {
         assumptions.push({

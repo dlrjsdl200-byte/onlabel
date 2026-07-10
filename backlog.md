@@ -197,3 +197,15 @@
 - **Fix 3 SKU**: (a)콤보팩 거부(성분 개수>기대면 제외 — DayQuil+NyQuil HBP팩·Robitussin value pack), (b)액상 타겟은 액상 우선(childrens-tylenol이 8HR 캐플릿 매칭), (c)advil-allergy-sinus 실제=ibuprofen+chlorpheniramine+**pseudoephedrine**(spec 수정), (d)claritin-d 12hr/24hr 결정론 선택.
 - **Fix 4 결정(chlor-trimeton)**: Chlor-Trimeton 브랜드 openFDA 부재(자사 "Aller-chlor"만). (a)모노그래프 동등 제네릭 허용(chlorpheniramine 4mg 표준) or (b)defer. 함량은 grounding됨.
 - **🔴 Fix 5 새 제형(액상 per-mL)**: dimetapp·robitussin 등 액상은 "in each 5 mL"/"2 tsp(10 mL)" → `mgPerDose = strength × doseVol/labelVol`. verify() 모델에 dose-volume 개념 소폭 확장 필요. = "새 제형 추가"의 본체, 미완.
+
+## B-19. 약어/미인식 modifier 오해소 (P0) `[✅ DONE 2026-07-10]`
+"Tylenol ES"→Tylenol PM 오해소로 danger→caution 다운그레이드(위험 은폐). 수정: STRENGTH_ALIAS(es/xs→extra) + noise residual→family default(PRODUCT_VOCAB). verify.ts. 회귀테스트 3. 상세: findings 2026-07-10.
+
+## B-20. 제품 중복 이중계산 false danger (P1) `[✅ DONE 2026-07-10]`
+verify(["Advil","Advil"])가 원장 이중합산→false danger. 수정: matched를 product.id로 dedup. 서로 다른 제품 합산·generic 0mg(B-8)은 유지. 회귀테스트 1.
+
+## B-21. fuzzyLookup 임계값 부재 (P2) `[✅ DONE 2026-07-10]`
+일반문구("cold and flu")·긴 alias 브랜드("Advil / Motrin IB")서 오매칭. 수정: alias 변형 스코어링 + unmatched 페널티 + generic-only 거부(distinctiveOverlap≥1). 회귀테스트 2.
+
+## B-22. API 입력 길이 상한 (P2) `[✅ DONE 2026-07-10]`
+/api/check·/stream·/contrast에 question≤2000자(+products≤20) 가드 추가(비용·지연 방어).
