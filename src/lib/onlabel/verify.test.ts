@@ -188,9 +188,20 @@ test("duplicate product name is not double-counted", () => {
   assert.strictEqual(verify(["Advil", "Aleve"]).overall, "danger");
 });
 
-// B-21: "Advil 200mg" must resolve to plain Advil, not Advil PM (the "/ Motrin IB"
-// alias must not sink the canonical SKU). Generic symptom phrases resolve to
-// nothing rather than latching onto an arbitrary SKU.
+// B-31: two DIFFERENT brands of the same drug are two ibuprofen sources, not one.
+// "Advil" and "Motrin" used to collapse into a single SKU (the old combined brand
+// "Advil / Motrin IB"), so the card said ok while the prose said "don't — double
+// ibuprofen". Motrin now resolves to its own motrin-ib SKU, so the two sum to a
+// real duplication. The B-20 same-name dedup above still holds.
+test("Advil + Motrin are two ibuprofen products (not deduped into one)", () => {
+  assert.strictEqual(verify(["Advil", "Motrin"]).overall, "danger");
+  assert.strictEqual(verify(["Motrin"]).matched[0]?.id, "motrin-ib");
+  // same name twice is still ONE product (B-20 preserved)
+  assert.strictEqual(verify(["Advil", "Advil"]).overall, "ok");
+});
+
+// B-21: "Advil 200mg" must resolve to plain Advil, not Advil PM. Generic symptom
+// phrases resolve to nothing rather than latching onto an arbitrary SKU.
 test("'Advil 200mg' resolves to plain Advil (not Advil PM)", () => {
   assert.strictEqual(verify(["Advil 200mg"]).matched[0]?.id, "advil");
 });

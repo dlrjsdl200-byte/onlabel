@@ -240,3 +240,9 @@ verdict는 1차 tool 호출 제품으로 스냅되나 done은 전체 productSet 
 
 ## B-28. 대조엔진 직접 API 전환 (P2 속도, 후속) `[IDEA]`
 /api/contrast(claimPipeline·verifyLanguage)는 아직 query()(SDK subprocess) 사용 — opt-in이라 데모 필수경로 아님. 메인경로와 동일하게 Messages API 직접 루프로 전환하면 대조엔진도 빨라지고 SDK 의존 완전 제거 가능. 후속.
+
+## B-31. same-drug 다른 브랜드 dedup 갭 (Advil+Motrin) `[✅ DONE 2026-07-10]`
+> 180문항 프로브서 발견: verify(["Advil","Motrin"])=ok인데 둘 다 ibuprofen(산문은 "No"). 원인=`advil` 브랜드가 "Advil / Motrin IB"로 Motrin alias 중복소유→bare "Motrin"이 tie-break로 advil 흡수(별도 motrin-ib SKU 존재). 수정=advil 브랜드→"Advil"(데이터 1줄), Motrin→motrin-ib 고유해소→2 ibuprofen=danger. 코어 dedup(B-20) 불변, golden 무영향, 회귀테스트 신규. findings 2026-07-10.
+
+## B-32. 반복 generic 성분명 caution 카드 (LLM 추출 한계) `[P3 잔여]`
+> "dextromethorphan and dextromethorphan"/"took X, add X"에서 모델이 동일문자열 2회 전달을 거부→products 1개→카드 ok(caution 아님). 프롬프트+few-shot로도 미해소(LLM 완강). 산문은 정확히 "same drug, don't double up" 경고=안전 커버. 리터럴 "X and X"는 합성 엣지(실사용 아님), "took X" 케이스는 이미복용량=verify 스코프밖이라 ok 정당. 근본해결은 결정론 검출(질문서 반복성분 파싱→verify에 중복주입) 필요, 저가치. 후속.
