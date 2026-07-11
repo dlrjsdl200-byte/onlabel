@@ -1,5 +1,5 @@
 import type { IngredientFinding } from "@/lib/onlabel/verify";
-import { VERDICT, fmtMg, fmtRegimen } from "./verdict";
+import { VERDICT, fmtMg } from "./verdict";
 import { cn } from "@/lib/utils";
 
 export function IngredientLedger({
@@ -8,21 +8,23 @@ export function IngredientLedger({
   findings: IngredientFinding[];
 }) {
   if (findings.length === 0) return null;
-  // Renders inside the evidence rail under its own "Ingredient ledger" heading,
-  // so it carries no heading/section of its own — just the table + footnote.
+  // Compact for the evidence rail: four columns, product breakdown folded into a
+  // sub-line under the ingredient name so nothing wraps awkwardly in the narrow
+  // column. Numeric cells never wrap ("4,000 mg" stays on one line).
   return (
     <>
       <div className="overflow-x-auto rounded-xl border">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-muted/50 text-left text-xs uppercase tracking-wide text-muted-foreground">
-              <th className="px-4 py-2.5 font-medium">Ingredient</th>
-              <th className="px-4 py-2.5 font-medium">Found in</th>
-              <th className="px-4 py-2.5 text-right font-medium">
-                Combined&nbsp;/&nbsp;day
+            <tr className="border-b bg-muted/50 text-left text-[10px] uppercase tracking-wide text-muted-foreground">
+              <th className="px-3 py-2 font-medium">Ingredient</th>
+              <th className="whitespace-nowrap px-2 py-2 text-right font-medium">
+                Combined
               </th>
-              <th className="px-4 py-2.5 text-right font-medium">Limit</th>
-              <th className="px-4 py-2.5 text-center font-medium">Status</th>
+              <th className="whitespace-nowrap px-2 py-2 text-right font-medium">
+                Limit
+              </th>
+              <th className="px-3 py-2 text-right font-medium">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -32,21 +34,21 @@ export function IngredientLedger({
               return (
                 <tr
                   key={f.ingredient}
-                  className={cn(
-                    "border-b last:border-0",
-                    flagged && v.bg,
-                  )}
+                  className={cn("border-b align-top last:border-0", flagged && v.bg)}
                 >
-                  <td className="px-4 py-3 font-medium text-foreground">
-                    {f.displayName}
-                  </td>
-                  <td className="px-4 py-3">
-                    <ul className="space-y-1.5">
+                  <td className="px-3 py-2.5">
+                    <div className="font-medium text-foreground">
+                      {f.displayName}
+                    </div>
+                    <ul className="mt-0.5 space-y-0.5">
                       {f.contributions.map((c) => (
-                        <li key={c.brand}>
-                          <span className="text-foreground">{c.brand}</span>
-                          <span className="block text-xs tabular-nums text-muted-foreground">
-                            {fmtRegimen(c)}
+                        <li
+                          key={c.brand}
+                          className="text-[11px] leading-snug text-muted-foreground"
+                        >
+                          {c.brand}{" "}
+                          <span className="whitespace-nowrap tabular-nums">
+                            · {fmtMg(c.maxDailyMg)}
                           </span>
                         </li>
                       ))}
@@ -54,19 +56,21 @@ export function IngredientLedger({
                   </td>
                   <td
                     className={cn(
-                      "px-4 py-3 text-right tabular-nums",
-                      f.exceedsLimit ? cn("font-semibold", v.fg) : "text-foreground",
+                      "whitespace-nowrap px-2 py-2.5 text-right tabular-nums",
+                      f.exceedsLimit
+                        ? cn("font-semibold", v.fg)
+                        : "text-foreground",
                     )}
                   >
                     {fmtMg(f.totalMaxDailyMg)}
                   </td>
-                  <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">
+                  <td className="whitespace-nowrap px-2 py-2.5 text-right tabular-nums text-muted-foreground">
                     {f.limitMg != null ? fmtMg(f.limitMg) : "—"}
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-3 py-2.5 text-right">
                     <span
                       className={cn(
-                        "inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold",
+                        "inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-0.5 text-xs font-semibold",
                         v.bg,
                         v.fg,
                       )}
@@ -83,7 +87,7 @@ export function IngredientLedger({
         </table>
       </div>
       <p className="text-xs text-muted-foreground">
-        “Combined / day” is each product taken at its own label maximum, summed.
+        “Combined” is each product taken at its own label maximum, summed.
       </p>
     </>
   );
