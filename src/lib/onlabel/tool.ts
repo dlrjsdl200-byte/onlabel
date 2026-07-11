@@ -10,6 +10,19 @@ import { tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod";
 import { verify, type VerifyResult, type IngredientFinding } from "./verify";
 
+/** Human-readable drug class per internal class key — so "is Advil an NSAID?"
+ * and "what kind of drug is X?" can be answered from the KB, not memory. */
+const CLASS_READABLE: Record<string, string> = {
+  "analgesic-antipyretic": "pain reliever / fever reducer",
+  nsaid: "NSAID (nonsteroidal anti-inflammatory drug)",
+  antitussive: "cough suppressant",
+  expectorant: "expectorant (loosens mucus)",
+  decongestant: "decongestant",
+  "antihistamine-sedating": "sedating (drowsy) antihistamine",
+  "antihistamine-nonsedating": "non-drowsy antihistamine",
+  stimulant: "stimulant",
+};
+
 /**
  * Pure core: run a safety check and format a summary for an LLM to read.
  * Separated from the SDK tool so it can be unit-tested without an LLM.
@@ -49,6 +62,16 @@ export function runSafetyCheck(products: string[]): {
         );
       }
     }
+  }
+
+  // Drug class per ingredient (FDA-grounded) — grounds "is X an NSAID?" /
+  // "what kind of drug is X?" so the model states the class from the KB.
+  if (result.findings.length) {
+    const cls = result.findings.map(
+      (f) => `${f.displayName} = ${CLASS_READABLE[f.class] ?? f.class}`,
+    );
+    lines.push("");
+    lines.push(`Drug class (FDA-grounded): ${cls.join("; ")}.`);
   }
 
   // Direction A — grounded dosing surface. Every ingredient finding (including
