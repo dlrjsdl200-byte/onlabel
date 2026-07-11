@@ -246,3 +246,9 @@ verdict는 1차 tool 호출 제품으로 스냅되나 done은 전체 productSet 
 
 ## B-32. 반복 generic 성분명 caution 카드 (LLM 추출 한계) `[P3 잔여]`
 > "dextromethorphan and dextromethorphan"/"took X, add X"에서 모델이 동일문자열 2회 전달을 거부→products 1개→카드 ok(caution 아님). 프롬프트+few-shot로도 미해소(LLM 완강). 산문은 정확히 "same drug, don't double up" 경고=안전 커버. 리터럴 "X and X"는 합성 엣지(실사용 아님), "took X" 케이스는 이미복용량=verify 스코프밖이라 ok 정당. 근본해결은 결정론 검출(질문서 반복성분 파싱→verify에 중복주입) 필요, 저가치. 후속.
+
+## B-33. 정성적 의료 주장(부작용·위험) 접지 fence 부재 `[P2 논지]`
+- **무엇**: 사용자가 "side effects of ibuprofen" 같은 **정성적 의료 질문**을 직접 타이핑하면 에이전트가 KB 근거 없이 **기억에서 자유 생성**(NSAID 부작용 목록 등). 현재 grounding fence는 *숫자*만 막고 *정성적 주장*은 안 막음. OnLabel이 일반 AI를 비판하는 바로 그 행동(무접지 의료 타이핑)이라 **논지 일관성 구멍**.
+- **발견**: 2026-07-11, 사용자가 "이거 llm타이핑같은데" 지적. 후속칩 "What side effects…?"가 유도했음 → **칩은 제거 완료**(ab5bf51), 데모 경로는 깨끗. 단 직접 타이핑 경로는 잔존.
+- **왜 지금 보류**(사용자 결정 2026-07-11): 최소 범위 유지. 칩 제거로 데모 경로 커버됨. agent 행동 변경은 데모 느낌(답변 짧아짐)에 영향 → 데모 후 재논의.
+- **재추가안(접지 가능)**: KB `risk` 필드에 접지 한 줄 있음(ibuprofen "GI bleeding, kidney and cardiovascular risk…", acetaminophen "Liver damage — leading cause of acute liver failure…"). tool.ts에서 ceiling처럼 risk도 노출 + agent 규칙: 부작용·위험 질문은 **KB risk note만 접지 진술 + "전체 목록은 Drug Facts 라벨/약사" defer**, 기억 열거 금지. (ceiling 노출 수정 b4fe786과 동형 패턴.)
