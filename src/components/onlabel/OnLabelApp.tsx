@@ -2,7 +2,6 @@
 
 import { QuestionInput } from "./QuestionInput";
 import { AnswerView } from "./AnswerView";
-import { ContrastEngine } from "./ContrastEngine";
 import { FollowUps } from "./FollowUps";
 import { ProgressSteps } from "./ProgressSteps";
 import { Disclaimer } from "./Disclaimer";
@@ -57,13 +56,6 @@ export function OnLabelApp() {
                 prose={state.prose}
                 streaming={state.status === "streaming"}
               />
-              {state.status !== "streaming" &&
-                state.verification.matched.length > 0 && (
-                  <ContrastEngine
-                    question={state.question}
-                    products={state.verification.matched.map((p) => p.brand)}
-                  />
-                )}
               {state.status !== "streaming" &&
                 state.verification.findings.length > 0 && (
                   <FollowUps result={state.verification} onAsk={ask} />
