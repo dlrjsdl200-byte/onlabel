@@ -1,7 +1,7 @@
 import type { VerifyResult } from "@/lib/onlabel/verify";
 import { VerdictCard } from "./VerdictCard";
 import { AssumptionNote } from "./AssumptionNote";
-import { ContrastStrip } from "./ContrastStrip";
+import { Disclosure } from "./Disclosure";
 import { IngredientLedger } from "./IngredientLedger";
 import { EfficacyNote } from "./EfficacyNote";
 import { Sources } from "./Sources";
@@ -30,8 +30,6 @@ export function AnswerView({
         {question}
       </p>
 
-      <ContrastStrip severity={result.overall} />
-
       <VerdictCard severity={result.overall} summary={result.summary} />
 
       <AssumptionNote assumptions={result.assumptions} />
@@ -57,9 +55,17 @@ export function AnswerView({
         )}
       </div>
 
-      <IngredientLedger findings={result.findings} />
-
-      <EfficacyNote findings={result.findings} />
+      {result.findings.length > 0 && (
+        <Disclosure
+          summary="See the dose math"
+          meta={`${result.findings.length} ingredient${
+            result.findings.length === 1 ? "" : "s"
+          }`}
+        >
+          <IngredientLedger findings={result.findings} />
+          <EfficacyNote findings={result.findings} />
+        </Disclosure>
+      )}
 
       <Sources result={result} />
 

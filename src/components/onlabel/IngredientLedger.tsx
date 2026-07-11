@@ -8,11 +8,10 @@ export function IngredientLedger({
   findings: IngredientFinding[];
 }) {
   if (findings.length === 0) return null;
+  // Renders inside a <Disclosure> ("See the dose math") — no own heading/section,
+  // the disclosure summary provides the label.
   return (
-    <section>
-      <h3 className="mb-2 text-sm font-semibold text-foreground">
-        Ingredient ledger
-      </h3>
+    <>
       <div className="overflow-x-auto rounded-xl border">
         <table className="w-full text-sm">
           <thead>
@@ -83,9 +82,9 @@ export function IngredientLedger({
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">
+      <p className="text-xs text-muted-foreground">
         “Combined / day” is each product taken at its own label maximum, summed.
       </p>
-    </section>
+    </>
   );
 }

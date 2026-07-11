@@ -24,42 +24,47 @@ export function VerdictCard({
   return (
     <div
       className={cn(
-        "flex items-start gap-4 rounded-xl border p-5 shadow-sm",
+        "overflow-hidden rounded-xl border shadow-sm",
         v.bg,
         v.border,
       )}
       role="status"
       aria-live="polite"
     >
-      <div
-        className={cn(
-          "flex size-10 shrink-0 items-center justify-center rounded-lg text-lg font-bold text-white",
-          v.solid,
-        )}
-        aria-hidden
-      >
-        {v.icon}
-      </div>
-      <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <span
-            className={cn(
-              "text-xs font-semibold uppercase tracking-wider",
-              v.fg,
-            )}
-          >
-            {v.label}
-          </span>
+      {/* Severity strip: absorbs the standalone ContrastStrip's job — one glance
+          tells you the verdict color before any text is read. */}
+      <div className={cn("h-1.5", v.solid)} aria-hidden />
+      <div className="flex items-start gap-4 p-5">
+        <div
+          className={cn(
+            "flex size-10 shrink-0 items-center justify-center rounded-lg text-lg font-bold text-white",
+            v.solid,
+          )}
+          aria-hidden
+        >
+          {v.icon}
         </div>
-        <h2 className={cn("mt-0.5 text-lg font-semibold", v.fg)}>
-          {v.headline}
-        </h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-foreground/80">
-          {summary}
-        </p>
-        <p className="mt-2 border-t border-foreground/10 pt-2 text-xs leading-relaxed text-foreground/55">
-          {SCOPE_NOTE}
-        </p>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                "text-xs font-semibold uppercase tracking-wider",
+                v.fg,
+              )}
+            >
+              {v.label}
+            </span>
+          </div>
+          <h2 className={cn("mt-0.5 text-lg font-semibold", v.fg)}>
+            {v.headline}
+          </h2>
+          <p className="mt-1.5 text-sm leading-relaxed text-foreground/80">
+            {summary}
+          </p>
+          <p className="mt-2 border-t border-foreground/10 pt-2 text-xs leading-relaxed text-foreground/55">
+            {SCOPE_NOTE}
+          </p>
+        </div>
       </div>
     </div>
   );
