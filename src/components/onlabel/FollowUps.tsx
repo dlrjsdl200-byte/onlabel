@@ -32,14 +32,17 @@ function buildFollowUps(result: VerifyResult): string[] {
     out.push(`What's the maximum daily dose of ${focus.displayName}?`);
   }
 
-  // 2. Duration — only when we have dosing data, and only if we can name the
-  //    product(s) so the question stands alone.
-  if (brandList && findings.some((f) => f.dosing)) {
-    out.push(`How many days in a row can I take ${brandList}?`);
+  // Anchor every combination/duration question to something the checker can
+  // resolve: the named product(s) if any, otherwise the ingredient itself.
+  const anchor = brandList || focus?.displayName || "";
+
+  // 2. Duration — only when the KB actually has a dosing schedule to ground on.
+  if (anchor && findings.some((f) => f.dosing)) {
+    out.push(`How many days in a row can I take ${anchor}?`);
   }
 
-  // 3. A common add-on reliever not already among the ingredients — phrased
-  //    against the named products so it needs no prior turn.
+  // 3. A common add-on reliever not already among the ingredients. Routes back
+  //    through the checker, so the answer is a grounded verdict — not memory.
   const present = new Set(findings.map((f) => f.ingredient));
   const addOns: Array<{ key: string; label: string }> = [
     { key: "ibuprofen", label: "ibuprofen (Advil)" },
@@ -47,13 +50,15 @@ function buildFollowUps(result: VerifyResult): string[] {
     { key: "naproxen", label: "naproxen (Aleve)" },
   ];
   const addOn = addOns.find((a) => !present.has(a.key));
-  if (addOn && brandList) {
-    out.push(`Can I take ${addOn.label} with ${brandList}?`);
+  if (addOn && anchor) {
+    out.push(`Can I take ${addOn.label} with ${anchor}?`);
   }
 
-  if (focus && out.length < 3) {
-    out.push(`What side effects should I watch for with ${focus.displayName}?`);
-  }
+  // NOTE: no "what side effects…" suggestion. OnLabel checks ingredient
+  // duplication and dose ceilings — it has no grounded side-effect data, so
+  // that question can only be answered by ungrounded LLM prose, which violates
+  // the neuro-symbolic promise. We never lead the user to a question we can't
+  // answer from FDA data. Fewer, grounded chips beats a chip that fabricates.
 
   return out.slice(0, 3);
 }
