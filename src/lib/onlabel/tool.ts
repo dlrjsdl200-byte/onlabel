@@ -27,11 +27,28 @@ export function runSafetyCheck(products: string[]): {
     lines.push(`Not in catalog: ${result.unmatched.join(", ")}`);
   }
   if (result.genericIngredients.length) {
+    // A bare ingredient has no product/strength, so a per-PRODUCT daily total is
+    // unknown. But the ingredient's FDA daily CEILING (limitMg) is a fixed,
+    // sourced fact independent of any product — surface it so a "what's the max
+    // daily dose of X?" question is answered from the KB, not refused or (worse)
+    // filled in from the model's memory.
     lines.push(
-      `Bare ingredient(s) named (counted for duplication, but amount unknown — do not state a dose or daily total for these): ${result.genericIngredients
-        .map((g) => g.input)
-        .join(", ")}`,
+      "Bare ingredient(s) named — no product/strength given, so a per-product daily total is unknown. " +
+        "The FDA daily ceiling below IS grounded and MAY be stated as the maximum daily dose:",
     );
+    for (const g of result.genericIngredients) {
+      const f = result.findings.find((x) => x.ingredient === g.ingredient);
+      if (f && f.limitMg != null) {
+        lines.push(
+          `- ${f.displayName}: FDA daily ceiling ${f.limitMg} mg/24h (source: ${f.source}). ` +
+            `State this as the maximum daily dose. Do NOT state a per-dose amount for it — no strength was named.`,
+        );
+      } else {
+        lines.push(
+          `- ${f?.displayName ?? g.input}: no established OTC daily ceiling in this tool — defer to the label or a pharmacist.`,
+        );
+      }
+    }
   }
 
   // Direction A — grounded dosing surface. Every ingredient finding (including
