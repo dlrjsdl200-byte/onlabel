@@ -8,8 +8,8 @@ export function IngredientLedger({
   findings: IngredientFinding[];
 }) {
   if (findings.length === 0) return null;
-  // Renders inside a <Disclosure> ("See the dose math") — no own heading/section,
-  // the disclosure summary provides the label.
+  // Renders inside the evidence rail under its own "Ingredient ledger" heading,
+  // so it carries no heading/section of its own — just the table + footnote.
   return (
     <>
       <div className="overflow-x-auto rounded-xl border">

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { VerifyResult } from "@/lib/onlabel/verify";
 import citationsData from "@/data/citations.json";
-import { Disclosure } from "./Disclosure";
 
 interface Citation {
   monograph: string;
@@ -47,10 +46,13 @@ export function Sources({ result }: { result: VerifyResult }) {
   const total = cited.length + plain.size;
 
   return (
-    <Disclosure
-      summary="Sources"
-      meta={`${total} FDA reference${total === 1 ? "" : "s"}`}
-    >
+    <section>
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        Sources{" "}
+        <span className="font-normal normal-case tracking-normal text-muted-foreground/70">
+          · {total} FDA reference{total === 1 ? "" : "s"}
+        </span>
+      </h3>
       <div className="flex flex-wrap gap-2">
         {cited.map((key) => {
           const c = CITATIONS[key];
@@ -106,6 +108,6 @@ export function Sources({ result }: { result: VerifyResult }) {
           </span>
         ))}
       </div>
-    </Disclosure>
+    </section>
   );
 }

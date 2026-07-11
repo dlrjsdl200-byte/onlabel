@@ -1,75 +1,126 @@
 import type { VerifyResult } from "@/lib/onlabel/verify";
 import { VerdictCard } from "./VerdictCard";
 import { AssumptionNote } from "./AssumptionNote";
-import { Disclosure } from "./Disclosure";
 import { IngredientLedger } from "./IngredientLedger";
 import { EfficacyNote } from "./EfficacyNote";
 import { Sources } from "./Sources";
+import { FollowUps } from "./FollowUps";
 import { Disclaimer } from "./Disclaimer";
 
 /**
- * Presentational answer view. Renders in "verdict-first" order:
- * deterministic verdict + ledger snap immediately; prose fills in below.
- * `prose` may be empty while streaming.
+ * Two-column result: the answer reads on the left, the FDA evidence sits in a
+ * right rail (expanded, since a rail has the room to show the dose table and
+ * sources open). On desktop this fills the horizontal space; on mobile the grid
+ * collapses to one column and the rail stacks below the answer.
+ *
+ * Verdict-first order is preserved: the deterministic verdict + ledger snap in
+ * immediately; `prose` fills in below and may be empty while streaming.
  */
 export function AnswerView({
   question,
   result,
   prose,
   streaming,
+  onAsk,
 }: {
   question: string;
   result: VerifyResult;
   prose: string;
   streaming?: boolean;
+  onAsk?: (q: string) => void;
 }) {
+  const hasFindings = result.findings.length > 0;
+  const productCount = new Set(result.matched.map((p) => p.brand)).size;
+
   return (
     <div className="flex w-full flex-col gap-5">
-      <p className="text-sm text-muted-foreground">
-        <span className="font-medium text-foreground">You asked:</span>{" "}
-        {question}
-      </p>
-
-      <VerdictCard severity={result.overall} summary={result.summary} />
-
-      <AssumptionNote assumptions={result.assumptions} />
-
-      {result.unmatched.length > 0 && (
-        <p className="rounded-lg border bg-muted/40 px-4 py-2 text-sm text-muted-foreground">
-          Couldn’t recognize: {result.unmatched.join(", ")}. Checked the rest.
+      <div>
+        <p className="text-[15px] font-medium tracking-tight">
+          <span className="text-muted-foreground">You asked:</span> {question}
         </p>
-      )}
-
-      <div className="text-[15px] leading-relaxed text-foreground/90">
-        {prose ? (
-          <p className="whitespace-pre-wrap">{prose}</p>
-        ) : (
-          <div className="space-y-2" aria-hidden>
-            <div className="h-4 w-11/12 animate-pulse rounded bg-muted" />
-            <div className="h-4 w-full animate-pulse rounded bg-muted" />
-            <div className="h-4 w-4/5 animate-pulse rounded bg-muted" />
-          </div>
-        )}
-        {streaming && prose && (
-          <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse bg-primary align-middle" />
-        )}
+        <MetaStrip productCount={productCount} ingredientCount={result.findings.length} />
       </div>
 
-      {result.findings.length > 0 && (
-        <Disclosure
-          summary="See the dose math"
-          meta={`${result.findings.length} ingredient${
-            result.findings.length === 1 ? "" : "s"
-          }`}
-        >
-          <IngredientLedger findings={result.findings} />
-          <EfficacyNote findings={result.findings} />
-        </Disclosure>
-      )}
+      <div className="grid gap-5 lg:grid-cols-[1.6fr_1fr] lg:items-start lg:gap-6">
+        {/* MAIN — the answer */}
+        <div className="flex min-w-0 flex-col gap-5">
+          <VerdictCard severity={result.overall} summary={result.summary} />
 
-      <Sources result={result} />
+          <AssumptionNote assumptions={result.assumptions} />
+
+          {result.unmatched.length > 0 && (
+            <p className="rounded-lg border bg-muted/40 px-4 py-2 text-sm text-muted-foreground">
+              Couldn’t recognize: {result.unmatched.join(", ")}. Checked the rest.
+            </p>
+          )}
+
+          <div className="text-[15px] leading-relaxed text-foreground/90">
+            {prose ? (
+              <p className="whitespace-pre-wrap">{prose}</p>
+            ) : (
+              <div className="space-y-2" aria-hidden>
+                <div className="h-4 w-11/12 animate-pulse rounded bg-muted" />
+                <div className="h-4 w-full animate-pulse rounded bg-muted" />
+                <div className="h-4 w-4/5 animate-pulse rounded bg-muted" />
+              </div>
+            )}
+            {streaming && prose && (
+              <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse bg-primary align-middle" />
+            )}
+          </div>
+
+          {!streaming && hasFindings && onAsk && (
+            <FollowUps result={result} onAsk={onAsk} />
+          )}
+        </div>
+
+        {/* RAIL — the FDA evidence, expanded */}
+        <aside className="flex flex-col gap-4 lg:sticky lg:top-6">
+          {hasFindings && (
+            <section>
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Ingredient ledger
+              </h3>
+              <IngredientLedger findings={result.findings} />
+            </section>
+          )}
+
+          <EfficacyNote findings={result.findings} />
+
+          <Sources result={result} />
+        </aside>
+      </div>
 
       <Disclaimer />
+    </div>
+  );
+}
+
+/** A "what we checked" strip that makes the result read as substantive at a glance. */
+function MetaStrip({
+  productCount,
+  ingredientCount,
+}: {
+  productCount: number;
+  ingredientCount: number;
+}) {
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {productCount > 0 && (
+        <span className="inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground">
+          <b className="font-semibold tabular-nums text-foreground">{productCount}</b>
+          {productCount === 1 ? "product" : "products"}
+        </span>
+      )}
+      {ingredientCount > 0 && (
+        <span className="inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground">
+          <b className="font-semibold tabular-nums text-foreground">{ingredientCount}</b>
+          active {ingredientCount === 1 ? "ingredient" : "ingredients"}
+        </span>
+      )}
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+        ✓ checked against FDA labels
+      </span>
     </div>
   );
 }

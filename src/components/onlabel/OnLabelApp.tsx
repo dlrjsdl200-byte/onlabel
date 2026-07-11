@@ -2,7 +2,6 @@
 
 import { QuestionInput } from "./QuestionInput";
 import { AnswerView } from "./AnswerView";
-import { FollowUps } from "./FollowUps";
 import { ProgressSteps } from "./ProgressSteps";
 import { Disclaimer } from "./Disclaimer";
 import { useOnLabelStream } from "./useOnLabelStream";
@@ -16,10 +15,8 @@ export function OnLabelApp() {
     state.status === "streaming" && !state.verification && !state.prose;
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-5 py-10 sm:py-16">
-      <header
-        className={active ? "mb-6" : "mb-8 text-center"}
-      >
+    <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-5 py-10 sm:py-14">
+      <header className={active ? "mb-6" : "mb-8 text-center"}>
         <button
           onClick={reset}
           className="text-2xl font-semibold tracking-tight text-foreground hover:opacity-80"
@@ -33,40 +30,41 @@ export function OnLabelApp() {
         )}
       </header>
 
-      <QuestionInput
-        onSubmit={ask}
-        disabled={state.status === "streaming"}
-        compact={active}
-      />
+      <div className={active ? "w-full max-w-3xl" : "mx-auto w-full max-w-xl"}>
+        <QuestionInput
+          onSubmit={ask}
+          disabled={state.status === "streaming"}
+          compact={active}
+        />
+      </div>
 
       {active && (
         <div className="mt-8">
           {state.status === "error" ? (
-            <div className="rounded-xl border border-verdict-danger/40 bg-verdict-danger-bg p-4 text-sm text-verdict-danger-fg">
+            <div className="max-w-2xl rounded-xl border border-verdict-danger/40 bg-verdict-danger-bg p-4 text-sm text-verdict-danger-fg">
               <p className="font-medium">Something went wrong.</p>
               <p className="mt-1 text-foreground/70">{state.error}</p>
             </div>
           ) : thinking ? (
-            <ProgressSteps />
+            <div className="max-w-2xl">
+              <ProgressSteps />
+            </div>
           ) : state.verification ? (
-            <div className="space-y-6">
-              <AnswerView
+            <AnswerView
+              question={state.question}
+              result={state.verification}
+              prose={state.prose}
+              streaming={state.status === "streaming"}
+              onAsk={ask}
+            />
+          ) : (
+            <div className="max-w-2xl">
+              <NoVerdictAnswer
                 question={state.question}
-                result={state.verification}
                 prose={state.prose}
                 streaming={state.status === "streaming"}
               />
-              {state.status !== "streaming" &&
-                state.verification.findings.length > 0 && (
-                  <FollowUps result={state.verification} onAsk={ask} />
-                )}
             </div>
-          ) : (
-            <NoVerdictAnswer
-              question={state.question}
-              prose={state.prose}
-              streaming={state.status === "streaming"}
-            />
           )}
         </div>
       )}
