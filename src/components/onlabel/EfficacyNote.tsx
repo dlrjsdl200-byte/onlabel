@@ -12,7 +12,7 @@ export function EfficacyNote({
       {notes.map((f) => (
         <div
           key={f.ingredient}
-          className="rounded-xl border-l-4 border-l-primary bg-accent/60 p-4"
+          className="rounded-lg border-2 border-l-8 border-foreground border-l-primary bg-card p-3.5"
         >
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-foreground">

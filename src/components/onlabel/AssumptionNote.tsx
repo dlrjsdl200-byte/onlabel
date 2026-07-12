@@ -12,8 +12,8 @@ export function AssumptionNote({
 }) {
   if (assumptions.length === 0) return null;
   return (
-    <div className="rounded-lg border border-primary/25 bg-accent/50 px-4 py-3 text-sm">
-      <span className="font-medium text-foreground">Assumed strength.</span>{" "}
+    <div className="rounded-lg border-2 border-foreground border-l-8 border-l-primary bg-card px-4 py-3 text-sm">
+      <span className="font-bold text-foreground">Assumed strength.</span>{" "}
       <span className="text-foreground/75">
         {assumptions.map((a, i) => (
           <span key={a.input}>

@@ -31,7 +31,7 @@ export function LabelWarnings({ result }: { result: VerifyResult }) {
 
   return (
     <section>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <h3 className="mb-2 text-xs font-extrabold uppercase tracking-[0.08em] text-foreground">
         Label warnings
       </h3>
       <div className="flex flex-col gap-2">

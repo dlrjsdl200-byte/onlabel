@@ -31,7 +31,7 @@ export function ProgressSteps() {
   }, [active]);
 
   return (
-    <div className="flex w-full flex-col gap-3 rounded-xl border bg-muted/20 p-5">
+    <div className="flex w-full flex-col gap-3 rounded-xl border-2 border-foreground bg-card p-5">
       <ul className="space-y-2.5">
         {STEPS.map((label, i) => {
           const done = i < active;

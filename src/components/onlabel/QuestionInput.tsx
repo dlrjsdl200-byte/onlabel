@@ -43,13 +43,13 @@ export function QuestionInput({
           onChange={(e) => setValue(e.target.value)}
           placeholder="Ask about your OTC medicines…"
           disabled={disabled}
-          className="h-12 flex-1 rounded-lg border bg-background px-4 text-base shadow-sm outline-none ring-primary/30 placeholder:text-muted-foreground focus:ring-2 disabled:opacity-60"
+          className="h-[3.25rem] flex-1 rounded-xl border-2 border-foreground bg-card px-4 text-base font-medium outline-none placeholder:font-normal placeholder:text-muted-foreground focus:ring-2 focus:ring-foreground/25 disabled:opacity-60"
           aria-label="Your OTC medication question"
         />
         <button
           type="submit"
           disabled={disabled}
-          className="h-12 rounded-lg bg-primary px-6 font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="h-[3.25rem] rounded-xl border-2 border-foreground bg-foreground px-6 font-extrabold text-background transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           Ask
         </button>
@@ -62,7 +62,7 @@ export function QuestionInput({
               type="button"
               onClick={() => submit(ex)}
               disabled={disabled}
-              className="rounded-full border bg-muted/40 px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
+              className="rounded-full border-2 border-foreground bg-card px-3.5 py-1.5 text-sm font-bold text-foreground/80 transition-colors hover:bg-foreground hover:text-background disabled:opacity-50"
             >
               {ex}
             </button>

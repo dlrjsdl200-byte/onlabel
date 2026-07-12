@@ -47,9 +47,9 @@ export function Sources({ result }: { result: VerifyResult }) {
 
   return (
     <section>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <h3 className="mb-2 text-xs font-extrabold uppercase tracking-[0.08em] text-foreground">
         Sources{" "}
-        <span className="font-normal normal-case tracking-normal text-muted-foreground/70">
+        <span className="font-bold normal-case tracking-normal text-muted-foreground">
           · {total} FDA reference{total === 1 ? "" : "s"}
         </span>
       </h3>
@@ -65,7 +65,7 @@ export function Sources({ result }: { result: VerifyResult }) {
                 onClick={() => setOpen(isOpen ? null : key)}
                 title={`${c.monograph} ${c.section} — click to see the FDA text`}
                 aria-expanded={isOpen}
-                className="flex items-center gap-1.5 rounded-full border border-verdict-ok/40 bg-verdict-ok-bg/40 px-3 py-1 text-xs font-medium text-foreground/80 transition-colors hover:bg-verdict-ok-bg"
+                className="flex items-center gap-1.5 rounded-full border-2 border-foreground bg-card px-3 py-1 text-xs font-bold text-foreground/80 transition-colors hover:bg-foreground hover:text-background"
               >
                 <span aria-hidden className="text-verdict-ok-fg">
                   §
@@ -102,7 +102,7 @@ export function Sources({ result }: { result: VerifyResult }) {
         {[...plain].map((s) => (
           <span
             key={s}
-            className="rounded-full border bg-muted/40 px-3 py-1 text-xs text-muted-foreground"
+            className="rounded-full border-2 border-foreground bg-card px-3 py-1 text-xs font-bold text-muted-foreground"
           >
             {s}
           </span>

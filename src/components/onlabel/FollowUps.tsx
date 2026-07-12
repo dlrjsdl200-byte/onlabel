@@ -75,18 +75,20 @@ export function FollowUps({
 
   return (
     <section>
-      <h3 className="mb-2 text-sm font-semibold text-foreground">Related</h3>
+      <h3 className="mb-2 text-xs font-extrabold uppercase tracking-[0.08em] text-foreground">
+        Related
+      </h3>
       <div className="flex flex-col gap-2">
         {questions.map((q) => (
           <button
             key={q}
             type="button"
             onClick={() => onAsk(q)}
-            className="group flex items-center justify-between gap-3 rounded-lg border bg-background px-4 py-2.5 text-left text-sm text-foreground/85 shadow-sm transition-colors hover:border-primary/40 hover:bg-muted/40"
+            className="group flex items-center justify-between gap-3 rounded-lg border-2 border-foreground bg-card px-4 py-2.5 text-left text-sm font-semibold text-foreground/85 transition-colors hover:bg-foreground hover:text-background"
           >
             <span>{q}</span>
             <span
-              className="shrink-0 text-muted-foreground/50 transition-colors group-hover:text-primary"
+              className="shrink-0 font-bold text-muted-foreground transition-colors group-hover:text-background"
               aria-hidden
             >
               →

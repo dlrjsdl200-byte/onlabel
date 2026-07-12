@@ -19,12 +19,12 @@ export function OnLabelApp() {
       <header className={active ? "mb-6" : "mb-8 text-center"}>
         <button
           onClick={reset}
-          className="text-2xl font-semibold tracking-tight text-foreground hover:opacity-80"
+          className="text-2xl font-extrabold tracking-tight text-foreground hover:opacity-80"
         >
           OnLabel
         </button>
         {!active && (
-          <p className="mt-1.5 text-muted-foreground">
+          <p className="mt-1.5 font-medium text-muted-foreground">
             Know what&rsquo;s really in your OTC meds.
           </p>
         )}
@@ -41,8 +41,8 @@ export function OnLabelApp() {
       {active && (
         <div className="mt-8">
           {state.status === "error" ? (
-            <div className="max-w-2xl rounded-xl border border-verdict-danger/40 bg-verdict-danger-bg p-4 text-sm text-verdict-danger-fg">
-              <p className="font-medium">Something went wrong.</p>
+            <div className="max-w-2xl rounded-xl border-2 border-verdict-danger bg-verdict-danger-bg p-4 text-sm text-verdict-danger-fg">
+              <p className="font-bold">Something went wrong.</p>
               <p className="mt-1 text-foreground/70">{state.error}</p>
             </div>
           ) : thinking ? (

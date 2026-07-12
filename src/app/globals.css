@@ -77,8 +77,8 @@
   --input: oklch(0.922 0.005 260);
   --ring: oklch(0.55 0.2 260);
 
-  /* Verdict semantic palette (clinical-clean, muted saturation) */
-  --verdict-danger: oklch(0.585 0.22 25);
+  /* Verdict semantic palette — Traffic-Light: punchier, high-contrast red. */
+  --verdict-danger: oklch(0.565 0.235 27);
   --verdict-danger-fg: oklch(0.44 0.19 25);
   --verdict-danger-bg: oklch(0.968 0.03 25);
   --verdict-caution: oklch(0.72 0.15 75);
@@ -92,7 +92,8 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  /* Traffic-Light rebuild: sharper geometry. */
+  --radius: 0.5rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);

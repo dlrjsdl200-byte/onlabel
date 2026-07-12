@@ -13,18 +13,18 @@ export function IngredientLedger({
   // column. Numeric cells never wrap ("4,000 mg" stays on one line).
   return (
     <>
-      <div className="overflow-x-auto rounded-xl border">
+      <div className="overflow-x-auto rounded-xl border-2 border-foreground">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-muted/50 text-left text-[10px] uppercase tracking-wide text-muted-foreground">
-              <th className="px-3 py-2 font-medium">Ingredient</th>
-              <th className="whitespace-nowrap px-2 py-2 text-right font-medium">
+            <tr className="bg-foreground text-left text-[10px] font-bold uppercase tracking-wide text-background">
+              <th className="px-3 py-2 font-bold">Ingredient</th>
+              <th className="whitespace-nowrap px-2 py-2 text-right font-bold">
                 Combined
               </th>
-              <th className="whitespace-nowrap px-2 py-2 text-right font-medium">
+              <th className="whitespace-nowrap px-2 py-2 text-right font-bold">
                 Limit
               </th>
-              <th className="px-3 py-2 text-right font-medium">Status</th>
+              <th className="px-3 py-2 text-right font-bold">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -34,7 +34,7 @@ export function IngredientLedger({
               return (
                 <tr
                   key={f.ingredient}
-                  className={cn("border-b align-top last:border-0", flagged && v.bg)}
+                  className={cn("border-t-2 border-foreground align-top", flagged && v.bg)}
                 >
                   <td className="px-3 py-2.5">
                     <div className="font-medium text-foreground">

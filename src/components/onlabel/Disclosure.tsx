@@ -23,10 +23,10 @@ export function Disclosure({
 }) {
   return (
     <details
-      className="group rounded-xl border bg-background"
+      className="group rounded-xl border-2 border-foreground bg-card"
       {...(defaultOpen ? { open: true } : {})}
     >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-bold text-foreground [&::-webkit-details-marker]:hidden">
         <span>
           {summary}
           {meta && (
@@ -42,7 +42,7 @@ export function Disclosure({
           ›
         </span>
       </summary>
-      <div className="flex flex-col gap-4 border-t px-4 py-4">{children}</div>
+      <div className="flex flex-col gap-4 border-t-2 border-foreground px-4 py-4">{children}</div>
     </details>
   );
 }
