@@ -270,3 +270,10 @@
 - **구현(Option B, 결정론)**: `scripts/fda-warnings.ts`(fda-add 파이프라인 재사용, 제품→SPL 해소→경고 verbatim+set_id 추출, LLM 0, 못뽑으면 null+로그) → `warnings.json` **46/47 접지**(aleve만 경고섹션 부재→null). verify.ts `VerifyResult.warnings`(제품id→ProductWarnings, matched에 결정론 부착, mutation 없음). `LabelWarnings.tsx`(rail 접기카드, verbatim 섹션+DailyMed 링크). tool.ts=경고 텍스트 미포함(패러프레이즈 차단)·포인터만. agent=부작용/경고 질문 라우팅→"라벨 경고 표시됨, 가리키고 defer, 기억 나열 금지."
 - **검증**: tsc·eslint·golden 240/240·build 그린. 라이브 10문항(실사용 시뮬): "side effects of Advil"→**기억 나열 거부·라벨 카드 접지**, 전 기능(조합·max-dose·efficacy·interval·class·warnings·red-flag·open·이성질체) 정상. transcript evals/transcripts/ask10-*.json.
 - **주의**: Advil stopUse에 openFDA 원본 텍스트 병합 아티팩트("aIf pregnant…sk") — verbatim이라 미수정(라벨 텍스트 저작 안 함 원칙). 데모케이스(Tylenol ES·DayQuil) 깨끗. aleve 경고 null(후속 set_id 지정 보완 가능).
+
+## 2026-07-12 (프론트엔드 재빌드 — 레퍼런스 조사 + 10방향 목업 + A/B → Traffic-Light 채택)
+> 사용자 "프론트엔드 대대적 재빌드" → 조사 기반 목업 탐색 후 방향 확정(D41).
+- **조사**: answer-engine(Perplexity 소스rail·인라인인용, OpenEvidence details) + 헬스앱 신뢰(blue=신뢰·green=정상·red=긴급, Inter/IBM Plex, calm color) + editorial(cream·ink·plum, New Yorker풍) + 데이터대시보드(risk score·모듈카드). 출처 웹검색 2026.
+- **목업 탐색(아티팩트, 재사용 가능)**: 10방향 갤러리=**dc8d79cd**(Clinical Calm·Editorial Rx·Answer Engine·Data Receipt·Traffic-Light·Consumer Friendly·Drug Facts Label·Dashboard·Dark Premium·Swiss Mono). 1·2·4·5 각 search+result=**6e90cd15**. A/B 풀목업(1 vs 5)=**bafc2d1d**. 동일 데모콘텐츠(Tylenol ES+DayQuil DANGER)로 비교.
+- **채택 = Traffic-Light(B, D41)**: DANGER=solid 빨강 알람블록, CAUTION/OK=볼드테두리 카드+solid 아이콘, NumbersStrip(combined/limit/+over). 흰 바탕+border-foreground 2px. 컴포넌트 className 기반이라 토큰+클래스로 향후 방향 변경 가능. playwright 3종 렌더 검증.
+- **미채택안 보존**: Clinical Calm(1)은 A/B 아티팩트에 남아 있어 필요시 전환 가능(className 교체 수준).
