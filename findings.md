@@ -262,3 +262,11 @@
 - **efficacy 라우팅 수정**(사용자 "llm타이핑같은데"): "does DayQuil's decongestant work?"가 도구 미경유 → 접지 efficacy note(phenylephrine 16-0 자문위+FDA refs, D9) 안 뜨고 LLM 기억 프로즈만. agent 규칙2에 "효능/effectiveness 질문→도구 필수" 추가. 라이브: verification 발생, efficacy note 카드+sources 렌더, 프로즈 KB원문 접지.
 - **P1 라우팅 4종 추가**(간격·기간·조성·계열): tool.ts에 readable 약물계열 라인 노출(CLASS_READABLE, "Ibuprofen = NSAID…") + agent 규칙2에 단일제품 grounded 질문(interval/duration/composition/class) 도구 필수 라우팅. 라이브: "Is Advil an NSAID?"→"Yes…ibuprofen…NSAID", "How often can I take Tylenol ES?"→"every 4 to 6 hours…max 3,000 mg…10 days" 전부 접지. tsc·golden 240/240.
 - **잔여 갭**: risk 노출(B-33) · efficacyNote 확장(phenylephrine 1개뿐) · NSAID dosing interval 미보유. **defer 정답(데이터 없음)**: onset·지속·ER/분쇄·알코올/Rx상호작용·소아용량·임부. fence 방어 유지.
+
+## 2026-07-12 (risk 필드 = 검증 안 된 LLM 스캐폴딩 → 삭제 + openFDA 라벨경고 접지로 대체)
+> 사용자 "risk 한 줄 내가 쓴 적 없는데?" → git 이력 추적 결과 provenance 구멍 발견 → 삭제 + 진짜 접지로 재구축.
+- **🔴 발견**: `risk` 한 줄(17/17)은 Day-1 스캐폴딩 커밋 `c31f622`(Co-Authored-By Claude)에서 생성 = **LLM 저작, 검증 안 됨.** `verify:false`는 ceiling 문서화용이지 risk 검증 아님. citations.json에 risk 인용 0. 즉 **trust core에 숨은 LLM 의료 텍스트.** dead(미사용)라 당장 무해했으나 surface 시 논지 위반. → **삭제**(ingredients.json 17줄 + verify.ts 스키마 3곳).
+- **openFDA 라벨경고 접지 조사**: openFDA drug label API가 OTC Drug Facts 경고섹션을 **구조화·verbatim** 제공(라이브 확인): warnings·do_not_use·stop_use·when_using·ask_doctor·ask_doctor_or_pharmacist + set_id. **제품당(SPL)**, 긴 산문(사용자 "부작용은 길다"와 일치). 진짜 FDA 접지(삭제한 hand-authored와 차원 다름).
+- **구현(Option B, 결정론)**: `scripts/fda-warnings.ts`(fda-add 파이프라인 재사용, 제품→SPL 해소→경고 verbatim+set_id 추출, LLM 0, 못뽑으면 null+로그) → `warnings.json` **46/47 접지**(aleve만 경고섹션 부재→null). verify.ts `VerifyResult.warnings`(제품id→ProductWarnings, matched에 결정론 부착, mutation 없음). `LabelWarnings.tsx`(rail 접기카드, verbatim 섹션+DailyMed 링크). tool.ts=경고 텍스트 미포함(패러프레이즈 차단)·포인터만. agent=부작용/경고 질문 라우팅→"라벨 경고 표시됨, 가리키고 defer, 기억 나열 금지."
+- **검증**: tsc·eslint·golden 240/240·build 그린. 라이브 10문항(실사용 시뮬): "side effects of Advil"→**기억 나열 거부·라벨 카드 접지**, 전 기능(조합·max-dose·efficacy·interval·class·warnings·red-flag·open·이성질체) 정상. transcript evals/transcripts/ask10-*.json.
+- **주의**: Advil stopUse에 openFDA 원본 텍스트 병합 아티팩트("aIf pregnant…sk") — verbatim이라 미수정(라벨 텍스트 저작 안 함 원칙). 데모케이스(Tylenol ES·DayQuil) 깨끗. aleve 경고 null(후속 set_id 지정 보완 가능).

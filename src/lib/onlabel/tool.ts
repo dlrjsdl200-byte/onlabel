@@ -158,6 +158,22 @@ export function runSafetyCheck(products: string[]): {
     }
   }
 
+  // Label warnings are shown to the user VERBATIM (a UI card, from the FDA Drug
+  // Facts label) — the actual warning text is deliberately NOT included here, so
+  // the model cannot paraphrase it. It only learns that warnings are displayed
+  // and how to handle side-effect / warning questions: point, don't enumerate.
+  const warnedBrands = Object.values(result.warnings).map((w) => w.brandName);
+  if (warnedBrands.length) {
+    lines.push("");
+    lines.push(
+      `FDA Drug Facts label warnings for ${warnedBrands.join(", ")} are displayed to the user ` +
+        `(verbatim, with a link to the full label). If the user asks about side effects, warnings, ` +
+        `precautions, who should not take it, or when to stop use, tell them the FDA label warnings ` +
+        `are shown below and to read the full Drug Facts label or ask a pharmacist — do NOT list side ` +
+        `effects or warnings from your own knowledge.`,
+    );
+  }
+
   return { text: lines.join("\n"), result };
 }
 

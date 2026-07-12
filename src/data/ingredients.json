@@ -14,7 +14,6 @@
       ],
       "class": "analgesic-antipyretic",
       "maxDailyMg": 4000,
-      "risk": "Liver damage — the leading cause of acute liver failure in the US. Often hidden in multi-symptom cold/flu and PM products.",
       "source": "FDA OTC label ceiling (4,000 mg/24h)",
       "verify": false,
       "dosing": {
@@ -29,7 +28,6 @@
       "aka": [],
       "class": "nsaid",
       "maxDailyMg": 1200,
-      "risk": "GI bleeding, kidney and cardiovascular risk. Do not combine with other NSAIDs.",
       "source": "FDA OTC label (1,200 mg/24h; Rx allows more)",
       "verify": false
     },
@@ -38,7 +36,6 @@
       "aka": [],
       "class": "nsaid",
       "maxDailyMg": 660,
-      "risk": "GI bleeding, kidney and cardiovascular risk. Do not combine with other NSAIDs.",
       "source": "FDA OTC label (660 mg/24h)",
       "verify": false
     },
@@ -50,7 +47,6 @@
       ],
       "class": "nsaid",
       "maxDailyMg": 4000,
-      "risk": "GI bleeding; Reye's syndrome in children/teens with viral illness. Is an NSAID.",
       "source": "FDA OTC Monograph M013 (Internal Analgesic) §M013.10(b) Dosage: adults not to exceed 4,000 mg in 24 hours.",
       "verify": false,
       "dosing": {
@@ -67,7 +63,6 @@
       ],
       "class": "antitussive",
       "maxDailyMg": 120,
-      "risk": "Excess causes neurologic effects. Common in cough + cold combos.",
       "source": "FDA OTC Cough/Cold/Allergy monograph (M012); Drugs.com professional monograph — 120 mg/24h",
       "verify": false,
       "dosing": {
@@ -82,7 +77,6 @@
       "aka": [],
       "class": "expectorant",
       "maxDailyMg": 2400,
-      "risk": "Low toxicity.",
       "source": "FDA OTC Cough/Cold/Allergy monograph (M012); Drugs.com professional monograph — 2,400 mg/24h",
       "verify": false,
       "dosing": {
@@ -99,7 +93,6 @@
       ],
       "class": "decongestant",
       "maxDailyMg": 240,
-      "risk": "Raises blood pressure and heart rate. Sold behind the counter.",
       "source": "FDA OTC Monograph M012 (Cough/Cold/Allergy) §M012.20(a)(2)-(3) Directions: adults 60 mg every 4-6h, not to exceed 240 mg in 24 hours.",
       "verify": false,
       "dosing": {
@@ -116,7 +109,6 @@
       ],
       "class": "decongestant",
       "maxDailyMg": 60,
-      "risk": "Raises blood pressure.",
       "efficacyNote": "An FDA advisory committee unanimously (16-0) concluded in Sept 2023 that oral phenylephrine is NOT effective as a nasal decongestant; FDA proposed removing it from the OTC monograph (Nov 8, 2024).",
       "efficacyRefs": [
         "https://www.fda.gov/news-events/press-announcements/fda-proposes-ending-use-oral-phenylephrine-otc-monograph-nasal-decongestant-active-ingredient-after",
@@ -136,7 +128,6 @@
       "aka": [],
       "class": "antihistamine-sedating",
       "maxDailyMg": 300,
-      "risk": "Sedation and anticholinergic effects; additive with other sedating antihistamines and alcohol.",
       "source": "OTC antihistamine labeling; StatPearls (Antihistamines) — 300 mg/24h",
       "verify": false,
       "dosing": {
@@ -151,7 +142,6 @@
       "aka": [],
       "class": "antihistamine-sedating",
       "maxDailyMg": 24,
-      "risk": "Sedation; additive with other sedating antihistamines.",
       "source": "OTC antihistamine labeling (4 mg q4-6h, max 24 mg/24h)",
       "verify": false,
       "dosing": {
@@ -166,7 +156,6 @@
       "aka": [],
       "class": "antihistamine-sedating",
       "maxDailyMg": 24,
-      "risk": "Sedation; additive with other sedating antihistamines.",
       "source": "Single-ingredient SPL 'Dimetapp Cold and Allergy' (brompheniramine maleate 2 mg/10 mL; adults 20 mL = 4 mg every 4 h, no more than 6 doses/24 h -> 24 mg/24 h) — openFDA/DailyMed SPL 15c3570c-bd00-8e43-e063-6294a90a8683",
       "verify": false,
       "dosing": {
@@ -181,7 +170,6 @@
       "aka": [],
       "class": "antihistamine-sedating",
       "maxDailyMg": 75,
-      "risk": "Sedation; found in nighttime cold products and sleep aids.",
       "source": "FDA OTC Monograph M012 (Cough/Cold/Allergy) §M012.12(h) Directions: adults 7.5-12.5 mg every 4-6h, not to exceed 75 mg in 24 hours.",
       "verify": false,
       "dosing": {
@@ -196,7 +184,6 @@
       "aka": [],
       "class": "antihistamine-nonsedating",
       "maxDailyMg": 10,
-      "risk": "Low sedation.",
       "source": "OTC label — 10 mg once daily",
       "verify": false
     },
@@ -205,7 +192,6 @@
       "aka": [],
       "class": "antihistamine-nonsedating",
       "maxDailyMg": 10,
-      "risk": "Mild sedation possible.",
       "source": "OTC label — 10 mg once daily",
       "verify": false,
       "dupGroup": "cetirizine"
@@ -215,7 +201,6 @@
       "aka": [],
       "class": "antihistamine-nonsedating",
       "maxDailyMg": 180,
-      "risk": "Non-sedating.",
       "source": "OTC label — 180 mg once daily (or 60 mg twice daily)",
       "verify": false
     },
@@ -224,7 +209,6 @@
       "aka": [],
       "class": "antihistamine-nonsedating",
       "maxDailyMg": 5,
-      "risk": "Mild sedation possible; the active enantiomer of cetirizine (a distinct ingredient).",
       "source": "Xyzal Allergy 24HR label — 5 mg once daily (DailyMed SPL 8be45c2a-1eca-4a00-81b9-f7babdbdcd41)",
       "verify": false,
       "dupGroup": "cetirizine"
@@ -234,7 +218,6 @@
       "aka": [],
       "class": "stimulant",
       "maxDailyMg": null,
-      "risk": "Added to some analgesics; jitteriness at high totals.",
       "source": "FDA OTC Monograph M011 (Stimulant) §M011.50(d) Directions: adults 100-200 mg per dose, not more often than every 3-4h. The monograph states no 24-hour ceiling, so maxDailyMg is intentionally null (duplication is still flagged).",
       "verify": false
     }

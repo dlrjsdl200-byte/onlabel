@@ -9,6 +9,7 @@
 
 import ingredientsData from "../../data/ingredients.json";
 import productsData from "../../data/products.json";
+import warningsData from "../../data/warnings.json";
 
 export type Severity = "ok" | "caution" | "danger";
 
@@ -28,7 +29,6 @@ export interface IngredientRef {
   aka: string[];
   class: string;
   maxDailyMg: number | null;
-  risk: string;
   efficacyNote?: string;
   efficacyRefs?: string[];
   source: string;
@@ -90,7 +90,6 @@ export interface IngredientFinding {
   exceedsLimit: boolean;
   severity: Severity;
   message: string;
-  risk: string;
   efficacyNote?: string;
   efficacyRefs?: string[];
   source: string;
@@ -121,6 +120,21 @@ export interface GenericIngredientMatch {
   ingredient: string;
 }
 
+/** Verbatim OTC Drug Facts warning sections for a product, extracted
+ * deterministically from its openFDA SPL (scripts/fda-warnings.ts). No text is
+ * authored by us or an LLM — these are the label's own words, cited by set_id. */
+export interface ProductWarnings {
+  brandName: string;
+  setId: string;
+  warnings?: string;
+  doNotUse?: string;
+  stopUse?: string;
+  whenUsing?: string;
+  askDoctor?: string;
+  askDoctorOrPharmacist?: string;
+  source: string;
+}
+
 export interface VerifyResult {
   input: string[];
   matched: Product[];
@@ -131,6 +145,10 @@ export interface VerifyResult {
   classFindings: ClassFinding[];
   overall: Severity;
   summary: string;
+  /** FDA label warnings for each matched product that has them, keyed by product
+   * id. Deterministic (openFDA verbatim) — the UI renders these; the LLM never
+   * authors warning text. */
+  warnings: Record<string, ProductWarnings>;
 }
 
 export interface ProductMatch {
@@ -144,6 +162,8 @@ export interface ProductMatch {
 const INGREDIENTS = (ingredientsData as { ingredients: Record<string, IngredientRef> })
   .ingredients;
 const PRODUCTS = (productsData as { products: Product[] }).products;
+const WARNINGS = (warningsData as { products: Record<string, ProductWarnings | null> })
+  .products;
 
 const SEVERITY_RANK: Record<Severity, number> = { ok: 0, caution: 1, danger: 2 };
 
@@ -487,7 +507,6 @@ export function verify(productNames: string[]): VerifyResult {
       exceedsLimit,
       severity,
       message,
-      risk: ref?.risk ?? "",
       efficacyNote: ref?.efficacyNote,
       efficacyRefs: ref?.efficacyRefs,
       source: ref?.source ?? "",
@@ -564,6 +583,13 @@ export function verify(productNames: string[]): VerifyResult {
 
   const summary = buildSummary(overall, findings, classFindings, unmatched);
 
+  // Attach FDA label warnings for each matched product that has them (deterministic).
+  const warnings: Record<string, ProductWarnings> = {};
+  for (const p of matched) {
+    const w = WARNINGS[p.id];
+    if (w) warnings[p.id] = w;
+  }
+
   return {
     input: productNames,
     matched,
@@ -574,6 +600,7 @@ export function verify(productNames: string[]): VerifyResult {
     classFindings,
     overall,
     summary,
+    warnings,
   };
 }
 

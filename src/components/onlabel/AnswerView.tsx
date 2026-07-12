@@ -4,6 +4,7 @@ import { AssumptionNote } from "./AssumptionNote";
 import { IngredientLedger } from "./IngredientLedger";
 import { EfficacyNote } from "./EfficacyNote";
 import { Sources } from "./Sources";
+import { LabelWarnings } from "./LabelWarnings";
 import { FollowUps } from "./FollowUps";
 import { Disclaimer } from "./Disclaimer";
 
@@ -86,6 +87,8 @@ export function AnswerView({
           )}
 
           <EfficacyNote findings={result.findings} />
+
+          <LabelWarnings result={result} />
 
           <Sources result={result} />
         </aside>

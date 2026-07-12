@@ -15,6 +15,7 @@
     "eval:live": "node --env-file=.env --import tsx evals/run-eval.ts --live",
     "collect": "node --env-file=.env --import tsx evals/collect.ts",
     "sync:fda": "tsx scripts/sync-fda.ts",
+    "sync:warnings": "tsx scripts/fda-warnings.ts",
     "check:catalog": "tsx evals/verify-catalog.ts",
     "audit:ceilings": "tsx scripts/audit-ceilings.ts"
   },
