@@ -7,6 +7,7 @@ const EXAMPLES = [
   "Is it safe to take NyQuil with Tylenol PM?",
   "Can I take Advil and Aleve at the same time?",
   "Does DayQuil's decongestant actually work?",
+  "I'm pregnant, can I take Tylenol?",
 ];
 
 export function QuestionInput({
