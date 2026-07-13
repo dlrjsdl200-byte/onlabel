@@ -4,6 +4,7 @@ import { useState } from "react";
 
 const EXAMPLES = [
   "Can I take Tylenol and DayQuil together?",
+  "Can I take Xyzal and Zyrtec together?",
   "Is it safe to take NyQuil with Tylenol PM?",
   "Can I take Advil and Aleve at the same time?",
   "Does DayQuil's decongestant actually work?",
