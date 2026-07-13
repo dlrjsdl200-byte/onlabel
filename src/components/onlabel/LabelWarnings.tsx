@@ -8,17 +8,19 @@ import { Disclosure } from "./Disclosure";
  * never authors warning text. Long by nature, so each product's warnings sit in
  * a collapsed Disclosure with a DailyMed link to the full label.
  *
- * The section strings are self-headed in the SPL (they begin "Warnings…", "Do
- * not use…", "Stop use…"), so we render them as-is without adding our own
- * headings — keeping the text exactly as the label states it.
+ * The SPL section strings are self-headed but the heading runs inline into the
+ * body ("Warnings Allergy alert: …", "Do not use • if you …"), so on screen it
+ * reads as one long block and the reader can't tell which FDA section a passage
+ * came from. We add a short bold section label ABOVE each passage so the source
+ * section is visible — the verbatim label text below is never edited (D40).
  */
-const SECTIONS: Array<keyof ProductWarnings> = [
-  "warnings",
-  "doNotUse",
-  "stopUse",
-  "whenUsing",
-  "askDoctor",
-  "askDoctorOrPharmacist",
+const SECTIONS: Array<{ key: keyof ProductWarnings; label: string }> = [
+  { key: "warnings", label: "Warnings" },
+  { key: "doNotUse", label: "Do not use" },
+  { key: "stopUse", label: "Stop use" },
+  { key: "whenUsing", label: "When using this product" },
+  { key: "askDoctor", label: "Ask a doctor before use" },
+  { key: "askDoctorOrPharmacist", label: "Ask a doctor or pharmacist" },
 ];
 
 export function LabelWarnings({ result }: { result: VerifyResult }) {
@@ -42,17 +44,18 @@ export function LabelWarnings({ result }: { result: VerifyResult }) {
             meta="FDA Drug Facts"
           >
             <div className="flex flex-col gap-3">
-              {SECTIONS.map((key) => {
+              {SECTIONS.map(({ key, label }) => {
                 const text = w[key];
-                if (!text || key === "brandName" || key === "setId" || key === "source")
-                  return null;
+                if (!text) return null;
                 return (
-                  <p
-                    key={key}
-                    className="text-[13px] leading-relaxed text-foreground/80"
-                  >
-                    {text}
-                  </p>
+                  <div key={key} className="flex flex-col gap-0.5">
+                    <span className="text-[11px] font-extrabold uppercase tracking-[0.06em] text-foreground/60">
+                      {label} · FDA label
+                    </span>
+                    <p className="text-[13px] leading-relaxed text-foreground/80">
+                      {text}
+                    </p>
+                  </div>
                 );
               })}
               <a
