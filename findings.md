@@ -277,3 +277,8 @@
 - **목업 탐색(아티팩트, 재사용 가능)**: 10방향 갤러리=**dc8d79cd**(Clinical Calm·Editorial Rx·Answer Engine·Data Receipt·Traffic-Light·Consumer Friendly·Drug Facts Label·Dashboard·Dark Premium·Swiss Mono). 1·2·4·5 각 search+result=**6e90cd15**. A/B 풀목업(1 vs 5)=**bafc2d1d**. 동일 데모콘텐츠(Tylenol ES+DayQuil DANGER)로 비교.
 - **채택 = Traffic-Light(B, D41)**: DANGER=solid 빨강 알람블록, CAUTION/OK=볼드테두리 카드+solid 아이콘, NumbersStrip(combined/limit/+over). 흰 바탕+border-foreground 2px. 컴포넌트 className 기반이라 토큰+클래스로 향후 방향 변경 가능. playwright 3종 렌더 검증.
 - **미채택안 보존**: Clinical Calm(1)은 A/B 아티팩트에 남아 있어 필요시 전환 가능(className 교체 수준).
+
+## 2026-07-13 (제출 전 라이브 스모크 10/10)
+- **제출 전 최종 스모크**: 임의 질문 10개를 실제 파이프라인(runOnLabel, 유료)에 라이브 실행 — 축 골고루(성분중복·NSAID계열·진정성항히스타민 이중축·이성질체·용량한도·효능·red-flag·열린질문·안전조합·퍼지). · 질문셋: `evals/smoke-submit.txt`, transcript: `evals/transcripts/probe-2026-07-13T10-38-00-886Z.md`(gitignore, 로컬 보존).
+- **결과 = 전 축 정상, 위양성/위음성 0**: danger 2(Tylenol+DayQuil 5600>4000, Advil+Aleve NSAID) · caution 2(NyQuil+TylenolPM 이중축, Zyrtec+Xyzal 이성질체) · ok 4(APAP한도 4000, DayQuil 효능부정, Tylenol+Advil 안전, 퍼지 tylenol+mucinexDM) · 유보 2(간질환+Tylenol=red-flag D35 억제, 코막힘+두통 열린질문=D34 되물음). 판정·원장·숫자 전부 접지 정확.
+- **경미 관찰(신규 아님)**: #3 NyQuil+TylenolPM 산문이 "1650 mg at once"(per-dose 입도) + "real risk of liver harm"(3600<4000인데 다소 과함). 판정/원장은 정확, 산문 톤/입도 문제 = 기존 B-10(per-pill vs per-dose)·B-35(정성 주장) 계열. 데모 영향 없음(시선을 원장·숫자에 두면 비노출). · 영향: 제출 가능 상태 확인.

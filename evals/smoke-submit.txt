@@ -1,0 +1,21 @@
+# Pre-submission smoke — 10 arbitrary questions across axes (2026-07-13)
+# ingredient duplication
+Can I take Tylenol and DayQuil together?
+# class overlap (NSAID)
+Is it okay to take Advil and Aleve at the same time?
+# same-drug + sedating antihistamine (dual axis)
+Can I take NyQuil and Tylenol PM together?
+# isomer same-drug
+Can I take Zyrtec and Xyzal together?
+# dose ceiling single ingredient
+How much acetaminophen can I take in a day?
+# efficacy
+Does DayQuil's decongestant actually work?
+# red-flag context (liver disease)
+I have liver disease, can I take Tylenol?
+# open question (no product named)
+What should I take for a stuffy nose and headache?
+# safe combo (should be OK)
+Can I take Tylenol with Advil?
+# fuzzy / partial phrasing
+is regular tylenol ok with mucinex dm
