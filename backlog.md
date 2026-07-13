@@ -262,3 +262,10 @@ verdict는 1차 tool 호출 제품으로 스냅되나 done은 전체 productSet 
 - **데모 조치(2026-07-13, 사용자 확정 옵션 1)**: 데모 시퀀스에서 **단일 성분 사실 질문을 빼고 제품 조합 질문만 사용**(Tylenol+DayQuil, Advil+Aleve, Zyrtec+Xyzal 등). 코어 미수정(기능 동결 준수, "항상 작동하는 데모 경로 유지").
 - **RELATED(후속 질문 칩) 제거(2026-07-13)**: RELATED가 `buildFollowUps`로 "What's the maximum daily dose of {ingredient}?" 같은 **단일 성분 사실 질문을 자동 유도** → 클릭 시 위 0mg OK 카드 엣지로 직행. 후속칩이 문제 경로를 유도한 패턴은 B-33 전례. **조치: `AnswerView.tsx`에서 `<FollowUps>` 렌더+import 제거, 미사용 `onAsk` prop 정리(AnswerView·OnLabelApp).** `FollowUps.tsx` 파일은 dead code로 존치(복원 대비, ContrastEngine 방침 동일). verify() 코어·`ask`(검색폼) 불변. typecheck·build 그린. 재추가 조건 = B-34 수정안(사실 질문 verdict 억제)으로 칩이 안전 경로만 유도하게 된 후.
 - **수정안(후속)**: 명시 제품 0개 + generic 성분명만인 사실 질문은 verdict 카드 억제하고 사실 답변(prose-only, cf. B-29 NoVerdictAnswer 경로)으로 렌더. verify() 코어 불변, 렌더/게이트만. cf. D34·D32·B-29.
+
+## B-35. 정성적 효능·용도 주장(제품이 어떤 증상을 커버) 접지 fence 부재 `[BACKLOG]`
+> **발견**: 2026-07-13, 데모 대본 작성 중 사용자(약사)가 "Tylenol and DayQuil" 답변 산문의 왼쪽 하단 문구를 "LLM 타이핑 같다"고 지적.
+- **증상**: 산문에 `"If you need a multi-symptom cold remedy, DayQuil alone covers cough, congestion, and fever."` 같은 **제품 효능·용도 주장**이 나옴. 이는 도구(verify()) 결과에 없는, LLM이 기억에서 자유 생성한 정성적 임상 주장 = OnLabel이 일반 AI를 비판하는 바로 그 무접지 의료 텍스트. 논지 일관성 구멍.
+- **원인**: SYSTEM_PROMPT의 grounding fence(agent.ts:147-168)가 **clinical number(용량·간격·기간)만** 막고, "이 약이 무슨 증상을 커버한다/무엇에 좋다" 같은 **정성적 효능·용도 주장**은 명시적으로 안 막음. B-33(부작용·경고)과 같은 뿌리 — B-33은 openFDA 경고 verbatim으로 접지 해결했으나 효능·용도 축은 여전히 fence 밖. (efficacy note는 phenylephrine 등 도구가 주는 특정 finding만 접지, 일반 용도 서술은 비접지.)
+- **데모 조치(2026-07-13, 사용자 확정 "데모에선 그냥 두기")**: agent 프롬프트 미수정(기능 동결·데모 답변 톤 보호). 데모는 이 문구가 덜 두드러지는 질문/문구로 구성하거나 감수. verify() 판정 코어·FDA 접지 축(숫자·경고·efficacy)은 이 갭과 무관하게 정확.
+- **수정안(후속)**: fence에 "제품이 어떤 증상을 커버하는지·무엇에 좋은지 같은 효능/용도 주장은 도구 결과에 없으면 진술 금지, 라벨/약사로 defer" 한 줄 추가(숫자 fence와 동형). 또는 openFDA `indications_and_usage`/`purpose` 섹션을 제품당 verbatim 접지(B-33 warnings.json 패턴 재사용)해 용도 질문을 접지 답변으로 승격. LLM 생성 금지(D40 원칙). cf. B-33·D40·agent.ts fence.
