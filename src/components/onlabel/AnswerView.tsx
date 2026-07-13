@@ -6,7 +6,6 @@ import { IngredientLedger } from "./IngredientLedger";
 import { EfficacyNote } from "./EfficacyNote";
 import { Sources } from "./Sources";
 import { LabelWarnings } from "./LabelWarnings";
-import { FollowUps } from "./FollowUps";
 import { Disclaimer } from "./Disclaimer";
 
 /**
@@ -23,13 +22,11 @@ export function AnswerView({
   result,
   prose,
   streaming,
-  onAsk,
 }: {
   question: string;
   result: VerifyResult;
   prose: string;
   streaming?: boolean;
-  onAsk?: (q: string) => void;
 }) {
   const hasFindings = result.findings.length > 0;
   const productCount = new Set(result.matched.map((p) => p.brand)).size;
@@ -73,9 +70,6 @@ export function AnswerView({
             )}
           </div>
 
-          {!streaming && hasFindings && onAsk && (
-            <FollowUps result={result} onAsk={onAsk} />
-          )}
         </div>
 
         {/* RAIL — the FDA evidence, expanded */}

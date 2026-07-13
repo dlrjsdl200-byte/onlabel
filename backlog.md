@@ -253,3 +253,12 @@ verdict는 1차 tool 호출 제품으로 스냅되나 done은 전체 productSet 
 - **발견**: 2026-07-11, 사용자가 "이거 llm타이핑같은데" 지적. 후속칩 "What side effects…?"가 유도했음 → **칩은 제거 완료**(ab5bf51), 데모 경로는 깨끗. 단 직접 타이핑 경로는 잔존.
 - **왜 지금 보류**(사용자 결정 2026-07-11): 최소 범위 유지. 칩 제거로 데모 경로 커버됨. agent 행동 변경은 데모 느낌(답변 짧아짐)에 영향 → 데모 후 재논의.
 - **재추가안(접지 가능)**: KB `risk` 필드에 접지 한 줄 있음(ibuprofen "GI bleeding, kidney and cardiovascular risk…", acetaminophen "Liver damage — leading cause of acute liver failure…"). tool.ts에서 ceiling처럼 risk도 노출 + agent 규칙: 부작용·위험 질문은 **KB risk note만 접지 진술 + "전체 목록은 Drug Facts 라벨/약사" defer**, 기억 열거 금지. (ceiling 노출 수정 b4fe786과 동형 패턴.)
+
+
+## B-34. 단일 성분 사실 질문에 verdict 카드 오출력 (P2 데모경계) `[BACKLOG]`
+> **발견**: 2026-07-13, 데모 대본 작성 중 "What's the maximum daily dose of Acetaminophen?"(제품 없는 단일 성분 사실 질문) 검색 시 발견.
+- **증상**: 조합할 제품이 없는 단일 성분 사실 질문에도 초록 OK verdict 카드("No duplication or dose-ceiling problems found")가 뜸. Ingredient Ledger는 Combined **0 mg** / "amount not specified"로 표시 → "0mg이 안전"처럼 오독 가능. 산문 답("4,000 mg per 24h, FDA label ceiling")은 정확.
+- **원인**: generic 성분명은 용량 미상이라 0mg로 원장 참여(D32). 조합 제품이 0개라 "중복 없음=OK"가 결정론적으로 성립 → verdict 카드가 뜸. 이는 D34("검사기, 명시된 제품 조합에만 verdict") 정신과 어긋나는 **경계 빈틈**: 단일 성분 사실 질문은 verdict 대상이 아닌데 카드가 억제되지 않음.
+- **데모 조치(2026-07-13, 사용자 확정 옵션 1)**: 데모 시퀀스에서 **단일 성분 사실 질문을 빼고 제품 조합 질문만 사용**(Tylenol+DayQuil, Advil+Aleve, Zyrtec+Xyzal 등). 코어 미수정(기능 동결 준수, "항상 작동하는 데모 경로 유지").
+- **RELATED(후속 질문 칩) 제거(2026-07-13)**: RELATED가 `buildFollowUps`로 "What's the maximum daily dose of {ingredient}?" 같은 **단일 성분 사실 질문을 자동 유도** → 클릭 시 위 0mg OK 카드 엣지로 직행. 후속칩이 문제 경로를 유도한 패턴은 B-33 전례. **조치: `AnswerView.tsx`에서 `<FollowUps>` 렌더+import 제거, 미사용 `onAsk` prop 정리(AnswerView·OnLabelApp).** `FollowUps.tsx` 파일은 dead code로 존치(복원 대비, ContrastEngine 방침 동일). verify() 코어·`ask`(검색폼) 불변. typecheck·build 그린. 재추가 조건 = B-34 수정안(사실 질문 verdict 억제)으로 칩이 안전 경로만 유도하게 된 후.
+- **수정안(후속)**: 명시 제품 0개 + generic 성분명만인 사실 질문은 verdict 카드 억제하고 사실 답변(prose-only, cf. B-29 NoVerdictAnswer 경로)으로 렌더. verify() 코어 불변, 렌더/게이트만. cf. D34·D32·B-29.

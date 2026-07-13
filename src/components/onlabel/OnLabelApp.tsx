@@ -55,7 +55,6 @@ export function OnLabelApp() {
               result={state.verification}
               prose={state.prose}
               streaming={state.status === "streaming"}
-              onAsk={ask}
             />
           ) : (
             <div className="max-w-2xl">
